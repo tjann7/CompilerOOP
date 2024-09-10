@@ -7,15 +7,15 @@ public class TokenizerMain {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Enter ; to exit, ' to parse");
+        System.out.println("Enter ' to exit, ; to parse");
         StringBuilder stringBuilder = new StringBuilder();
         while (true) {
             String line = scanner.nextLine();
-            if (line.strip().equals(";")) {
+            if (line.strip().equals("'")) {
                 break;
             }
 
-            if (line.strip().equals("'")) {
+            if (line.strip().equals(";")) {
                 try {
                     Tokenizer tokenizer = new Tokenizer(stringBuilder.toString());
                     while (tokenizer.hasNext()) {
