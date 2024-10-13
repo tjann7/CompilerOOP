@@ -17,7 +17,7 @@ public class ThisNodeTest {
     void parserTest() {
         TokenIterator iterator = new TokenIterator(List.of(new Token(TokenType.THIS_KEYWORD, "this")));
         ThisNode node = ThisNode.PARSER.parse(iterator);
-        assertEquals(node, new ThisNode());
+        assertEquals(new ThisNode(), node);
         assertFalse(iterator.hasNext());
     }
 }

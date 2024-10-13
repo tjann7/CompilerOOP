@@ -18,7 +18,7 @@ public class IntegerLiteralNodeTest {
         for (String value : List.of("1", "123", "5892")) {
             TokenIterator iterator = new TokenIterator(List.of(new Token(TokenType.INTEGER_LITERAL, value)));
             IntegerLiteralNode node = IntegerLiteralNode.PARSER.parse(iterator);
-            assertEquals(node, new IntegerLiteralNode(Integer.parseInt(value)));
+            assertEquals(new IntegerLiteralNode(Integer.parseInt(value)), node);
             assertFalse(iterator.hasNext());
         }
     }

@@ -51,7 +51,7 @@ public class PrimaryNodeTest {
     @Test
     void parserThisTest() {
         TokenIterator iterator = new TokenIterator(List.of(new Token(TokenType.THIS_KEYWORD, "this")));
-        PrimaryNode node = PrimaryNode.PARSER.parse(new Token(TokenType.THIS_KEYWORD, "this"));
+        PrimaryNode node = PrimaryNode.PARSER.parse(iterator);
         assertEquals(new ThisNode(), node);
         assertFalse(iterator.hasNext());
     }

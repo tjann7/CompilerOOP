@@ -84,4 +84,11 @@ public final class TokenIterator {
             index--;
         }
     }
+
+    @NotNull
+    public TokenIterator copy() {
+        TokenIterator iterator = new TokenIterator(list);
+        iterator.index = index;
+        return iterator;
+    }
 }

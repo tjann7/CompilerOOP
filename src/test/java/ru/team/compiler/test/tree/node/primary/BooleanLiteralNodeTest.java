@@ -18,7 +18,7 @@ public class BooleanLiteralNodeTest {
         for (String value : List.of("true", "false")) {
             TokenIterator iterator = new TokenIterator(List.of(new Token(TokenType.BOOLEAN_LITERAL, value)));
             BooleanLiteralNode node = BooleanLiteralNode.PARSER.parse(iterator);
-            assertEquals(node, new BooleanLiteralNode(Boolean.parseBoolean(value)));
+            assertEquals(new BooleanLiteralNode(Boolean.parseBoolean(value)), node);
             assertFalse(iterator.hasNext());
         }
     }

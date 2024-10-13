@@ -10,6 +10,7 @@ import ru.team.compiler.tree.node.TreeNodeParser;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
+// TODO: rename to ReferenceNode because it can be not only ClassName, but a VariableName too
 public final class ClassNameNode extends PrimaryNode {
 
     public static final TreeNodeParser<ClassNameNode> PARSER = new TreeNodeParser<>() {

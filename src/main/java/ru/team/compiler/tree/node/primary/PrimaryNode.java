@@ -14,14 +14,14 @@ public abstract sealed class PrimaryNode extends TreeNode permits IntegerLiteral
         @Override
         @NotNull
         public PrimaryNode parse(@NotNull TokenIterator iterator) {
-            Token token = iterator.next("integer/real/boolean/this/className identifier");
+            Token token = iterator.lookup("integer/real/boolean/this/className identifier");
 
             return switch (token.type()) {
-                case INTEGER_LITERAL -> IntegerLiteralNode.PARSER.parse(token);
-                case REAL_LITERAL -> RealLiteralNode.PARSER.parse(token);
-                case BOOLEAN_LITERAL -> BooleanLiteralNode.PARSER.parse(token);
-                case THIS_KEYWORD -> ThisNode.PARSER.parse(token);
-                case IDENTIFIER -> ClassNameNode.PARSER.parse(token);
+                case INTEGER_LITERAL -> IntegerLiteralNode.PARSER.parse(iterator);
+                case REAL_LITERAL -> RealLiteralNode.PARSER.parse(iterator);
+                case BOOLEAN_LITERAL -> BooleanLiteralNode.PARSER.parse(iterator);
+                case THIS_KEYWORD -> ThisNode.PARSER.parse(iterator);
+                case IDENTIFIER -> ClassNameNode.PARSER.parse(iterator);
                 default -> throw new NodeFormatException("integer/real/boolean/this/className identifier", token);
             };
         }

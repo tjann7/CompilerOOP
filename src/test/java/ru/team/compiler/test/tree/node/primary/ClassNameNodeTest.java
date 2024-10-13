@@ -18,7 +18,7 @@ public class ClassNameNodeTest {
         String identifier = "abcdef";
         TokenIterator iterator = new TokenIterator(List.of(new Token(TokenType.IDENTIFIER, identifier)));
         ClassNameNode node = ClassNameNode.PARSER.parse(iterator);
-        assertEquals(node, new ClassNameNode(identifier));
+        assertEquals(new ClassNameNode(identifier), node);
         assertFalse(iterator.hasNext());
     }
 }

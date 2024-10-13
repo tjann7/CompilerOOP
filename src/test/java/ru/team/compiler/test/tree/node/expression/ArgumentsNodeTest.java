@@ -45,7 +45,7 @@ public class ArgumentsNodeTest {
     }
 
     @Test
-    void parserMoreTest() {
+    void parserMultipleTest() {
         List<Token> tokens = List.of(
                 new Token(TokenType.OPENING_PARENTHESIS, "("),
                 new Token(TokenType.THIS_KEYWORD, "this"),
