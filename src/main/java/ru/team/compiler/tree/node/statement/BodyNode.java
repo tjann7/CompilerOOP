@@ -60,7 +60,8 @@ public final class BodyNode extends TreeNode {
                     }
 
                     if (!statementNodes.isEmpty()) {
-                        iterator.next(TokenType.SEMICOLON);
+                        while (iterator.consume(TokenType.SEMICOLON)) {
+                        }
 
                         token = iterator.lookup();
                         if (endTypes.contains(token.type())) {

@@ -89,6 +89,8 @@ public class BodyNodeTest {
                 new Token(TokenType.DOT, "."),
                 new Token(TokenType.IDENTIFIER, "field1"),
                 new Token(TokenType.SEMICOLON, ";"),
+                new Token(TokenType.SEMICOLON, ";"),
+                new Token(TokenType.SEMICOLON, ";"),
                 new Token(TokenType.IDENTIFIER, "variable2"),
                 new Token(TokenType.ASSIGNMENT_OPERATOR, ":="),
                 new Token(TokenType.BOOLEAN_LITERAL, "false"),
