@@ -4,10 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.exception.NodeFormatException;
 
-import java.util.Iterator;
 import java.util.List;
 
-public final class TokenIterator implements Iterator<Token> {
+public final class TokenIterator {
 
     private final List<Token> list;
     private int index = 0;
@@ -16,12 +15,10 @@ public final class TokenIterator implements Iterator<Token> {
         this.list = list;
     }
 
-    @Override
     public boolean hasNext() {
         return index < list.size();
     }
 
-    @Override
     @NotNull
     public Token next() throws CompilerException {
         return next("any");

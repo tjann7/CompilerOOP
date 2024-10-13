@@ -1,9 +1,11 @@
 package ru.team.compiler.test.tree.node.expression;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import org.junit.jupiter.api.Test;
 import ru.team.compiler.token.Token;
+import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.expression.ArgumentsNode;
 import ru.team.compiler.tree.node.expression.ExpressionNode;
@@ -22,8 +24,10 @@ public class ArgumentsNodeTest {
                 new Token(TokenType.CLOSING_PARENTHESIS, ")")
         );
 
-        ArgumentsNode node = ArgumentsNode.PARSER.parse(tokens);
+        TokenIterator iterator = new TokenIterator(tokens);
+        ArgumentsNode node = ArgumentsNode.PARSER.parse(iterator);
         assertEquals(new ArgumentsNode(List.of()), node);
+        assertFalse(iterator.hasNext());
     }
 
     @Test
@@ -34,8 +38,10 @@ public class ArgumentsNodeTest {
                 new Token(TokenType.CLOSING_PARENTHESIS, ")")
         );
 
-        ArgumentsNode node = ArgumentsNode.PARSER.parse(tokens);
+        TokenIterator iterator = new TokenIterator(tokens);
+        ArgumentsNode node = ArgumentsNode.PARSER.parse(iterator);
         assertEquals(new ArgumentsNode(List.of(new ExpressionNode(new ThisNode(), List.of()))), node);
+        assertFalse(iterator.hasNext());
     }
 
     @Test
@@ -50,13 +56,15 @@ public class ArgumentsNodeTest {
                 new Token(TokenType.CLOSING_PARENTHESIS, ")")
         );
 
-        ArgumentsNode node = ArgumentsNode.PARSER.parse(tokens);
+        TokenIterator iterator = new TokenIterator(tokens);
+        ArgumentsNode node = ArgumentsNode.PARSER.parse(iterator);
         assertEquals(new ArgumentsNode(List.of(
                 new ExpressionNode(new ThisNode(), List.of()),
 
                 new ExpressionNode(new ClassNameNode("abc"), List.of(
                         new ExpressionNode.IdArg(new IdentifierNode("field"), null)))
         )), node);
+        assertFalse(iterator.hasNext());
     }
 
     @Test
@@ -72,7 +80,8 @@ public class ArgumentsNodeTest {
                 new Token(TokenType.CLOSING_PARENTHESIS, ")")
         );
 
-        ArgumentsNode node = ArgumentsNode.PARSER.parse(tokens);
+        TokenIterator iterator = new TokenIterator(tokens);
+        ArgumentsNode node = ArgumentsNode.PARSER.parse(iterator);
         assertEquals(new ArgumentsNode(List.of(
                 new ExpressionNode(new ClassNameNode("abc"), List.of(
                         new ExpressionNode.IdArg(
@@ -81,5 +90,6 @@ public class ArgumentsNodeTest {
                                         new ExpressionNode(new ThisNode(), List.of())
                                 )))))
         )), node);
+        assertFalse(iterator.hasNext());
     }
 }

@@ -93,6 +93,18 @@ public class TokenizerTest {
     }
 
     @Test
+    void newLineTokens() {
+        String newLineTokens = "a \n  b \n\t\nc\n";
+        test(new Tokenizer(newLineTokens), List.of(
+                new Token(TokenType.IDENTIFIER, "a"),
+                new Token(TokenType.NEW_LINE, "\n"),
+                new Token(TokenType.IDENTIFIER, "b"),
+                new Token(TokenType.NEW_LINE, "\n"),
+                new Token(TokenType.IDENTIFIER, "c")
+        ));
+    }
+
+    @Test
     void complexTokens() {
         List<Token> availableTokens = new ArrayList<>();
 
@@ -186,8 +198,17 @@ public class TokenizerTest {
                 boolean mustUseSpace = tokenType.isKeyword() || tokenType.isLiteral() || tokenType == TokenType.IDENTIFIER;
 
                 if (mustUseSpace || random.nextBoolean()) {
-                    codeBuilder.append(whitespaces.get(random.nextInt(whitespaces.size())));
+                    String whitespace = whitespaces.get(random.nextInt(whitespaces.size()));
+                    codeBuilder.append(whitespace);
+
+                    if (whitespace.equals("\n")) {
+                        tokens.add(new Token(TokenType.NEW_LINE, "\n"));
+                    }
                 }
+            }
+
+            if (tokens.get(tokens.size() - 1).type() == TokenType.NEW_LINE) {
+                tokens.remove(tokens.size() - 1);
             }
 
             Tokenizer tokenizer = new Tokenizer(codeBuilder.toString());
@@ -209,7 +230,7 @@ public class TokenizerTest {
 
     private void test(@NotNull Tokenizer tokenizer, @NotNull Iterable<Token> expectedTokens) {
         for (Token token : expectedTokens) {
-            assertTrue(tokenizer.hasNext());
+            assertTrue(tokenizer.hasNext(), token::toString);
             assertEquals(token, tokenizer.next());
         }
 

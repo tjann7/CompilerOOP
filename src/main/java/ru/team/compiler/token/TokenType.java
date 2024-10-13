@@ -13,6 +13,8 @@ public enum TokenType {
     DOT,
     COMMA,
 
+    NEW_LINE,
+
     OPENING_PARENTHESIS,
     CLOSING_PARENTHESIS,
     OPENING_BRACKET,
@@ -22,6 +24,7 @@ public enum TokenType {
     THEN_KEYWORD,
     ELSE_KEYWORD,
     WHILE_KEYWORD,
+    LOOP_KEYWORD,
     IS_KEYWORD,
     END_KEYWORD,
     THIS_KEYWORD,

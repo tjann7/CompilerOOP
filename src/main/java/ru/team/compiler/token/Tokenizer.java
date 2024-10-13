@@ -19,15 +19,9 @@ public class Tokenizer {
             '(', TokenType.OPENING_PARENTHESIS,
             ')', TokenType.CLOSING_PARENTHESIS,
             '[', TokenType.OPENING_BRACKET,
-            ']', TokenType.CLOSING_BRACKET
+            ']', TokenType.CLOSING_BRACKET,
+            '\n', TokenType.NEW_LINE
     );
-//    private final Set<String> keywords = Set.of(
-//            "if", "then", "else",
-//            "while", "is", "end",
-//            "this", "return",
-//            "method", "class", "extends",
-//            "var"
-//    );
     private final Map<String, TokenType> keywords = Arrays.stream(TokenType.values())
         .filter(tokenType -> tokenType.name().endsWith("_KEYWORD"))
         .map(tokenType -> {
@@ -41,8 +35,7 @@ public class Tokenizer {
 
     private final String string;
     private int pos;
-
-    // this.a := 1
+    private boolean newLine;
 
     public Tokenizer(String string) {
         this.string = string;
@@ -115,6 +108,9 @@ public class Tokenizer {
 
     private void skipWhitespaces(boolean checkEof) {
         while (pos < string.length() && Character.isWhitespace(string.charAt(pos))) {
+            if (string.charAt(pos) == '\n') {
+                newLine = true;
+            }
             pos++;
         }
 
@@ -132,9 +128,14 @@ public class Tokenizer {
 
     @NotNull
     private String token() {
-        StringBuilder stringBuilder = new StringBuilder();
-
         skipWhitespaces();
+
+        if (newLine) {
+            newLine = false;
+            return "\n";
+        }
+
+        StringBuilder stringBuilder = new StringBuilder();
 
         char c = chr();
         TokenType tokenType = singleTokens.get(c);
