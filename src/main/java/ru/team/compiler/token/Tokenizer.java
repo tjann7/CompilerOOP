@@ -1,7 +1,7 @@
-package ru.team.compiler;
+package ru.team.compiler.token;
 
 import org.jetbrains.annotations.NotNull;
-import ru.team.compiler.utils.Pair;
+import ru.team.compiler.util.Pair;
 
 import java.util.Arrays;
 import java.util.Map;

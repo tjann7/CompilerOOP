@@ -1,4 +1,4 @@
-package ru.team.compiler.test.utils;
+package ru.team.compiler.test.util;
 
 import org.jetbrains.annotations.NotNull;
 

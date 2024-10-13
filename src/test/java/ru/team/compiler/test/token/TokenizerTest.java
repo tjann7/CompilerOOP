@@ -1,4 +1,4 @@
-package ru.team.compiler.test;
+package ru.team.compiler.test.token;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -6,10 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
-import ru.team.compiler.Token;
-import ru.team.compiler.TokenType;
-import ru.team.compiler.Tokenizer;
-import ru.team.compiler.test.utils.RandomChar;
+import ru.team.compiler.token.Token;
+import ru.team.compiler.token.TokenType;
+import ru.team.compiler.token.Tokenizer;
+import ru.team.compiler.test.util.RandomChar;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package ru.team.compiler.utils;
+package ru.team.compiler.util;
 
 public final class Pair<A, B> {
 

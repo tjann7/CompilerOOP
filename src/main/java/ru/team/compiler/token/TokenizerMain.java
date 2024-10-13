@@ -1,4 +1,4 @@
-package ru.team.compiler;
+package ru.team.compiler.token;
 
 import java.util.Scanner;
 

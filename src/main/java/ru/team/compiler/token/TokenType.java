@@ -1,4 +1,4 @@
-package ru.team.compiler;
+package ru.team.compiler.token;
 
 public enum TokenType {
     INTEGER_LITERAL,
