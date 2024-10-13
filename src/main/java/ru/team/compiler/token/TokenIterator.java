@@ -91,4 +91,8 @@ public final class TokenIterator {
         iterator.index = index;
         return iterator;
     }
+
+    public int index() {
+        return index;
+    }
 }

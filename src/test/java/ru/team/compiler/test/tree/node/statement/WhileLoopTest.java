@@ -8,10 +8,10 @@ import ru.team.compiler.token.Token;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.expression.ExpressionNode;
-import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.BooleanLiteralNode;
 import ru.team.compiler.tree.node.primary.IntegerLiteralNode;
 import ru.team.compiler.tree.node.primary.RealLiteralNode;
+import ru.team.compiler.tree.node.primary.ReferenceNode;
 import ru.team.compiler.tree.node.statement.AssignmentNode;
 import ru.team.compiler.tree.node.statement.BodyNode;
 import ru.team.compiler.tree.node.statement.ReturnNode;
@@ -60,7 +60,7 @@ public class WhileLoopTest {
                         new ExpressionNode(new BooleanLiteralNode(true), List.of()),
                         new BodyNode(List.of(
                                 new AssignmentNode(
-                                        new IdentifierNode("variable"),
+                                        new ExpressionNode(new ReferenceNode("variable"), List.of()),
                                         new ExpressionNode(new RealLiteralNode(5), List.of())),
                                 new ReturnNode(
                                         new ExpressionNode(new IntegerLiteralNode(1), List.of()))))),

@@ -7,8 +7,8 @@ import ru.team.compiler.token.Token;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.expression.ExpressionNode;
-import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.RealLiteralNode;
+import ru.team.compiler.tree.node.primary.ReferenceNode;
 import ru.team.compiler.tree.node.statement.AssignmentNode;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public class AssignmentNodeTest {
         TokenIterator iterator = new TokenIterator(tokens);
         AssignmentNode node = AssignmentNode.PARSER.parse(iterator);
         assertEquals(new AssignmentNode(
-                        new IdentifierNode("variable"),
+                        new ExpressionNode(new ReferenceNode("variable"), List.of()),
                         new ExpressionNode(new RealLiteralNode(5), List.of())),
                 node);
     }

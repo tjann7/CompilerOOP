@@ -18,7 +18,7 @@ public abstract sealed class StatementNode extends TreeNode permits AssignmentNo
             Token token = iterator.lookup();
 
             return switch (token.type()) {
-                case IDENTIFIER -> AssignmentNode.PARSER.parse(iterator);
+                case IDENTIFIER, THIS_KEYWORD -> AssignmentNode.PARSER.parse(iterator);
                 case WHILE_KEYWORD -> WhileLoopNode.PARSER.parse(iterator);
                 case IF_KEYWORD -> IfNode.PARSER.parse(iterator);
                 case RETURN_KEYWORD -> ReturnNode.PARSER.parse(iterator);

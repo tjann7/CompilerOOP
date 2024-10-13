@@ -69,7 +69,7 @@ public class BodyNodeTest {
             BodyNode node = parser.parse(iterator);
             assertEquals(new BodyNode(List.of(
                             new AssignmentNode(
-                                    new IdentifierNode("variable"),
+                                    new ExpressionNode(new ReferenceNode("variable"), List.of()),
                                     new ExpressionNode(new RealLiteralNode(5), List.of())))),
                     node, "Test #" + (i + 1));
             assertTrue(iterator.hasNext(), "Test #" + (i + 1));
@@ -101,12 +101,12 @@ public class BodyNodeTest {
         BodyNode node = parser.parse(iterator);
         assertEquals(new BodyNode(List.of(
                         new AssignmentNode(
-                                new IdentifierNode("variable1"),
+                                new ExpressionNode(new ReferenceNode("variable1"), List.of()),
                                 new ExpressionNode(new ReferenceNode("id1"), List.of(
                                         new ExpressionNode.IdArg(new IdentifierNode("field1"), null)
                                 ))),
                         new AssignmentNode(
-                                new IdentifierNode("variable2"),
+                                new ExpressionNode(new ReferenceNode("variable2"), List.of()),
                                 new ExpressionNode(new BooleanLiteralNode(false), List.of())
                         ))),
                 node);
@@ -137,7 +137,7 @@ public class BodyNodeTest {
                                 new ExpressionNode(new BooleanLiteralNode(true), List.of()),
                                 new BodyNode(List.of(
                                         new AssignmentNode(
-                                                new IdentifierNode("variable"),
+                                                new ExpressionNode(new ReferenceNode("variable"), List.of()),
                                                 new ExpressionNode(new RealLiteralNode(5), List.of()))))))),
                 node);
         assertTrue(iterator.hasNext());

@@ -4,11 +4,13 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import ru.team.compiler.exception.CompilerException;
+import ru.team.compiler.exception.NodeFormatException;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNodeParser;
 import ru.team.compiler.tree.node.expression.ExpressionNode;
-import ru.team.compiler.tree.node.expression.IdentifierNode;
+
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
@@ -18,28 +20,45 @@ public final class AssignmentNode extends StatementNode {
         @Override
         @NotNull
         public AssignmentNode parse(@NotNull TokenIterator iterator) throws CompilerException {
-            IdentifierNode identifierNode = IdentifierNode.PARSER.parse(iterator);
-            iterator.next(TokenType.ASSIGNMENT_OPERATOR);
+            TokenIterator copiedIterator = iterator.copy();
+
             ExpressionNode expressionNode = ExpressionNode.PARSER.parse(iterator);
-            return new AssignmentNode(identifierNode, expressionNode);
+
+            List<ExpressionNode.IdArg> idArgs = expressionNode.idArgs();
+            if (!idArgs.isEmpty() && idArgs.get(idArgs.size() - 1).argumentsNode() != null) {
+                int startIndex = copiedIterator.index();
+                int endIndex = iterator.index();
+
+                StringBuilder stringBuilder = new StringBuilder();
+                for (int i = startIndex; i < endIndex; i++) {
+                    stringBuilder.append(copiedIterator.next().value());
+                }
+
+                throw new NodeFormatException("field", "method call at " + stringBuilder);
+            }
+
+            iterator.next(TokenType.ASSIGNMENT_OPERATOR);
+
+            ExpressionNode valueExpressionNode = ExpressionNode.PARSER.parse(iterator);
+            return new AssignmentNode(expressionNode, valueExpressionNode);
         }
     };
 
-    private final IdentifierNode identifierNode;
     private final ExpressionNode expressionNode;
+    private final ExpressionNode valueExpressionNode;
 
-    public AssignmentNode(@NotNull IdentifierNode identifierNode, @NotNull ExpressionNode expressionNode) {
-        this.identifierNode = identifierNode;
+    public AssignmentNode(@NotNull ExpressionNode expressionNode, @NotNull ExpressionNode valueExpressionNode) {
         this.expressionNode = expressionNode;
-    }
-
-    @NotNull
-    public IdentifierNode identifierNode() {
-        return identifierNode;
+        this.valueExpressionNode = valueExpressionNode;
     }
 
     @NotNull
     public ExpressionNode expressionNode() {
         return expressionNode;
+    }
+
+    @NotNull
+    public ExpressionNode valueExpressionNode() {
+        return valueExpressionNode;
     }
 }
