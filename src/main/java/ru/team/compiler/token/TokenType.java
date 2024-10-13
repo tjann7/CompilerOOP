@@ -31,8 +31,8 @@ public enum TokenType {
     EXTENDS_KEYWORD,
     VAR_KEYWORD;
 
-    private boolean literal = name().endsWith("_LITERAL");
-    private boolean keyword = name().endsWith("_KEYWORD");
+    private final boolean literal = name().endsWith("_LITERAL");
+    private final boolean keyword = name().endsWith("_KEYWORD");
 
     public boolean isLiteral() {
         return literal;
