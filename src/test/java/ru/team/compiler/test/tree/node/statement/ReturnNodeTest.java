@@ -9,7 +9,7 @@ import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.expression.ExpressionNode;
 import ru.team.compiler.tree.node.expression.IdentifierNode;
-import ru.team.compiler.tree.node.primary.ClassNameNode;
+import ru.team.compiler.tree.node.primary.ReferenceNode;
 import ru.team.compiler.tree.node.statement.ReturnNode;
 
 import java.util.List;
@@ -28,7 +28,7 @@ public class ReturnNodeTest {
         TokenIterator iterator = new TokenIterator(tokens);
         ReturnNode node = ReturnNode.PARSER.parse(iterator);
         assertEquals(new ReturnNode(
-                new ExpressionNode(new ClassNameNode("variable"), List.of(
+                new ExpressionNode(new ReferenceNode("variable"), List.of(
                         new ExpressionNode.IdArg(new IdentifierNode("field"), null)))),
                 node);
         assertFalse(iterator.hasNext());

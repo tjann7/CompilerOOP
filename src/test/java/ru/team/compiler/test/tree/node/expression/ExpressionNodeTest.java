@@ -10,7 +10,7 @@ import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.expression.ArgumentsNode;
 import ru.team.compiler.tree.node.expression.ExpressionNode;
 import ru.team.compiler.tree.node.expression.IdentifierNode;
-import ru.team.compiler.tree.node.primary.ClassNameNode;
+import ru.team.compiler.tree.node.primary.ReferenceNode;
 import ru.team.compiler.tree.node.primary.ThisNode;
 
 import java.util.List;
@@ -22,7 +22,7 @@ public class ExpressionNodeTest {
         String identifier = "abcdef";
         TokenIterator iterator = new TokenIterator(List.of(new Token(TokenType.IDENTIFIER, identifier)));
         ExpressionNode node = ExpressionNode.PARSER.parse(iterator);
-        assertEquals(new ExpressionNode(new ClassNameNode(identifier), List.of()), node);
+        assertEquals(new ExpressionNode(new ReferenceNode(identifier), List.of()), node);
         assertFalse(iterator.hasNext());
     }
 
@@ -73,13 +73,13 @@ public class ExpressionNodeTest {
         List<ExpressionNode.IdArg> list = List.of(
                 new ExpressionNode.IdArg(new IdentifierNode("method1"), new ArgumentsNode(List.of(
                         new ExpressionNode(
-                                new ClassNameNode("abc"),
+                                new ReferenceNode("abc"),
                                 List.of(
                                         new ExpressionNode.IdArg(
                                                 new IdentifierNode("method2"),
                                                 new ArgumentsNode(List.of(
                                                         new ExpressionNode(
-                                                                new ClassNameNode("cba"),
+                                                                new ReferenceNode("cba"),
                                                                 List.of(
                                                                         new ExpressionNode.IdArg(
                                                                                 new IdentifierNode("field"),

@@ -8,7 +8,7 @@ import ru.team.compiler.token.Token;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.primary.BooleanLiteralNode;
-import ru.team.compiler.tree.node.primary.ClassNameNode;
+import ru.team.compiler.tree.node.primary.ReferenceNode;
 import ru.team.compiler.tree.node.primary.IntegerLiteralNode;
 import ru.team.compiler.tree.node.primary.PrimaryNode;
 import ru.team.compiler.tree.node.primary.RealLiteralNode;
@@ -61,7 +61,7 @@ public class PrimaryNodeTest {
         for (String value : List.of("a", "b", "c")) {
             TokenIterator iterator = new TokenIterator(List.of(new Token(TokenType.IDENTIFIER, value)));
             PrimaryNode node = PrimaryNode.PARSER.parse(iterator);
-            assertEquals(new ClassNameNode(value), node);
+            assertEquals(new ReferenceNode(value), node);
             assertFalse(iterator.hasNext());
         }
     }

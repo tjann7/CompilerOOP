@@ -10,21 +10,20 @@ import ru.team.compiler.tree.node.TreeNodeParser;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
-// TODO: rename to ReferenceNode because it can be not only ClassName, but a VariableName too
-public final class ClassNameNode extends PrimaryNode {
+public final class ReferenceNode extends PrimaryNode {
 
-    public static final TreeNodeParser<ClassNameNode> PARSER = new TreeNodeParser<>() {
+    public static final TreeNodeParser<ReferenceNode> PARSER = new TreeNodeParser<>() {
         @Override
         @NotNull
-        public ClassNameNode parse(@NotNull TokenIterator iterator) {
-            Token token = iterator.next(TokenType.IDENTIFIER, "className identifier");
-            return new ClassNameNode(token.value());
+        public ReferenceNode parse(@NotNull TokenIterator iterator) {
+            Token token = iterator.next(TokenType.IDENTIFIER, "reference identifier");
+            return new ReferenceNode(token.value());
         }
     };
 
     private final String value;
 
-    public ClassNameNode(@NotNull String value) {
+    public ReferenceNode(@NotNull String value) {
         this.value = value;
     }
 

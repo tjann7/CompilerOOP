@@ -12,7 +12,7 @@ import ru.team.compiler.tree.node.TreeNodeParser;
 import ru.team.compiler.tree.node.expression.ExpressionNode;
 import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.BooleanLiteralNode;
-import ru.team.compiler.tree.node.primary.ClassNameNode;
+import ru.team.compiler.tree.node.primary.ReferenceNode;
 import ru.team.compiler.tree.node.primary.RealLiteralNode;
 import ru.team.compiler.tree.node.statement.AssignmentNode;
 import ru.team.compiler.tree.node.statement.BodyNode;
@@ -102,7 +102,7 @@ public class BodyNodeTest {
         assertEquals(new BodyNode(List.of(
                         new AssignmentNode(
                                 new IdentifierNode("variable1"),
-                                new ExpressionNode(new ClassNameNode("id1"), List.of(
+                                new ExpressionNode(new ReferenceNode("id1"), List.of(
                                         new ExpressionNode.IdArg(new IdentifierNode("field1"), null)
                                 ))),
                         new AssignmentNode(

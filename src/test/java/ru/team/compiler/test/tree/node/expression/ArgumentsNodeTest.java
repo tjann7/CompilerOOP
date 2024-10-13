@@ -10,7 +10,7 @@ import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.expression.ArgumentsNode;
 import ru.team.compiler.tree.node.expression.ExpressionNode;
 import ru.team.compiler.tree.node.expression.IdentifierNode;
-import ru.team.compiler.tree.node.primary.ClassNameNode;
+import ru.team.compiler.tree.node.primary.ReferenceNode;
 import ru.team.compiler.tree.node.primary.ThisNode;
 
 import java.util.List;
@@ -61,7 +61,7 @@ public class ArgumentsNodeTest {
         assertEquals(new ArgumentsNode(List.of(
                 new ExpressionNode(new ThisNode(), List.of()),
 
-                new ExpressionNode(new ClassNameNode("abc"), List.of(
+                new ExpressionNode(new ReferenceNode("abc"), List.of(
                         new ExpressionNode.IdArg(new IdentifierNode("field"), null)))
         )), node);
         assertFalse(iterator.hasNext());
@@ -83,7 +83,7 @@ public class ArgumentsNodeTest {
         TokenIterator iterator = new TokenIterator(tokens);
         ArgumentsNode node = ArgumentsNode.PARSER.parse(iterator);
         assertEquals(new ArgumentsNode(List.of(
-                new ExpressionNode(new ClassNameNode("abc"), List.of(
+                new ExpressionNode(new ReferenceNode("abc"), List.of(
                         new ExpressionNode.IdArg(
                                 new IdentifierNode("method"),
                                 new ArgumentsNode(List.of(
