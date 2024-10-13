@@ -56,16 +56,16 @@ public class TokenizerTest {
     @Test
     void literals() {
         String integerLiteral = "1234";
-        test(new Tokenizer(integerLiteral, 0), new Token(TokenType.INTEGER_LITERAL, integerLiteral));
+        test(new Tokenizer(integerLiteral), new Token(TokenType.INTEGER_LITERAL, integerLiteral));
 
         String realLiteral = "1234.56";
-        test(new Tokenizer(realLiteral, 0), new Token(TokenType.REAL_LITERAL, realLiteral));
+        test(new Tokenizer(realLiteral), new Token(TokenType.REAL_LITERAL, realLiteral));
 
         String falseLiteral = "false";
-        test(new Tokenizer(falseLiteral, 0), new Token(TokenType.BOOLEAN_LITERAL, falseLiteral));
+        test(new Tokenizer(falseLiteral), new Token(TokenType.BOOLEAN_LITERAL, falseLiteral));
 
         String trueLiteral = "true";
-        test(new Tokenizer(trueLiteral, 0), new Token(TokenType.BOOLEAN_LITERAL, trueLiteral));
+        test(new Tokenizer(trueLiteral), new Token(TokenType.BOOLEAN_LITERAL, trueLiteral));
     }
 
     @Test

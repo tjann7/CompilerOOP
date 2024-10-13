@@ -10,7 +10,8 @@ public class NodeFormatException extends RuntimeException {
     public static final Object END_OF_STRING = new Object();
 
     public NodeFormatException(@Nullable String expected, @Nullable Object actual) {
-        super("Expected: %s | Actual: %s".formatted(expected, format(actual)));
+        super("zExpected: %s | Actual: %s".formatted(expected, format(actual)));
+//        super("(at line: %d, column: %d) Expected: %s | Actual: %s".formatted(expected, format(actual)));
     }
 
     @NotNull

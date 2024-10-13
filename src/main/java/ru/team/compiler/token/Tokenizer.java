@@ -35,16 +35,13 @@ public class Tokenizer {
 
     private final String string;
     private int line;
+    private int column;
+    private int colIncr;
     private int pos;
 
-    public Tokenizer(String string, int line) {
-        this.string = string;
-        this.line = line;
-    }
 
     public Tokenizer(String string) {
         this.string = string;
-        this.line = 0;
     }
 
     public boolean hasNext() {
@@ -60,21 +57,21 @@ public class Tokenizer {
         if (token.length() == 1) {
             TokenType tokenType = singleTokens.get(token.charAt(0));
             if (tokenType != null) {
-                return new Token(tokenType, token, line, pos);
+                return new Token(tokenType, token, line, column);
             }
         }
 
         if (token.equals(":=")) {
-            return new Token(TokenType.ASSIGNMENT_OPERATOR, token, line, pos);
+            return new Token(TokenType.ASSIGNMENT_OPERATOR, token, line, column);
         }
 
         TokenType tokenType = keywords.get(token);
         if (tokenType != null) {
-            return new Token(tokenType, token, line, pos);
+            return new Token(tokenType, token, line, column);
         }
 
         if (booleans.contains(token)) {
-            return new Token(TokenType.BOOLEAN_LITERAL, token, line, pos);
+            return new Token(TokenType.BOOLEAN_LITERAL, token, line, column);
         }
 
         char startChar = token.charAt(0);
@@ -84,7 +81,7 @@ public class Tokenizer {
             for (char chr : token.toCharArray()) {
                 if (chr == '.') {
                     if (dot) {
-                        return new Token(TokenType.UNIDENTIFIED, token, line, pos);
+                        return new Token(TokenType.UNIDENTIFIED, token, line, column);
                     }
 
                     dot = true;
@@ -92,18 +89,18 @@ public class Tokenizer {
                 }
 
                 if (!Character.isDigit(chr)) {
-                    return new Token(TokenType.UNIDENTIFIED, token, line, pos);
+                    return new Token(TokenType.UNIDENTIFIED, token, line, column);
                 }
             }
 
-            return new Token(dot ? TokenType.REAL_LITERAL : TokenType.INTEGER_LITERAL, token, line, pos);
+            return new Token(dot ? TokenType.REAL_LITERAL : TokenType.INTEGER_LITERAL, token, line, column);
         }
 
         if (identifierPattern.matcher(token).matches()) {
-            return new Token(TokenType.IDENTIFIER, token, line, pos);
+            return new Token(TokenType.IDENTIFIER, token, line, column);
         }
 
-        return new Token(TokenType.UNIDENTIFIED, token, line, pos);
+        return new Token(TokenType.UNIDENTIFIED, token, line, column);
     }
 
     // ===
@@ -113,8 +110,18 @@ public class Tokenizer {
     }
 
     private void skipWhitespaces(boolean checkEof) {
-        while (pos < string.length() && Character.isWhitespace(string.charAt(pos))) {
-            pos++;
+        while (pos < string.length()) {
+            if (string.charAt(pos) == '\n') {
+                line += 1;
+                column = 0;
+                colIncr = 0;
+                ++pos;
+            } else if (Character.isWhitespace(string.charAt(pos))) {
+                ++pos;
+                ++column;
+            } else {
+                break;
+            }
         }
 
         if (checkEof) {
@@ -125,7 +132,8 @@ public class Tokenizer {
     private char chr() {
         checkEof();
 
-        pos++;
+        ++colIncr;
+        ++pos;
         return string.charAt(pos - 1);
     }
 
@@ -135,6 +143,8 @@ public class Tokenizer {
 
         StringBuilder stringBuilder = new StringBuilder();
 
+        column += colIncr;
+        colIncr = 0;
         char c = chr();
         TokenType tokenType = singleTokens.get(c);
         if (tokenType != null) {
@@ -144,7 +154,7 @@ public class Tokenizer {
                     if (c1 == '=') {
                         return ":=";
                     } else {
-                        pos--;
+                        --pos;
                     }
                 }
             }
@@ -154,7 +164,7 @@ public class Tokenizer {
 
         boolean ignoreDot = Character.isDigit(c);
 
-        while (!Character.isWhitespace(c)) {
+        while (!Character.isWhitespace(c) && !(c == '\n')) {
             stringBuilder.append(c);
             if (end()) {
                 break;
@@ -167,7 +177,7 @@ public class Tokenizer {
                     continue;
                 }
 
-                pos--;
+                --pos;
                 return stringBuilder.toString();
             }
         }

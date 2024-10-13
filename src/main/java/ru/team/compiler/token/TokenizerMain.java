@@ -15,25 +15,16 @@ public class TokenizerMain {
             if (code.strip().equals("'")) {
                 break;
             }
-
-            if (code.strip().equals(";")) {
-                try {
-                    Tokenizer tokenizer = new Tokenizer(stringBuilder.toString(), line);
-                    while (tokenizer.hasNext()) {
-                        System.out.println("DUDE");
-                        Token token = tokenizer.next();
-                        System.out.println(token);
-                    }
-                } catch (IllegalStateException e) {
-                    System.out.println("ERROR: " + e);
-                }
-                stringBuilder = new StringBuilder();
-                line += holdLines + 1;
-                holdLines = 0;
-                continue;
+            stringBuilder.append(code).append(" \n");
+        }
+        try {
+            Tokenizer tokenizer = new Tokenizer(stringBuilder.toString());
+            while (tokenizer.hasNext()) {
+                Token token = tokenizer.next();
+                System.out.println(token);
             }
-
-            ++holdLines;
+        } catch (IllegalStateException e) {
+            System.out.println("ERROR: " + e);
         }
     }
 }
