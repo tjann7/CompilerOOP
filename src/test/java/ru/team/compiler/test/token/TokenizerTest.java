@@ -93,13 +93,13 @@ public class TokenizerTest {
     }
 
     @Test
-    void newLineTokens() {
-        String newLineTokens = "a \n  b \n\t\nc\n";
-        test(new Tokenizer(newLineTokens), List.of(
+    void semicolonTokens() {
+        String semicolonTokens = "a ;  b ;\t\nc\n";
+        test(new Tokenizer(semicolonTokens), List.of(
                 new Token(TokenType.IDENTIFIER, "a"),
-                new Token(TokenType.NEW_LINE, "\n"),
+                new Token(TokenType.SEMICOLON, ";"),
                 new Token(TokenType.IDENTIFIER, "b"),
-                new Token(TokenType.NEW_LINE, "\n"),
+                new Token(TokenType.SEMICOLON, ";"),
                 new Token(TokenType.IDENTIFIER, "c")
         ));
     }
@@ -179,8 +179,8 @@ public class TokenizerTest {
         }
 
         // Generating random code
-        List<String> whitespaces = List.of(
-                " ", "\t", "\n"
+        List<String> delimiters = List.of(
+                " ", "\t", "\n", ";"
         );
 
         for (int i = 0; i < 1000; i++) {
@@ -198,17 +198,13 @@ public class TokenizerTest {
                 boolean mustUseSpace = tokenType.isKeyword() || tokenType.isLiteral() || tokenType == TokenType.IDENTIFIER;
 
                 if (mustUseSpace || random.nextBoolean()) {
-                    String whitespace = whitespaces.get(random.nextInt(whitespaces.size()));
-                    codeBuilder.append(whitespace);
+                    String delimiter = delimiters.get(random.nextInt(delimiters.size()));
+                    codeBuilder.append(delimiter);
 
-                    if (whitespace.equals("\n")) {
-                        tokens.add(new Token(TokenType.NEW_LINE, "\n"));
+                    if (delimiter.equals(";")) {
+                        tokens.add(new Token(TokenType.SEMICOLON, ";"));
                     }
                 }
-            }
-
-            if (tokens.get(tokens.size() - 1).type() == TokenType.NEW_LINE) {
-                tokens.remove(tokens.size() - 1);
             }
 
             Tokenizer tokenizer = new Tokenizer(codeBuilder.toString());

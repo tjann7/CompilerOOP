@@ -13,7 +13,7 @@ public enum TokenType {
     DOT,
     COMMA,
 
-    NEW_LINE,
+    SEMICOLON,
 
     OPENING_PARENTHESIS,
     CLOSING_PARENTHESIS,

@@ -48,7 +48,7 @@ public class WhileLoopTest {
                 new Token(TokenType.IDENTIFIER, "variable"),
                 new Token(TokenType.ASSIGNMENT_OPERATOR, ":="),
                 new Token(TokenType.REAL_LITERAL, "5.0"),
-                new Token(TokenType.NEW_LINE, "\n"),
+                new Token(TokenType.SEMICOLON, ";"),
                 new Token(TokenType.RETURN_KEYWORD, "return"),
                 new Token(TokenType.INTEGER_LITERAL, "1"),
                 new Token(TokenType.END_KEYWORD, "end")

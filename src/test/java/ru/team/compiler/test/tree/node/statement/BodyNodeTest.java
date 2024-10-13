@@ -62,7 +62,7 @@ public class BodyNodeTest {
             ));
 
             if (i == 1) {
-                tokens.add(3, new Token(TokenType.NEW_LINE, "\n"));
+                tokens.add(3, new Token(TokenType.SEMICOLON, ";"));
             }
 
             TokenIterator iterator = new TokenIterator(tokens);
@@ -88,7 +88,7 @@ public class BodyNodeTest {
                 new Token(TokenType.IDENTIFIER, "id1"),
                 new Token(TokenType.DOT, "."),
                 new Token(TokenType.IDENTIFIER, "field1"),
-                new Token(TokenType.NEW_LINE, "\n"),
+                new Token(TokenType.SEMICOLON, ";"),
                 new Token(TokenType.IDENTIFIER, "variable2"),
                 new Token(TokenType.ASSIGNMENT_OPERATOR, ":="),
                 new Token(TokenType.BOOLEAN_LITERAL, "false"),

@@ -20,7 +20,7 @@ public class Tokenizer {
             ')', TokenType.CLOSING_PARENTHESIS,
             '[', TokenType.OPENING_BRACKET,
             ']', TokenType.CLOSING_BRACKET,
-            '\n', TokenType.NEW_LINE
+            ';', TokenType.SEMICOLON
     );
     private final Map<String, TokenType> keywords = Arrays.stream(TokenType.values())
         .filter(tokenType -> tokenType.name().endsWith("_KEYWORD"))
@@ -35,7 +35,6 @@ public class Tokenizer {
 
     private final String string;
     private int pos;
-    private boolean newLine;
 
     public Tokenizer(String string) {
         this.string = string;
@@ -108,9 +107,6 @@ public class Tokenizer {
 
     private void skipWhitespaces(boolean checkEof) {
         while (pos < string.length() && Character.isWhitespace(string.charAt(pos))) {
-            if (string.charAt(pos) == '\n') {
-                newLine = true;
-            }
             pos++;
         }
 
@@ -129,11 +125,6 @@ public class Tokenizer {
     @NotNull
     private String token() {
         skipWhitespaces();
-
-        if (newLine) {
-            newLine = false;
-            return "\n";
-        }
 
         StringBuilder stringBuilder = new StringBuilder();
 
