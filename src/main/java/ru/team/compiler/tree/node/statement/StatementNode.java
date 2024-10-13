@@ -8,7 +8,8 @@ import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.tree.node.TreeNode;
 import ru.team.compiler.tree.node.TreeNodeParser;
 
-public abstract sealed class StatementNode extends TreeNode permits AssignmentNode, WhileLoopNode, IfNode, ReturnNode {
+public abstract sealed class StatementNode extends TreeNode permits AssignmentNode, WhileLoopNode, IfNode, ReturnNode,
+                                                                    VariableDeclarationNode {
 
     public static final TreeNodeParser<StatementNode> PARSER = new TreeNodeParser<>() {
         @Override
@@ -21,7 +22,8 @@ public abstract sealed class StatementNode extends TreeNode permits AssignmentNo
                 case WHILE_KEYWORD -> WhileLoopNode.PARSER.parse(iterator);
                 case IF_KEYWORD -> IfNode.PARSER.parse(iterator);
                 case RETURN_KEYWORD -> ReturnNode.PARSER.parse(iterator);
-                default -> throw new NodeFormatException("assignment/while/if/return", token);
+                case VAR_KEYWORD -> VariableDeclarationNode.PARSER.parse(iterator);
+                default -> throw new NodeFormatException("assignment/while/if/return/var", token);
             };
         }
     };
