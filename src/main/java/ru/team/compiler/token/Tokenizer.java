@@ -37,7 +37,7 @@ public class Tokenizer {
     );
 
     private final String string;
-    private int line;
+    private int line = 1;
     private int column;
     private int columnShift;
     private int pos;
@@ -187,13 +187,13 @@ public class Tokenizer {
                 if (ignoreDot && c == '.') {
                     continue;
                 }
-
+                columnShift--;
                 pos--;
                 return stringBuilder.toString();
             }
         }
-
-        onWhitespace(c);
+        pos--;
+        columnShift--;
 
         return stringBuilder.toString();
     }
