@@ -109,12 +109,19 @@ public class Tokenizer {
         skipWhitespaces(true);
     }
 
+    private boolean isMeaningfulChar(Character c) {
+        return !(Character.isWhitespace(c)) && !(c == '\n') && !(c == '\t');
+    }
+
     private void skipWhitespaces(boolean checkEof) {
         while (pos < string.length()) {
             if (string.charAt(pos) == '\n') {
                 line += 1;
                 column = 0;
                 colIncr = 0;
+                ++pos;
+            } else if (string.charAt(pos) == '\t') {
+                column += 4;
                 ++pos;
             } else if (Character.isWhitespace(string.charAt(pos))) {
                 ++pos;
@@ -164,7 +171,7 @@ public class Tokenizer {
 
         boolean ignoreDot = Character.isDigit(c);
 
-        while (!Character.isWhitespace(c) && !(c == '\n')) {
+        while (isMeaningfulChar(c)) {
             stringBuilder.append(c);
             if (end()) {
                 break;
