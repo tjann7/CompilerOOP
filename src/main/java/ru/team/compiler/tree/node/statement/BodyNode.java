@@ -21,16 +21,16 @@ import java.util.stream.Collectors;
 @ToString
 public final class BodyNode extends TreeNode {
 
-    private final List<StatementNode> statementNodes;
+    private final List<StatementNode> statements;
 
-    public BodyNode(@NotNull List<StatementNode> statementNodes) {
-        this.statementNodes = List.copyOf(statementNodes);
+    public BodyNode(@NotNull List<StatementNode> statements) {
+        this.statements = List.copyOf(statements);
     }
 
     @NotNull
     @Unmodifiable
-    public List<StatementNode> statementNodes() {
-        return statementNodes;
+    public List<StatementNode> statements() {
+        return statements;
     }
 
     @NotNull

@@ -30,22 +30,22 @@ public final class FieldNode extends ClassMemberNode {
         }
     };
 
-    private final IdentifierNode identifierNode;
-    private final ReferenceNode referenceNode;
+    private final IdentifierNode name;
+    private final ReferenceNode type;
 
-    public FieldNode(@NotNull IdentifierNode identifierNode, @NotNull ReferenceNode referenceNode) {
-        this.identifierNode = identifierNode;
-        this.referenceNode = referenceNode;
+    public FieldNode(@NotNull IdentifierNode name, @NotNull ReferenceNode type) {
+        this.name = name;
+        this.type = type;
     }
 
     @NotNull
-    public IdentifierNode identifierNode() {
-        return identifierNode;
+    public IdentifierNode name() {
+        return name;
     }
 
     @NotNull
-    public ReferenceNode referenceNode() {
-        return referenceNode;
+    public ReferenceNode type() {
+        return type;
     }
 
 }

@@ -32,21 +32,21 @@ public final class WhileLoopNode extends StatementNode {
         }
     };
 
-    private final ExpressionNode expressionNode;
-    private final BodyNode bodyNode;
+    private final ExpressionNode condition;
+    private final BodyNode body;
 
-    public WhileLoopNode(@NotNull ExpressionNode expressionNode, @NotNull BodyNode bodyNode) {
-        this.expressionNode = expressionNode;
-        this.bodyNode = bodyNode;
+    public WhileLoopNode(@NotNull ExpressionNode condition, @NotNull BodyNode body) {
+        this.condition = condition;
+        this.body = body;
     }
 
     @NotNull
-    public ExpressionNode expressionNode() {
-        return expressionNode;
+    public ExpressionNode condition() {
+        return condition;
     }
 
     @NotNull
-    public BodyNode bodyNode() {
-        return bodyNode;
+    public BodyNode body() {
+        return body;
     }
 }

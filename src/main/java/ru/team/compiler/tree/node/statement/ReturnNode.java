@@ -25,14 +25,14 @@ public final class ReturnNode extends StatementNode {
         }
     };
 
-    private final ExpressionNode expressionNode;
+    private final ExpressionNode expression;
 
-    public ReturnNode(@NotNull ExpressionNode expressionNode) {
-        this.expressionNode = expressionNode;
+    public ReturnNode(@NotNull ExpressionNode expression) {
+        this.expression = expression;
     }
 
     @NotNull
-    public ExpressionNode expressionNode() {
-        return expressionNode;
+    public ExpressionNode expression() {
+        return expression;
     }
 }

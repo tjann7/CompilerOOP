@@ -44,36 +44,36 @@ public final class MethodNode extends ClassMemberNode {
         }
     };
 
-    private final IdentifierNode identifierNode;
-    private final ParametersNode parametersNode;
-    private final IdentifierNode returnIdentifierNode;
-    private final BodyNode bodyNode;
+    private final IdentifierNode name;
+    private final ParametersNode parameters;
+    private final IdentifierNode returnType;
+    private final BodyNode body;
 
-    public MethodNode(@NotNull IdentifierNode identifierNode, @NotNull ParametersNode parametersNode,
-                      @Nullable IdentifierNode returnIdentifierNode, @NotNull BodyNode bodyNode) {
-        this.identifierNode = identifierNode;
-        this.parametersNode = parametersNode;
-        this.returnIdentifierNode = returnIdentifierNode;
-        this.bodyNode = bodyNode;
+    public MethodNode(@NotNull IdentifierNode name, @NotNull ParametersNode parameters,
+                      @Nullable IdentifierNode returnType, @NotNull BodyNode body) {
+        this.name = name;
+        this.parameters = parameters;
+        this.returnType = returnType;
+        this.body = body;
     }
 
     @NotNull
-    public IdentifierNode identifierNode() {
-        return identifierNode;
+    public IdentifierNode name() {
+        return name;
     }
 
     @NotNull
-    public ParametersNode parametersNode() {
-        return parametersNode;
+    public ParametersNode parameters() {
+        return parameters;
     }
 
     @Nullable
-    public IdentifierNode returnIdentifierNode() {
-        return returnIdentifierNode;
+    public IdentifierNode returnType() {
+        return returnType;
     }
 
     @NotNull
-    public BodyNode bodyNode() {
-        return bodyNode;
+    public BodyNode body() {
+        return body;
     }
 }

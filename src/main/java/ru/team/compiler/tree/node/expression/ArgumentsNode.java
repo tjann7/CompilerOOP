@@ -44,15 +44,15 @@ public final class ArgumentsNode extends TreeNode {
         }
     };
 
-    private final List<ExpressionNode> expressionNodes;
+    private final List<ExpressionNode> expressions;
 
-    public ArgumentsNode(@NotNull List<ExpressionNode> expressionNodes) {
-        this.expressionNodes = List.copyOf(expressionNodes);
+    public ArgumentsNode(@NotNull List<ExpressionNode> expressions) {
+        this.expressions = List.copyOf(expressions);
     }
 
     @NotNull
     @Unmodifiable
-    public List<ExpressionNode> expressionNodes() {
-        return expressionNodes;
+    public List<ExpressionNode> expressions() {
+        return expressions;
     }
 }

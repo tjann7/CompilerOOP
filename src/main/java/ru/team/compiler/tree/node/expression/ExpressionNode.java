@@ -48,17 +48,17 @@ public final class ExpressionNode extends TreeNode {
         }
     };
 
-    private final PrimaryNode primaryNode;
+    private final PrimaryNode primary;
     private final List<IdArg> idArgs;
 
-    public ExpressionNode(@NotNull PrimaryNode primaryNode, @NotNull List<IdArg> idArgs) {
-        this.primaryNode = primaryNode;
+    public ExpressionNode(@NotNull PrimaryNode primary, @NotNull List<IdArg> idArgs) {
+        this.primary = primary;
         this.idArgs = List.copyOf(idArgs);
     }
 
     @NotNull
-    public PrimaryNode primaryNode() {
-        return primaryNode;
+    public PrimaryNode primary() {
+        return primary;
     }
 
     @NotNull
@@ -67,7 +67,7 @@ public final class ExpressionNode extends TreeNode {
         return idArgs;
     }
 
-    public record IdArg(@NotNull IdentifierNode identifierNode, @Nullable ArgumentsNode argumentsNode) {
+    public record IdArg(@NotNull IdentifierNode name, @Nullable ArgumentsNode arguments) {
 
     }
 }

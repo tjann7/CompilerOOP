@@ -63,7 +63,7 @@ public final class ParametersNode extends TreeNode {
         return pars;
     }
 
-    public record Par(@NotNull IdentifierNode identifierNode, @NotNull ReferenceNode referenceNode) {
+    public record Par(@NotNull IdentifierNode name, @NotNull ReferenceNode type) {
 
     }
 }

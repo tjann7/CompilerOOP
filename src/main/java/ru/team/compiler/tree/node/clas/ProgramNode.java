@@ -27,15 +27,15 @@ public final class ProgramNode extends TreeNode {
         }
     };
 
-    private final List<ClassNode> classNodes;
+    private final List<ClassNode> classes;
 
-    public ProgramNode(@NotNull List<ClassNode> classNodes) {
-        this.classNodes = List.copyOf(classNodes);
+    public ProgramNode(@NotNull List<ClassNode> classes) {
+        this.classes = List.copyOf(classes);
     }
 
     @NotNull
     @Unmodifiable
-    public List<ClassNode> classNodes() {
-        return classNodes;
+    public List<ClassNode> classes() {
+        return classes;
     }
 }

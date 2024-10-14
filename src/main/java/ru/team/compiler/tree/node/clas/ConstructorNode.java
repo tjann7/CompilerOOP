@@ -33,22 +33,22 @@ public final class ConstructorNode extends ClassMemberNode {
         }
     };
 
-    private final ParametersNode parametersNode;
-    private final BodyNode bodyNode;
+    private final ParametersNode parameters;
+    private final BodyNode body;
 
-    public ConstructorNode(@NotNull ParametersNode parametersNode, @NotNull BodyNode bodyNode) {
-        this.parametersNode = parametersNode;
-        this.bodyNode = bodyNode;
+    public ConstructorNode(@NotNull ParametersNode parameters, @NotNull BodyNode body) {
+        this.parameters = parameters;
+        this.body = body;
     }
 
     @NotNull
-    public ParametersNode parametersNode() {
-        return parametersNode;
+    public ParametersNode parameters() {
+        return parameters;
     }
 
     @NotNull
-    public BodyNode bodyNode() {
-        return bodyNode;
+    public BodyNode body() {
+        return body;
     }
 
 }

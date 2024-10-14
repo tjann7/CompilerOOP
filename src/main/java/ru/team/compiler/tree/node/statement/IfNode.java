@@ -47,28 +47,29 @@ public final class IfNode extends StatementNode {
         }
     };
 
-    private final ExpressionNode expressionNode;
-    private final BodyNode thenBodyNode;
-    private final BodyNode elseBodyNode;
+    private final ExpressionNode condition;
+    private final BodyNode thenBody;
+    private final BodyNode elseBody;
 
-    public IfNode(@NotNull ExpressionNode expressionNode, @NotNull BodyNode thenBodyNode, @Nullable BodyNode elseBodyNode) {
-        this.expressionNode = expressionNode;
-        this.thenBodyNode = thenBodyNode;
-        this.elseBodyNode = elseBodyNode;
+    public IfNode(@NotNull ExpressionNode condition, @NotNull BodyNode thenBody,
+                  @Nullable BodyNode elseBody) {
+        this.condition = condition;
+        this.thenBody = thenBody;
+        this.elseBody = elseBody;
     }
 
     @NotNull
-    public ExpressionNode expressionNode() {
-        return expressionNode;
+    public ExpressionNode condition() {
+        return condition;
     }
 
     @NotNull
-    public BodyNode thenBodyNode() {
-        return thenBodyNode;
+    public BodyNode thenBody() {
+        return thenBody;
     }
 
     @Nullable
-    public BodyNode elseBodyNode() {
-        return elseBodyNode;
+    public BodyNode elseBody() {
+        return elseBody;
     }
 }

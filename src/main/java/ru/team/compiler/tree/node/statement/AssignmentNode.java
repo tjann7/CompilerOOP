@@ -26,7 +26,7 @@ public final class AssignmentNode extends StatementNode {
             ExpressionNode expressionNode = ExpressionNode.PARSER.parse(iterator);
 
             List<ExpressionNode.IdArg> idArgs = expressionNode.idArgs();
-            if (!idArgs.isEmpty() && idArgs.get(idArgs.size() - 1).argumentsNode() != null) {
+            if (!idArgs.isEmpty() && idArgs.get(idArgs.size() - 1).arguments() != null) {
                 int startIndex = copiedIterator.index();
                 int endIndex = iterator.index();
 
@@ -47,21 +47,21 @@ public final class AssignmentNode extends StatementNode {
         }
     };
 
-    private final ExpressionNode expressionNode;
-    private final ExpressionNode valueExpressionNode;
+    private final ExpressionNode expression;
+    private final ExpressionNode valueExpression;
 
-    public AssignmentNode(@NotNull ExpressionNode expressionNode, @NotNull ExpressionNode valueExpressionNode) {
-        this.expressionNode = expressionNode;
-        this.valueExpressionNode = valueExpressionNode;
+    public AssignmentNode(@NotNull ExpressionNode expression, @NotNull ExpressionNode valueExpression) {
+        this.expression = expression;
+        this.valueExpression = valueExpression;
     }
 
     @NotNull
-    public ExpressionNode expressionNode() {
-        return expressionNode;
+    public ExpressionNode expression() {
+        return expression;
     }
 
     @NotNull
-    public ExpressionNode valueExpressionNode() {
-        return valueExpressionNode;
+    public ExpressionNode valueExpression() {
+        return valueExpression;
     }
 }

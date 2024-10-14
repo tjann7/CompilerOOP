@@ -52,30 +52,30 @@ public final class ClassNode extends TreeNode {
         }
     };
 
-    private final IdentifierNode identifierNode;
-    private final IdentifierNode parentIdentifierNode;
-    private final List<ClassMemberNode> classMemberNodes;
+    private final IdentifierNode name;
+    private final IdentifierNode parentName;
+    private final List<ClassMemberNode> classMembers;
 
-    public ClassNode(@NotNull IdentifierNode identifierNode, @Nullable IdentifierNode parentIdentifierNode,
-                     @NotNull List<ClassMemberNode> classMemberNodes) {
-        this.identifierNode = identifierNode;
-        this.parentIdentifierNode = parentIdentifierNode;
-        this.classMemberNodes = List.copyOf(classMemberNodes);
+    public ClassNode(@NotNull IdentifierNode name, @Nullable IdentifierNode parentName,
+                     @NotNull List<ClassMemberNode> classMembers) {
+        this.name = name;
+        this.parentName = parentName;
+        this.classMembers = List.copyOf(classMembers);
     }
 
     @NotNull
-    public IdentifierNode identifierNode() {
-        return identifierNode;
+    public IdentifierNode name() {
+        return name;
     }
 
     @Nullable
-    public IdentifierNode parentIdentifierNode() {
-        return parentIdentifierNode;
+    public IdentifierNode parentName() {
+        return parentName;
     }
 
     @NotNull
     @Unmodifiable
-    public List<ClassMemberNode> classMemberNodes() {
-        return classMemberNodes;
+    public List<ClassMemberNode> classMembers() {
+        return classMembers;
     }
 }
