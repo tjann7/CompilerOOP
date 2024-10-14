@@ -1,6 +1,7 @@
 package ru.team.compiler.token;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.exception.NodeFormatException;
 
@@ -27,7 +28,7 @@ public final class TokenIterator {
     @NotNull
     public Token next(@NotNull String expected) throws CompilerException {
         if (!hasNext()) {
-            throw new NodeFormatException(expected, NodeFormatException.END_OF_STRING);
+            throw new NodeFormatException(expected, NodeFormatException.END_OF_STRING, lastToken());
         }
 
         return list.get(index++);
@@ -41,7 +42,7 @@ public final class TokenIterator {
     @NotNull
     public Token next(@NotNull TokenType expected, @NotNull String expectedMessage) throws CompilerException {
         if (!hasNext()) {
-            throw new NodeFormatException(expectedMessage, NodeFormatException.END_OF_STRING);
+            throw new NodeFormatException(expectedMessage, NodeFormatException.END_OF_STRING, lastToken());
         }
 
         Token token = next(expected.name());
@@ -60,7 +61,7 @@ public final class TokenIterator {
     @NotNull
     public Token lookup(@NotNull String expected) {
         if (!hasNext()) {
-            throw new NodeFormatException(expected, NodeFormatException.END_OF_STRING);
+            throw new NodeFormatException(expected, NodeFormatException.END_OF_STRING, lastToken());
         }
 
         return list.get(index);
@@ -94,5 +95,11 @@ public final class TokenIterator {
 
     public int index() {
         return index;
+    }
+
+    @Nullable
+    public Token lastToken() {
+        int size = list.size();
+        return size >= 1 ? list.get(size - 1) : null;
     }
 }

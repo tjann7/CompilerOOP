@@ -29,7 +29,7 @@ public final class IntegerLiteralNode extends PrimaryNode {
             try {
                 return new IntegerLiteralNode(Integer.parseInt(value));
             } catch (NumberFormatException e) {
-                throw new NodeFormatException("integer", value);
+                throw new NodeFormatException("integer", value, token);
             }
         }
     };

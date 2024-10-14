@@ -34,7 +34,7 @@ public final class BooleanLiteralNode extends PrimaryNode {
 
             Boolean bool = VALUES.get(token.value());
             if (bool == null) {
-                throw new NodeFormatException("boolean", token.value());
+                throw new NodeFormatException("boolean", token.value(), token);
             }
 
             return new BooleanLiteralNode(bool);

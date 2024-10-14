@@ -5,6 +5,7 @@ import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.exception.NodeFormatException;
+import ru.team.compiler.token.Token;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNodeParser;
@@ -30,11 +31,13 @@ public final class AssignmentNode extends StatementNode {
                 int endIndex = iterator.index();
 
                 StringBuilder stringBuilder = new StringBuilder();
+                Token lastToken = null;
                 for (int i = startIndex; i < endIndex; i++) {
-                    stringBuilder.append(copiedIterator.next().value());
+                    lastToken = copiedIterator.next();
+                    stringBuilder.append(lastToken.value());
                 }
 
-                throw new NodeFormatException("field", "method call at " + stringBuilder);
+                throw new NodeFormatException("field", "method call at " + stringBuilder, lastToken);
             }
 
             iterator.next(TokenType.ASSIGNMENT_OPERATOR);

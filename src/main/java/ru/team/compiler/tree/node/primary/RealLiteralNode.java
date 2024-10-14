@@ -29,7 +29,7 @@ public final class RealLiteralNode extends PrimaryNode {
             try {
                 return new RealLiteralNode(Double.parseDouble(value));
             } catch (NumberFormatException e) {
-                throw new NodeFormatException("double", value);
+                throw new NodeFormatException("double", value, token);
             }
         }
     };

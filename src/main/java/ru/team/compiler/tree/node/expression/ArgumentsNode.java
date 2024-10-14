@@ -34,7 +34,8 @@ public final class ArgumentsNode extends TreeNode {
                     if (iterator.consume(TokenType.CLOSING_PARENTHESIS)) {
                         break;
                     } else if (!iterator.consume(TokenType.COMMA)) {
-                        throw new NodeFormatException("comma/closing parenthesis", NodeFormatException.END_OF_STRING);
+                        throw new NodeFormatException("comma/closing parenthesis", NodeFormatException.END_OF_STRING,
+                                iterator.lastToken());
                     }
                 }
             }

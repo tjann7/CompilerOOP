@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.exception.NodeFormatException;
 import ru.team.compiler.token.TokenIterator;
@@ -47,7 +48,7 @@ public final class ClassNode extends TreeNode {
                 classMemberNodes.add(classMemberNode);
             }
 
-            throw new NodeFormatException("end", NodeFormatException.END_OF_STRING);
+            throw new NodeFormatException("end", NodeFormatException.END_OF_STRING, iterator.lastToken());
         }
     };
 
@@ -59,7 +60,7 @@ public final class ClassNode extends TreeNode {
                      @NotNull List<ClassMemberNode> classMemberNodes) {
         this.identifierNode = identifierNode;
         this.parentIdentifierNode = parentIdentifierNode;
-        this.classMemberNodes = classMemberNodes;
+        this.classMemberNodes = List.copyOf(classMemberNodes);
     }
 
     @NotNull
@@ -73,6 +74,7 @@ public final class ClassNode extends TreeNode {
     }
 
     @NotNull
+    @Unmodifiable
     public List<ClassMemberNode> classMemberNodes() {
         return classMemberNodes;
     }

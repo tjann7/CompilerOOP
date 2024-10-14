@@ -73,7 +73,7 @@ public final class BodyNode extends TreeNode {
                     statementNodes.add(statementNode);
                 }
 
-                throw new NodeFormatException(expectedMessage, NodeFormatException.END_OF_STRING);
+                throw new NodeFormatException(expectedMessage, NodeFormatException.END_OF_STRING, iterator.lastToken());
             }
         };
     }
