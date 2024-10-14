@@ -73,7 +73,7 @@ public final class TokenIterator {
 
     public boolean consume(@NotNull TokenType expected) {
         if (lookup(expected)) {
-            ++index;
+            index++;
             return true;
         }
 
@@ -82,7 +82,7 @@ public final class TokenIterator {
 
     public void previous() {
         if (index > 0) {
-            --index;
+            index--;
         }
     }
 

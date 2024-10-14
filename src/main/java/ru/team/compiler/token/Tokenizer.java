@@ -1,10 +1,13 @@
 package ru.team.compiler.token;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import ru.team.compiler.exception.NodeFormatException;
 import ru.team.compiler.util.Pair;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -23,12 +26,12 @@ public class Tokenizer {
             ';', TokenType.SEMICOLON
     );
     private final Map<String, TokenType> keywords = Arrays.stream(TokenType.values())
-        .filter(tokenType -> tokenType.name().endsWith("_KEYWORD"))
-        .map(tokenType -> {
-            String name = tokenType.name();
-            return Pair.of(name.substring(0, name.length() - "_KEYWORD".length()).toLowerCase(), tokenType);
-        })
-        .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+            .filter(tokenType -> tokenType.name().endsWith("_KEYWORD"))
+            .map(tokenType -> {
+                String name = tokenType.name();
+                return Pair.of(name.substring(0, name.length() - "_KEYWORD".length()).toLowerCase(), tokenType);
+            })
+            .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
     private final Set<String> booleans = Set.of(
             "true", "false"
     );
@@ -36,9 +39,8 @@ public class Tokenizer {
     private final String string;
     private int line;
     private int column;
-    private int colIncr;
+    private int columnShift;
     private int pos;
-
 
     public Tokenizer(String string) {
         this.string = string;
@@ -109,23 +111,12 @@ public class Tokenizer {
         skipWhitespaces(true);
     }
 
-    private boolean isMeaningfulChar(Character c) {
-        return !(Character.isWhitespace(c)) && !(c == '\n') && !(c == '\t');
-    }
-
     private void skipWhitespaces(boolean checkEof) {
         while (pos < string.length()) {
-            if (string.charAt(pos) == '\n') {
-                line += 1;
-                column = 0;
-                colIncr = 0;
-                ++pos;
-            } else if (string.charAt(pos) == '\t') {
-                column += 4;
-                ++pos;
-            } else if (Character.isWhitespace(string.charAt(pos))) {
-                ++pos;
-                ++column;
+            char chr = string.charAt(pos);
+            if (Character.isWhitespace(chr)) {
+                onWhitespace(chr);
+                pos++;
             } else {
                 break;
             }
@@ -136,11 +127,23 @@ public class Tokenizer {
         }
     }
 
+    private void onWhitespace(char chr) {
+        if (chr == '\n') {
+            line++;
+            column = 0;
+            columnShift = 0;
+        } else if (chr == '\t') {
+            column += 4;
+        } else if (Character.isWhitespace(chr)) {
+            column++;
+        }
+    }
+
     private char chr() {
         checkEof();
 
-        ++colIncr;
-        ++pos;
+        columnShift++;
+        pos++;
         return string.charAt(pos - 1);
     }
 
@@ -150,8 +153,9 @@ public class Tokenizer {
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        column += colIncr;
-        colIncr = 0;
+        column += columnShift;
+        columnShift = 0;
+
         char c = chr();
         TokenType tokenType = singleTokens.get(c);
         if (tokenType != null) {
@@ -161,7 +165,7 @@ public class Tokenizer {
                     if (c1 == '=') {
                         return ":=";
                     } else {
-                        --pos;
+                        pos--;
                     }
                 }
             }
@@ -171,7 +175,7 @@ public class Tokenizer {
 
         boolean ignoreDot = Character.isDigit(c);
 
-        while (isMeaningfulChar(c)) {
+        while (!Character.isWhitespace(c)) {
             stringBuilder.append(c);
             if (end()) {
                 break;
@@ -184,10 +188,12 @@ public class Tokenizer {
                     continue;
                 }
 
-                --pos;
+                pos--;
                 return stringBuilder.toString();
             }
         }
+
+        onWhitespace(c);
 
         return stringBuilder.toString();
     }
@@ -198,12 +204,12 @@ public class Tokenizer {
 
     private void checkEof() {
         if (end()) {
-            throw expected("string", "end of string");
+            throw expected("string", NodeFormatException.END_OF_STRING);
         }
     }
 
     @NotNull
-    private IllegalArgumentException expected(Object expected, Object actual) {
-        return new IllegalArgumentException("Expected: " + expected + " | Actual: " + actual);
+    private NodeFormatException expected(@Nullable Object expected, @Nullable Object actual) {
+        return new NodeFormatException(Objects.toString(expected), actual, line, column);
     }
 }
