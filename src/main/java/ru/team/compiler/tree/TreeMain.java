@@ -2,6 +2,7 @@ package ru.team.compiler.tree;
 
 import ru.team.compiler.token.Token;
 import ru.team.compiler.token.Tokenizer;
+import ru.team.compiler.tree.node.NodeToStringHelper;
 import ru.team.compiler.tree.node.TreeNode;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class TreeMain {
                     }
 
                     TreeNode node = TreeNode.PARSER.parse(tokens);
-                    System.out.println(node);
+                    System.out.println(NodeToStringHelper.toString(node, true));
                 } catch (Exception e) {
                     System.out.println("ERROR: " + e);
                 }
