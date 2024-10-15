@@ -192,8 +192,11 @@ public class Tokenizer {
                 return stringBuilder.toString();
             }
         }
-        pos--;
-        columnShift--;
+
+        if (!end()) {
+            pos--;
+            columnShift--;
+        }
 
         return stringBuilder.toString();
     }

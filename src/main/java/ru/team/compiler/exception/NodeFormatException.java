@@ -29,7 +29,7 @@ public class NodeFormatException extends RuntimeException {
         }
 
         if (object instanceof Token token) {
-            return token.type().name().toLowerCase();
+            return token.type().name().toLowerCase().replace('_', ' ');
         }
 
         if (object == END_OF_STRING) {

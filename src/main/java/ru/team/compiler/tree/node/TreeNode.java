@@ -19,8 +19,8 @@ import ru.team.compiler.tree.node.statement.StatementNode;
 import java.util.List;
 
 public abstract sealed class TreeNode permits PrimaryNode, IdentifierNode, ExpressionNode, ArgumentsNode,
-        BodyNode, StatementNode, ParametersNode, ClassMemberNode,
-        ClassNode, ProgramNode {
+                                              BodyNode, StatementNode, ParametersNode, ClassMemberNode,
+                                              ClassNode, ProgramNode {
 
     public static final TreeNodeParser<TreeNode> PARSER = new TreeNodeParser<>() {
 
