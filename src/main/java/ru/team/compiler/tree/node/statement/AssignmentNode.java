@@ -3,6 +3,7 @@ package ru.team.compiler.tree.node.statement;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
+import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.exception.NodeFormatException;
 import ru.team.compiler.token.Token;
@@ -63,5 +64,14 @@ public final class AssignmentNode extends StatementNode {
     @NotNull
     public ExpressionNode valueExpression() {
         return valueExpression;
+    }
+
+    @Override
+    @NotNull
+    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+        expression.traverse(context);
+        valueExpression.traverse(context);
+
+        return context;
     }
 }

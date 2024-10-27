@@ -1,6 +1,7 @@
 package ru.team.compiler.tree.node;
 
 import org.jetbrains.annotations.NotNull;
+import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.exception.NodeFormatException;
 import ru.team.compiler.token.Token;
@@ -71,5 +72,10 @@ public abstract sealed class TreeNode permits PrimaryNode, IdentifierNode, Expre
             return parsers;
         }
     };
+
+    @NotNull
+    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+        return context;
+    }
 
 }

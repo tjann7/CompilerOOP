@@ -6,15 +6,8 @@ import java.util.Objects;
 
 public record Token(@NotNull TokenType type, @NotNull String value, int line, int column) {
 
-    public Token(TokenType type, String value) {
+    public Token(@NotNull TokenType type, @NotNull String value) {
         this(type, value, 0, 0);
-    }
-
-    public Token(TokenType type, String value, int line, int column) {
-        this.type = type;
-        this.value = value;
-        this.line = line;
-        this.column = column;
     }
 
     @Override

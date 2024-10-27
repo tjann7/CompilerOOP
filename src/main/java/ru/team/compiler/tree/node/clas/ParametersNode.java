@@ -4,6 +4,9 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import ru.team.compiler.analyzer.AnalyzableVariable;
+import ru.team.compiler.analyzer.AnalyzeContext;
+import ru.team.compiler.exception.AnalyzerException;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.exception.NodeFormatException;
 import ru.team.compiler.token.TokenIterator;
@@ -14,7 +17,9 @@ import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
@@ -61,6 +66,27 @@ public final class ParametersNode extends TreeNode {
     @Unmodifiable
     public List<Par> pars() {
         return pars;
+    }
+
+    @Override
+    @NotNull
+    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+        Map<ReferenceNode, AnalyzableVariable> variables = new HashMap<>(context.variables());
+
+        for (Par par : pars) {
+            if (!context.hasClass(par.type)) {
+                throw new AnalyzerException("Parameter '%s.%s' references to unknown type '%s'"
+                        .formatted(context.currentPath(), par.name.value(), par.type.value()));
+            }
+
+            variables.put(par.name.asReference(), new AnalyzableVariable(par.name, par.type));
+        }
+
+        return new AnalyzeContext(
+                context.classes(),
+                variables,
+                context.currentPath()
+        );
     }
 
     public record Par(@NotNull IdentifierNode name, @NotNull ReferenceNode type) {

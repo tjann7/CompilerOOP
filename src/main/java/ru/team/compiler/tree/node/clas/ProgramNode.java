@@ -2,6 +2,7 @@ package ru.team.compiler.tree.node.clas;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.tree.node.TreeNode;
@@ -37,5 +38,17 @@ public final class ProgramNode extends TreeNode {
     @Unmodifiable
     public List<ClassNode> classes() {
         return classes;
+    }
+
+    @Override
+    @NotNull
+    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+        AnalyzeContext initialContext = context;
+
+        for (ClassNode classNode : classes) {
+            context = classNode.traverse(context);
+        }
+
+        return initialContext;
     }
 }

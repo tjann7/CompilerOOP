@@ -5,12 +5,15 @@ import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import ru.team.compiler.analyzer.AnalyzeContext;
+import ru.team.compiler.exception.AnalyzerException;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNode;
 import ru.team.compiler.tree.node.TreeNodeParser;
 import ru.team.compiler.tree.node.primary.PrimaryNode;
+import ru.team.compiler.tree.node.primary.ReferenceNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,5 +72,20 @@ public final class ExpressionNode extends TreeNode {
 
     public record IdArg(@NotNull IdentifierNode name, @Nullable ArgumentsNode arguments) {
 
+    }
+
+    @Override
+    @NotNull
+    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+        if (primary instanceof ReferenceNode referenceNode) {
+            if (!context.classes().containsKey(referenceNode) && !context.variables().containsKey(referenceNode)) {
+                throw new AnalyzerException("Expression in '%s' references to unknown type '%s'"
+                        .formatted(context.currentPath(), referenceNode.value()));
+            }
+        }
+
+        // TODO: add check for each IdArg that it references to correct classes
+
+        return context;
     }
 }

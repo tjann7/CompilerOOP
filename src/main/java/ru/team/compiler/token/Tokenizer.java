@@ -42,7 +42,7 @@ public class Tokenizer {
     private int columnShift;
     private int pos;
 
-    public Tokenizer(String string) {
+    public Tokenizer(@NotNull String string) {
         this.string = string;
     }
 

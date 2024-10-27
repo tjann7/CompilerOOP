@@ -3,6 +3,8 @@ package ru.team.compiler.tree.node.clas;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
+import ru.team.compiler.analyzer.AnalyzeContext;
+import ru.team.compiler.exception.AnalyzerException;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
@@ -48,4 +50,14 @@ public final class FieldNode extends ClassMemberNode {
         return type;
     }
 
+    @Override
+    @NotNull
+    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+        if (!context.hasClass(type)) {
+            throw new AnalyzerException("Field '%s.%s' references to unknown type '%s'"
+                    .formatted(context.currentPath(), name.value(), type.value()));
+        }
+
+        return context;
+    }
 }

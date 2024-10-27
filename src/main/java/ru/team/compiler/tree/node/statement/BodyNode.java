@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.exception.NodeFormatException;
 import ru.team.compiler.token.Token;
@@ -31,6 +32,19 @@ public final class BodyNode extends TreeNode {
     @Unmodifiable
     public List<StatementNode> statements() {
         return statements;
+    }
+
+    @Override
+    @NotNull
+    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+        AnalyzeContext initialContext = context;
+
+        context = context.concatPath("<body>");
+        for (StatementNode statementNode : statements) {
+            context = statementNode.traverse(context);
+        }
+
+        return initialContext;
     }
 
     @NotNull

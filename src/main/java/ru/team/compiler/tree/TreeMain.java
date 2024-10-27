@@ -1,9 +1,11 @@
 package ru.team.compiler.tree;
 
+import ru.team.compiler.analyzer.Analyzer;
 import ru.team.compiler.token.Token;
 import ru.team.compiler.token.Tokenizer;
 import ru.team.compiler.tree.node.NodeToStringHelper;
 import ru.team.compiler.tree.node.TreeNode;
+import ru.team.compiler.tree.node.clas.ProgramNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +33,11 @@ public class TreeMain {
 
                     TreeNode node = TreeNode.PARSER.parse(tokens);
                     System.out.println(NodeToStringHelper.toString(node, true));
+
+                    if (node instanceof ProgramNode programNode) {
+                        Analyzer.traverse(programNode);
+                        System.out.println("ProgramNode was traversed successfully!");
+                    }
                 } catch (Exception e) {
                     System.out.println("ERROR: " + e);
                 }

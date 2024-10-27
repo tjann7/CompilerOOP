@@ -64,7 +64,7 @@ public class ClassMemberNodeTest {
                         new ParametersNode(List.of(
                                 new ParametersNode.Par(
                                         new IdentifierNode("b"), new ReferenceNode("Integer")))),
-                        new IdentifierNode("Integer"),
+                        new ReferenceNode("Integer"),
                         new BodyNode(List.of(
                                 new ReturnNode(
                                         new ExpressionNode(new ReferenceNode("b"), List.of()))))),

@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
@@ -71,5 +72,16 @@ public final class IfNode extends StatementNode {
     @Nullable
     public BodyNode elseBody() {
         return elseBody;
+    }
+
+    @Override
+    @NotNull
+    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+        condition.traverse(context);
+        thenBody.traverse(context);
+        if (elseBody != null) {
+            elseBody.traverse(context);
+        }
+        return context;
     }
 }

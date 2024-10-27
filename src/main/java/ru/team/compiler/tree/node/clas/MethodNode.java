@@ -4,11 +4,14 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ru.team.compiler.analyzer.AnalyzeContext;
+import ru.team.compiler.exception.AnalyzerException;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNodeParser;
 import ru.team.compiler.tree.node.expression.IdentifierNode;
+import ru.team.compiler.tree.node.primary.ReferenceNode;
 import ru.team.compiler.tree.node.statement.BodyNode;
 
 @EqualsAndHashCode(callSuper = false)
@@ -27,9 +30,9 @@ public final class MethodNode extends ClassMemberNode {
 
             ParametersNode parametersNode = ParametersNode.PARSER.parse(iterator);
 
-            IdentifierNode returnIdentifierNode;
+            ReferenceNode returnIdentifierNode;
             if (iterator.consume(TokenType.COLON)) {
-                returnIdentifierNode = IdentifierNode.PARSER.parse(iterator);
+                returnIdentifierNode = ReferenceNode.PARSER.parse(iterator);
             } else {
                 returnIdentifierNode = null;
             }
@@ -46,11 +49,11 @@ public final class MethodNode extends ClassMemberNode {
 
     private final IdentifierNode name;
     private final ParametersNode parameters;
-    private final IdentifierNode returnType;
+    private final ReferenceNode returnType;
     private final BodyNode body;
 
     public MethodNode(@NotNull IdentifierNode name, @NotNull ParametersNode parameters,
-                      @Nullable IdentifierNode returnType, @NotNull BodyNode body) {
+                      @Nullable ReferenceNode returnType, @NotNull BodyNode body) {
         this.name = name;
         this.parameters = parameters;
         this.returnType = returnType;
@@ -68,12 +71,29 @@ public final class MethodNode extends ClassMemberNode {
     }
 
     @Nullable
-    public IdentifierNode returnType() {
+    public ReferenceNode returnType() {
         return returnType;
     }
 
     @NotNull
     public BodyNode body() {
         return body;
+    }
+
+    @Override
+    @NotNull
+    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+        if (returnType != null && !context.hasClass(returnType)) {
+            throw new AnalyzerException("Method '%s.%s' references to unknown type '%s'"
+                    .formatted(context.currentPath(), name.value(), returnType.value()));
+        }
+
+        AnalyzeContext initialContext = context;
+
+        context = context.concatPath(name.value());
+        context = parameters.traverse(context);
+        body.traverse(context);
+
+        return initialContext;
     }
 }

@@ -3,6 +3,7 @@ package ru.team.compiler.tree.node.statement;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
+import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
@@ -48,5 +49,13 @@ public final class WhileLoopNode extends StatementNode {
     @NotNull
     public BodyNode body() {
         return body;
+    }
+
+    @Override
+    @NotNull
+    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+        condition.traverse(context);
+        body.traverse(context);
+        return context;
     }
 }

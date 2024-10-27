@@ -5,6 +5,7 @@ import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.exception.NodeFormatException;
 import ru.team.compiler.token.TokenIterator;
@@ -12,6 +13,7 @@ import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNode;
 import ru.team.compiler.tree.node.TreeNodeParser;
 import ru.team.compiler.tree.node.expression.IdentifierNode;
+import ru.team.compiler.tree.node.primary.ReferenceNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,9 +30,9 @@ public final class ClassNode extends TreeNode {
 
             IdentifierNode identifierNode = IdentifierNode.PARSER.parse(iterator);
 
-            IdentifierNode parentIdentifierNode;
+            ReferenceNode parentIdentifierNode;
             if (iterator.consume(TokenType.EXTENDS_KEYWORD)) {
-                parentIdentifierNode = IdentifierNode.PARSER.parse(iterator);
+                parentIdentifierNode = ReferenceNode.PARSER.parse(iterator);
             } else {
                 parentIdentifierNode = null;
             }
@@ -53,10 +55,10 @@ public final class ClassNode extends TreeNode {
     };
 
     private final IdentifierNode name;
-    private final IdentifierNode parentName;
+    private final ReferenceNode parentName;
     private final List<ClassMemberNode> classMembers;
 
-    public ClassNode(@NotNull IdentifierNode name, @Nullable IdentifierNode parentName,
+    public ClassNode(@NotNull IdentifierNode name, @Nullable ReferenceNode parentName,
                      @NotNull List<ClassMemberNode> classMembers) {
         this.name = name;
         this.parentName = parentName;
@@ -69,7 +71,7 @@ public final class ClassNode extends TreeNode {
     }
 
     @Nullable
-    public IdentifierNode parentName() {
+    public ReferenceNode parentName() {
         return parentName;
     }
 
@@ -77,5 +79,18 @@ public final class ClassNode extends TreeNode {
     @Unmodifiable
     public List<ClassMemberNode> classMembers() {
         return classMembers;
+    }
+
+    @Override
+    @NotNull
+    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+        AnalyzeContext initialContext = context;
+
+        context = context.concatPath(name.value());
+        for (ClassMemberNode classMemberNode : classMembers) {
+            context = classMemberNode.traverse(context);
+        }
+
+        return initialContext;
     }
 }
