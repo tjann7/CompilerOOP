@@ -56,7 +56,7 @@ public class ClassNodeTest {
         ClassNode node = ClassNode.PARSER.parse(iterator);
         assertEquals(new ClassNode(
                         new IdentifierNode("A"),
-                        new IdentifierNode("B"),
+                        new ReferenceNode("B"),
                         List.of()),
                 node);
         assertFalse(iterator.hasNext());
@@ -81,7 +81,7 @@ public class ClassNodeTest {
         ClassNode node = ClassNode.PARSER.parse(iterator);
         assertEquals(new ClassNode(
                         new IdentifierNode("A"),
-                        new IdentifierNode("B"),
+                        new ReferenceNode("B"),
                         List.of(
                                 new FieldNode(new IdentifierNode("a"), new ReferenceNode("Integer")))),
                 node);
@@ -123,7 +123,7 @@ public class ClassNodeTest {
         ClassNode node = ClassNode.PARSER.parse(iterator);
         assertEquals(new ClassNode(
                         new IdentifierNode("A"),
-                        new IdentifierNode("B"),
+                        new ReferenceNode("B"),
                         List.of(
                                 new FieldNode(new IdentifierNode("a"), new ReferenceNode("Integer")),
                                 new ConstructorNode(
