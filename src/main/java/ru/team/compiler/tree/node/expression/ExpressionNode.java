@@ -88,8 +88,9 @@ public final class ExpressionNode extends TreeNode {
             if (!context.classes().containsKey(referenceNode) && !context.variables().containsKey(referenceNode)) {
                 throw new AnalyzerException("Expression in '%s' references to unknown type '%s'"
                         .formatted(context.currentPath(), referenceNode.value()));
-            } else if (context.classes().containsKey(referenceNode)) {
-                AnalyzableClass classContext = context.classes().get(referenceNode);
+            } else if (context.variables().containsKey(referenceNode)) {
+                AnalyzableClass classContext = context.classes()
+                        .get(context.variables().get(referenceNode));
                 for (IdArg i : idArgs) {
                     if (!context.variables().containsKey(i.name.value()))
                         throw new AnalyzerException();
