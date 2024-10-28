@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import ru.team.compiler.exception.AnalyzerException;
 import ru.team.compiler.tree.node.clas.ClassMemberNode;
 import ru.team.compiler.tree.node.clas.ClassNode;
+import ru.team.compiler.tree.node.clas.ConstructorNode;
 import ru.team.compiler.tree.node.clas.FieldNode;
 import ru.team.compiler.tree.node.clas.MethodNode;
 import ru.team.compiler.tree.node.clas.ParametersNode;
@@ -26,19 +27,23 @@ public final class Analyzer {
 
         classes.put(
                 new ReferenceNode("Any"),
-                new AnalyzableClass(new IdentifierNode("Any"), new ReferenceNode(""), Map.of(), Map.of())
+                new AnalyzableClass(new IdentifierNode("Any"), new ReferenceNode(""),
+                        Map.of(), Map.of(), Map.of())
         );
         classes.put(
                 new ReferenceNode("Integer"),
-                new AnalyzableClass(new IdentifierNode("Integer"), new ReferenceNode("Any"), Map.of(), Map.of())
+                new AnalyzableClass(new IdentifierNode("Integer"), new ReferenceNode("Any"),
+                        Map.of(), Map.of(), Map.of())
         );
         classes.put(
                 new ReferenceNode("Real"),
-                new AnalyzableClass(new IdentifierNode("Real"), new ReferenceNode("Any"), Map.of(), Map.of())
+                new AnalyzableClass(new IdentifierNode("Real"), new ReferenceNode("Any"),
+                        Map.of(), Map.of(), Map.of())
         );
         classes.put(
                 new ReferenceNode("Boolean"),
-                new AnalyzableClass(new IdentifierNode("Boolean"), new ReferenceNode("Any"), Map.of(), Map.of())
+                new AnalyzableClass(new IdentifierNode("Boolean"), new ReferenceNode("Any"),
+                        Map.of(), Map.of(), Map.of())
         );
 
         return classes;
@@ -53,6 +58,7 @@ public final class Analyzer {
                 throw new AnalyzerException("Class '%s' is already defined".formatted(classNode.name()));
             }
 
+            Map<AnalyzableConstructor.Key, AnalyzableConstructor> constructors = new HashMap<>();
             Map<AnalyzableMethod.Key, AnalyzableMethod> methods = new HashMap<>();
             Map<AnalyzableField.Key, AnalyzableField> fields = new HashMap<>();
 
@@ -61,6 +67,7 @@ public final class Analyzer {
             AnalyzableClass analyzableClass = new AnalyzableClass(
                     classNode.name(),
                     parentName != null ? parentName : new ReferenceNode("Any"),
+                    constructors,
                     methods,
                     fields
             );
@@ -82,8 +89,13 @@ public final class Analyzer {
                     AnalyzableField field = new AnalyzableField(name, type, analyzableClass);
                     // TODO: check if already defined
                     fields.put(field.key(), field);
+                } else if (classMemberNode instanceof ConstructorNode constructorNode) {
+                    ParametersNode parameters = constructorNode.parameters();
+
+                    AnalyzableConstructor constructor = new AnalyzableConstructor(parameters, analyzableClass);
+                    // TODO: check if already defined
+                    constructors.put(constructor.key(), constructor);
                 }
-                // TODO: constructors
             }
 
             classes.put(classReference, analyzableClass);
