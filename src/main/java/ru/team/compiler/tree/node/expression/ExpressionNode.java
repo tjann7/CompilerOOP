@@ -180,6 +180,11 @@ public final class ExpressionNode extends TreeNode {
 
                     for (AnalyzableMethod analyzableMethod : methods) {
                         // TODO: check that arguments are fit and place condition instead "true"
+                        // This such case must be supported:
+                        // method a(a: A)
+                        // B extends A
+                        // =>
+                        // a(A(1)) & a(B(1))
                         if (true) {
                             method = analyzableMethod;
                             break;
@@ -195,21 +200,8 @@ public final class ExpressionNode extends TreeNode {
                         break;
                     }
                 }
-
-                // method a(a: A)
-                // B extends A
-                // =>
-                // a(A(1)) & a(B(1))
             }
         }
-
-        // var a : Integer
-        // var b : Integer
-        // b := 1
-        // a := b
-        // a := Integer
-
-        // TODO: add check for each IdArg that it references to correct classes
 
         return context;
     }
