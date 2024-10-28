@@ -95,7 +95,7 @@ public final class ExpressionNode extends TreeNode {
 
     @Override
     @NotNull
-    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
         type(context);
         return context;
     }

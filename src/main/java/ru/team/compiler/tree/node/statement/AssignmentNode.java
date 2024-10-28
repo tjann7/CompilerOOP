@@ -60,7 +60,7 @@ public final class AssignmentNode extends StatementNode {
 
     @Override
     @NotNull
-    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
         ReferenceNode leftType;
 
         if (local) {

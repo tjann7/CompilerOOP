@@ -74,7 +74,7 @@ public abstract sealed class TreeNode permits PrimaryNode, IdentifierNode, Expre
     };
 
     @NotNull
-    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
         return context;
     }
 

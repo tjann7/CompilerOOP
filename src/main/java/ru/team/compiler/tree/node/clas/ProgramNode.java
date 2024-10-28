@@ -42,11 +42,11 @@ public final class ProgramNode extends TreeNode {
 
     @Override
     @NotNull
-    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
         AnalyzeContext initialContext = context;
 
         for (ClassNode classNode : classes) {
-            context = classNode.traverse(context);
+            context = classNode.analyze(context);
         }
 
         return initialContext;

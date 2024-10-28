@@ -53,9 +53,9 @@ public final class WhileLoopNode extends StatementNode {
 
     @Override
     @NotNull
-    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
-        condition.traverse(context);
-        body.traverse(context);
+    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
+        condition.analyze(context);
+        body.analyze(context);
         return context;
     }
 }

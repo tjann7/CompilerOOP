@@ -40,7 +40,7 @@ public class TreeMain {
                     }
 
                     if (node instanceof ProgramNode programNode) {
-                        programNode.traverse(Analyzer.createContext(programNode));
+                        programNode.analyze(Analyzer.createContext(programNode));
                         System.out.println("ProgramNode was traversed successfully!");
                     }
                 } catch (Exception e) {

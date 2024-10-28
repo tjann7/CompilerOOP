@@ -52,7 +52,7 @@ public final class FieldNode extends ClassMemberNode {
 
     @Override
     @NotNull
-    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
         if (!context.hasClass(type)) {
             throw new AnalyzerException("Field '%s.%s' references to unknown type '%s'"
                     .formatted(context.currentPath(), name.value(), type.value()));

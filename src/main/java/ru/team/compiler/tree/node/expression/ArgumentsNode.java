@@ -59,11 +59,11 @@ public final class ArgumentsNode extends TreeNode {
 
     @Override
     @NotNull
-    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
         AnalyzeContext initialContext = context;
         context = context.concatPath("<arguments>");
         for (ExpressionNode expressionNode : expressions) {
-            context = expressionNode.traverse(context);
+            context = expressionNode.analyze(context);
         }
 
         return initialContext;

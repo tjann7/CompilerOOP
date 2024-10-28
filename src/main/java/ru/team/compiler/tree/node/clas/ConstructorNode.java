@@ -54,12 +54,12 @@ public final class ConstructorNode extends ClassMemberNode {
 
     @Override
     @NotNull
-    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
         AnalyzeContext initialContext = context;
 
         context = context.concatPath("this");
-        context = parameters.traverse(context);
-        body.traverse(context);
+        context = parameters.analyze(context);
+        body.analyze(context);
 
         return initialContext;
     }

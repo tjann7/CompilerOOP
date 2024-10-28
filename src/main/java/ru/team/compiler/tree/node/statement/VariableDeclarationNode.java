@@ -56,7 +56,7 @@ public final class VariableDeclarationNode extends StatementNode {
 
     @Override
     @NotNull
-    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
         Map<ReferenceNode, AnalyzableVariable> variables = new HashMap<>(context.variables());
 
         if (!context.hasClass(type)) {

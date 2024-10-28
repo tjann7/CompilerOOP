@@ -97,7 +97,7 @@ public final class MethodNode extends ClassMemberNode {
 
     @Override
     @NotNull
-    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
         if (returnType != null && !context.hasClass(returnType)) {
             throw new AnalyzerException("Method '%s.%s' references to unknown type '%s'"
                     .formatted(context.currentPath(), name.value(), returnType.value()));
@@ -106,8 +106,8 @@ public final class MethodNode extends ClassMemberNode {
         AnalyzeContext initialContext = context;
 
         context = context.concatPath(name.value());
-        context = parameters.traverse(context);
-        body.traverse(context);
+        context = parameters.analyze(context);
+        body.analyze(context);
 
         return initialContext;
     }

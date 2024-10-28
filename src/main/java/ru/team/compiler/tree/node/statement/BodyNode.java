@@ -36,12 +36,12 @@ public final class BodyNode extends TreeNode {
 
     @Override
     @NotNull
-    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
         AnalyzeContext initialContext = context;
 
         context = context.concatPath("<body>");
         for (StatementNode statementNode : statements) {
-            context = statementNode.traverse(context);
+            context = statementNode.analyze(context);
         }
 
         return initialContext;

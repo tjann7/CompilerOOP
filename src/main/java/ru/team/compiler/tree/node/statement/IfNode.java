@@ -76,11 +76,11 @@ public final class IfNode extends StatementNode {
 
     @Override
     @NotNull
-    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
-        condition.traverse(context);
-        thenBody.traverse(context);
+    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
+        condition.analyze(context);
+        thenBody.analyze(context);
         if (elseBody != null) {
-            elseBody.traverse(context);
+            elseBody.analyze(context);
         }
         return context;
     }

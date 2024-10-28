@@ -39,7 +39,7 @@ public final class ReturnNode extends StatementNode {
 
     @Override
     @NotNull
-    public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
-        return expression.traverse(context);
+    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
+        return expression.analyze(context);
     }
 }
