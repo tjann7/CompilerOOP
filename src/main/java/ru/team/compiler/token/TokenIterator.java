@@ -97,6 +97,10 @@ public final class TokenIterator {
         return index;
     }
 
+    public void index(int index) {
+        this.index = index;
+    }
+
     @Nullable
     public Token lastToken() {
         int size = list.size();
