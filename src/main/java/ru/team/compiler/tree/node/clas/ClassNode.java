@@ -86,7 +86,7 @@ public final class ClassNode extends TreeNode {
     public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
         AnalyzeContext initialContext = context;
 
-        context = context.concatPath(name.value());
+        context = context.withClass(this);
         for (ClassMemberNode classMemberNode : classMembers) {
             context = classMemberNode.traverse(context);
         }

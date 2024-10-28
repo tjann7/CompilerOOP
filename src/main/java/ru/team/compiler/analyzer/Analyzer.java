@@ -56,6 +56,7 @@ public final class Analyzer {
             Map<AnalyzableMethod.Key, AnalyzableMethod> methods = new HashMap<>();
             Map<AnalyzableField.Key, AnalyzableField> fields = new HashMap<>();
 
+            // TODO: check for cyclic dependency: A extends B, B extends A
             ReferenceNode parentName = classNode.parentName();
             AnalyzableClass analyzableClass = new AnalyzableClass(
                     classNode.name(),
@@ -72,20 +73,23 @@ public final class Analyzer {
                     ReferenceNode type = methodNode.returnType();
 
                     AnalyzableMethod method = new AnalyzableMethod(name, parameters, type, analyzableClass);
+                    // TODO: check if already defined
                     methods.put(method.key(), method);
                 } else if (classMemberNode instanceof FieldNode fieldNode) {
                     IdentifierNode name = fieldNode.name();
                     ReferenceNode type = fieldNode.type();
 
                     AnalyzableField field = new AnalyzableField(name, type, analyzableClass);
+                    // TODO: check if already defined
                     fields.put(field.key(), field);
                 }
+                // TODO: constructors
             }
 
             classes.put(classReference, analyzableClass);
         }
 
-        programNode.traverse(new AnalyzeContext(classes, Map.of(), ""));
+        programNode.traverse(new AnalyzeContext(classes, Map.of(), "", null));
     }
 
 }
