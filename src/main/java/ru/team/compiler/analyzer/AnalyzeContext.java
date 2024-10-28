@@ -51,4 +51,16 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
                 classes, variables, currentPath.isEmpty() ? path : currentPath + "." + path, analyzableClass
         );
     }
+
+    public boolean isAssignableFrom(@NotNull ReferenceNode requiredClassName, @NotNull ReferenceNode className) {
+        if (!hasClass(requiredClassName)) {
+            throw new AnalyzerException("Class '%s' cannot be found at '%s'"
+                    .formatted(requiredClassName.value(), currentPath));
+        } else if (!hasClass(className)) {
+            throw new AnalyzerException("Class '%s' cannot be found at '%s'"
+                    .formatted(className.value(), currentPath));
+        }
+
+        return classes.get(requiredClassName).isAssignableFrom(this, classes.get(className));
+    }
 }

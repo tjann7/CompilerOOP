@@ -16,6 +16,7 @@ import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNode;
 import ru.team.compiler.tree.node.TreeNodeParser;
+import ru.team.compiler.tree.node.clas.ParametersNode;
 import ru.team.compiler.tree.node.primary.BooleanLiteralNode;
 import ru.team.compiler.tree.node.primary.IntegerLiteralNode;
 import ru.team.compiler.tree.node.primary.PrimaryNode;
@@ -86,10 +87,13 @@ public final class ExpressionNode extends TreeNode {
     @Override
     @NotNull
     public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
-        ReferenceNode currentType;
+        type(context);
+        return context;
+    }
 
-        // var a : A
-        // a := A(1).
+    @NotNull
+    public ReferenceNode type(@NotNull AnalyzeContext context) {
+        ReferenceNode currentType;
 
         int shift = 0;
 
@@ -168,7 +172,14 @@ public final class ExpressionNode extends TreeNode {
                     throw new AnalyzerException("Expression in '%s' is invalid: reference to unknown field '%s' in type '%s'"
                             .formatted(context.currentPath(), idArg.name, currentType.value()));
                 }
+
+                currentType = field.type();
             } else {
+                List<ReferenceNode> argumentsTypes = idArg.arguments.expressions()
+                        .stream()
+                        .map(expressionNode -> expressionNode.type(context))
+                        .collect(Collectors.toList());
+
                 AnalyzableMethod method = null;
 
                 AnalyzableClass currentClass = analyzableClass;
@@ -179,14 +190,26 @@ public final class ExpressionNode extends TreeNode {
                             .collect(Collectors.toList());
 
                     for (AnalyzableMethod analyzableMethod : methods) {
-                        // TODO: check that arguments are fit and place condition instead "true"
-                        // This such case must be supported:
-                        // method a(a: A)
-                        // B extends A
-                        // =>
-                        // a(A(1)) & a(B(1))
-                        if (true) {
-                            method = analyzableMethod;
+
+                        ParametersNode parameters = analyzableMethod.parameters();
+                        int size = idArg.arguments.expressions().size();
+                        if (size != parameters.pars().size()) {
+                            continue;
+                        }
+
+                        method = analyzableMethod;
+
+                        for (int j = 0; j < size; j++) {
+                            ReferenceNode argumentType = argumentsTypes.get(j);
+                            ReferenceNode parameterType = parameters.pars().get(j).type();
+
+                            if (!context.isAssignableFrom(argumentType, parameterType)) {
+                                method = null;
+                                break;
+                            }
+                        }
+
+                        if (method != null) {
                             break;
                         }
                     }
@@ -200,16 +223,28 @@ public final class ExpressionNode extends TreeNode {
                         break;
                     }
                 }
+
+                if (method == null) {
+                    throw new AnalyzerException("Expression in '%s' is invalid: reference to unknown method '%s' in type '%s'"
+                            .formatted(context.currentPath(), idArg.name, currentType.value()));
+                }
+
+                if (method.returnType() == null) {
+                    throw new AnalyzerException("Expression in '%s' is invalid: reference to void method '%s' in type '%s'"
+                            .formatted(context.currentPath(), idArg.name, currentType.value()));
+                }
+
+                currentType = method.returnType();
             }
         }
 
-        return context;
+        return currentType;
     }
 
     @Nullable
     private AnalyzableClass parentClass(@NotNull AnalyzeContext context, @NotNull AnalyzableClass currentClass) {
         String name = currentClass.name().value();
-        if (name.equals("Any") || name.equals("")) {
+        if (name.equals("")) {
             return null;
         }
 
