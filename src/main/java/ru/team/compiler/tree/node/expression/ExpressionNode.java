@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import ru.team.compiler.analyzer.AnalyzableClass;
+import ru.team.compiler.analyzer.AnalyzableConstructor;
 import ru.team.compiler.analyzer.AnalyzableField;
 import ru.team.compiler.analyzer.AnalyzableMethod;
 import ru.team.compiler.analyzer.AnalyzableVariable;
@@ -26,6 +27,7 @@ import ru.team.compiler.tree.node.primary.ThisNode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @EqualsAndHashCode(callSuper = false)
@@ -110,16 +112,36 @@ public final class ExpressionNode extends TreeNode {
                             .formatted(context.currentPath()));
                 }
 
-                if (idArg.arguments != null) {
+                if (idArg.arguments == null) {
                     throw new AnalyzerException("Expression in '%s' is invalid: no arguments for constructor"
                             .formatted(context.currentPath()));
                 }
 
-                // TODO: check argument correctness
+                currentType = referenceNode;
+
+                AnalyzableClass analyzableClass = context.classes().get(referenceNode);
+
+                AnalyzableConstructor constructor = findMatchingExecutable(
+                        context,
+                        analyzableClass,
+                        idArg.arguments,
+                        currentClass -> new ArrayList<>(currentClass.constructors().values()),
+                        AnalyzableConstructor::parameters);
+
+                if (constructor == null) {
+                    List<ReferenceNode> argumentsTypes = argumentTypes(context, idArg.arguments);
+
+                    throw new AnalyzerException("Expression in '%s' is invalid: reference to unknown constructor '%s(%s)' in type '%s'"
+                            .formatted(
+                                    context.currentPath(),
+                                    idArg.name,
+                                    argumentsTypes.stream()
+                                            .map(ReferenceNode::value)
+                                            .collect(Collectors.joining(",")),
+                                    currentType.value()));
+                }
 
                 shift = 1;
-
-                currentType = referenceNode;
             } else if (context.hasVariable(referenceNode)) {
                 AnalyzableVariable variable = context.variables().get(referenceNode);
                 currentType = variable.type();
@@ -175,63 +197,38 @@ public final class ExpressionNode extends TreeNode {
 
                 currentType = field.type();
             } else {
-                List<ReferenceNode> argumentsTypes = idArg.arguments.expressions()
-                        .stream()
-                        .map(expressionNode -> expressionNode.type(context))
-                        .collect(Collectors.toList());
-
-                AnalyzableMethod method = null;
-
-                AnalyzableClass currentClass = analyzableClass;
-                while (true) {
-                    List<AnalyzableMethod> methods = analyzableClass.methods().values()
-                            .stream()
-                            .filter(m -> m.name().equals(idArg.name))
-                            .collect(Collectors.toList());
-
-                    for (AnalyzableMethod analyzableMethod : methods) {
-
-                        ParametersNode parameters = analyzableMethod.parameters();
-                        int size = idArg.arguments.expressions().size();
-                        if (size != parameters.pars().size()) {
-                            continue;
-                        }
-
-                        method = analyzableMethod;
-
-                        for (int j = 0; j < size; j++) {
-                            ReferenceNode argumentType = argumentsTypes.get(j);
-                            ReferenceNode parameterType = parameters.pars().get(j).type();
-
-                            if (!context.isAssignableFrom(argumentType, parameterType)) {
-                                method = null;
-                                break;
-                            }
-                        }
-
-                        if (method != null) {
-                            break;
-                        }
-                    }
-
-                    if (method != null) {
-                        break;
-                    }
-
-                    currentClass = parentClass(context, currentClass);
-                    if (currentClass == null) {
-                        break;
-                    }
-                }
+                AnalyzableMethod method = findMatchingExecutable(
+                        context,
+                        analyzableClass,
+                        idArg.arguments,
+                        currentClass -> currentClass.methods().values()
+                                .stream()
+                                .filter(m -> m.name().equals(idArg.name))
+                                .collect(Collectors.toList()),
+                        AnalyzableMethod::parameters);
 
                 if (method == null) {
-                    throw new AnalyzerException("Expression in '%s' is invalid: reference to unknown method '%s' in type '%s'"
-                            .formatted(context.currentPath(), idArg.name, currentType.value()));
+                    List<ReferenceNode> argumentsTypes = argumentTypes(context, idArg.arguments);
+
+                    throw new AnalyzerException("Expression in '%s' is invalid: reference to unknown method '%s(%s)' in type '%s'"
+                            .formatted(
+                                    context.currentPath(),
+                                    idArg.name,
+                                    argumentsTypes.stream()
+                                            .map(ReferenceNode::value)
+                                            .collect(Collectors.joining(",")),
+                                    currentType.value()));
                 }
 
                 if (method.returnType() == null) {
-                    throw new AnalyzerException("Expression in '%s' is invalid: reference to void method '%s' in type '%s'"
-                            .formatted(context.currentPath(), idArg.name, currentType.value()));
+                    throw new AnalyzerException("Expression in '%s' is invalid: reference to void method '%s(%s)' in type '%s'"
+                            .formatted(
+                                    context.currentPath(),
+                                    idArg.name,
+                                    method.parameters().pars().stream()
+                                            .map(par -> "? > " + par.type().value())
+                                            .collect(Collectors.joining(",")),
+                                    currentType.value()));
                 }
 
                 currentType = method.returnType();
@@ -239,6 +236,64 @@ public final class ExpressionNode extends TreeNode {
         }
 
         return currentType;
+    }
+
+    @NotNull
+    private List<ReferenceNode> argumentTypes(@NotNull AnalyzeContext context, @NotNull ArgumentsNode arguments) {
+        return arguments.expressions()
+                .stream()
+                .map(expressionNode -> expressionNode.type(context))
+                .collect(Collectors.toList());
+    }
+
+    @Nullable
+    private <E> E findMatchingExecutable(@NotNull AnalyzeContext context, @NotNull AnalyzableClass analyzableClass,
+                                         @NotNull ArgumentsNode arguments,
+                                         @NotNull Function<AnalyzableClass, List<E>> entitiesFromClass,
+                                         @NotNull Function<E, ParametersNode> entityParameters) {
+        List<ReferenceNode> argumentsTypes = argumentTypes(context, arguments);
+
+        E finalEntity = null;
+
+        AnalyzableClass currentClass = analyzableClass;
+        while (true) {
+            List<E> entities = entitiesFromClass.apply(currentClass);
+
+            for (E entity : entities) {
+                ParametersNode parameters = entityParameters.apply(entity);
+                int size = arguments.expressions().size();
+                if (size != parameters.pars().size()) {
+                    continue;
+                }
+
+                finalEntity = entity;
+
+                for (int j = 0; j < size; j++) {
+                    ReferenceNode argumentType = argumentsTypes.get(j);
+                    ReferenceNode parameterType = parameters.pars().get(j).type();
+
+                    if (!context.isAssignableFrom(argumentType, parameterType)) {
+                        finalEntity = null;
+                        break;
+                    }
+                }
+
+                if (finalEntity != null) {
+                    break;
+                }
+            }
+
+            if (finalEntity != null) {
+                break;
+            }
+
+            currentClass = parentClass(context, currentClass);
+            if (currentClass == null) {
+                break;
+            }
+        }
+
+        return finalEntity;
     }
 
     @Nullable
