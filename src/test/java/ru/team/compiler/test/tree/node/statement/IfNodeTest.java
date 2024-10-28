@@ -99,9 +99,10 @@ public class IfNodeTest {
     }
 
     @Test
-    void optimizeEmptyBodiesTest() {
+    void optimizeEmptyBodiesWithoutSideEffectConditionTest() {
         IfNode ifNode = new IfNode(
-                new ExpressionNode(new BooleanLiteralNode(true), List.of()),
+                new ExpressionNode(new BooleanLiteralNode(true), List.of(
+                        new ExpressionNode.IdArg(new IdentifierNode("not"), null))),
                 new BodyNode(List.of()),
                 new BodyNode(List.of())
         );
@@ -112,21 +113,25 @@ public class IfNodeTest {
     }
 
     @Test
-    void optimizeEmptyBodiesWithMethodConditionTest() {
-        ExpressionNode condition = new ExpressionNode(
-                new BooleanLiteralNode(true), List.of(
-                new ExpressionNode.IdArg(
-                        new IdentifierNode("not"), new ArgumentsNode(List.of()))));
-
+    void optimizeEmptyBodiesWithSideEffectConditionTest() {
         IfNode ifNode = new IfNode(
-                condition,
+                new ExpressionNode(
+                        new BooleanLiteralNode(true), List.of(
+                        new ExpressionNode.IdArg(
+                                new IdentifierNode("not"), new ArgumentsNode(List.of())),
+                        new ExpressionNode.IdArg(
+                                new IdentifierNode("a"), null))),
                 new BodyNode(List.of()),
                 new BodyNode(List.of())
         );
 
         List<StatementNode> optimized = ifNode.optimize();
 
-        assertEquals(List.of(new MethodCallNode(condition)), optimized);
+        assertEquals(List.of(new MethodCallNode(new ExpressionNode(
+                        new BooleanLiteralNode(true), List.of(
+                        new ExpressionNode.IdArg(
+                                new IdentifierNode("not"), new ArgumentsNode(List.of())))))),
+                optimized);
     }
 
     @Test
@@ -137,8 +142,8 @@ public class IfNodeTest {
                         new IdentifierNode("not"), new ArgumentsNode(List.of()))));
 
         WhileLoopNode body = new WhileLoopNode(
-                        new ExpressionNode(new BooleanLiteralNode(true), List.of()),
-                        new BodyNode(List.of()));
+                new ExpressionNode(new BooleanLiteralNode(true), List.of()),
+                new BodyNode(List.of()));
 
         IfNode ifNode = new IfNode(
                 condition,
