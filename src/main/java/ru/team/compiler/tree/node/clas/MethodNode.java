@@ -105,10 +105,22 @@ public final class MethodNode extends ClassMemberNode {
 
         AnalyzeContext initialContext = context;
 
-        context = context.concatPath(name.value());
+        context = context.withMethod(this);
         context = parameters.analyze(context);
         body.analyze(context);
 
         return initialContext;
+    }
+
+    @Override
+    @NotNull
+    public MethodNode optimize() {
+        return new MethodNode(
+                isNative,
+                name,
+                parameters,
+                returnType,
+                body.optimize()
+        );
     }
 }

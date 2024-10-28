@@ -24,4 +24,9 @@ public abstract sealed class ClassMemberNode extends TreeNode permits FieldNode,
             };
         }
     };
+
+    @NotNull
+    public ClassMemberNode optimize() {
+        return this;
+    }
 }

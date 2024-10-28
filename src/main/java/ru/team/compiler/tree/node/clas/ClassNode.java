@@ -17,6 +17,7 @@ import ru.team.compiler.tree.node.primary.ReferenceNode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
@@ -92,5 +93,16 @@ public final class ClassNode extends TreeNode {
         }
 
         return initialContext;
+    }
+
+    @NotNull
+    public ClassNode optimize() {
+        return new ClassNode(
+                name,
+                parentName,
+                classMembers.stream()
+                        .map(ClassMemberNode::optimize)
+                        .collect(Collectors.toList())
+        );
     }
 }

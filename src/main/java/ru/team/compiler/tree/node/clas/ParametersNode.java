@@ -86,7 +86,8 @@ public final class ParametersNode extends TreeNode {
                 context.classes(),
                 variables,
                 context.currentPath(),
-                context.currentClass()
+                context.currentClass(),
+                context.currentMethod()
         );
     }
 

@@ -66,7 +66,7 @@ public final class AssignmentNode extends StatementNode {
         if (local) {
             AnalyzableVariable variable = context.variables().get(referenceNode);
             if (variable == null) {
-                throw new AnalyzerException("Assignment in '%s' is invalid: reference to unknown variable '%s'"
+                throw new AnalyzerException("Assignment at '%s' is invalid: reference to unknown variable '%s'"
                         .formatted(context.currentPath(), referenceNode.value()));
             }
 
@@ -85,7 +85,7 @@ public final class AssignmentNode extends StatementNode {
         ReferenceNode rightType = valueExpression.type(context);
 
         if (!leftType.equals(rightType)) {
-            throw new AnalyzerException("Assignment in '%s' is invalid: expected '%s' type on the right side, got '%s'"
+            throw new AnalyzerException("Assignment at '%s' is invalid: expected '%s' type on the right side, got '%s'"
                     .formatted(context.currentPath(), leftType.value(), rightType.value()));
         }
 

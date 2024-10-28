@@ -14,6 +14,7 @@ import ru.team.compiler.tree.node.TreeNode;
 import ru.team.compiler.tree.node.TreeNodeParser;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,6 +46,16 @@ public final class BodyNode extends TreeNode {
         }
 
         return initialContext;
+    }
+
+    @NotNull
+    public BodyNode optimize() {
+        return new BodyNode(
+                statements.stream()
+                        .map(StatementNode::optimize)
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toList())
+        );
     }
 
     @NotNull

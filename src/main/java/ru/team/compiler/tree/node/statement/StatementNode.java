@@ -9,6 +9,8 @@ import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNode;
 import ru.team.compiler.tree.node.TreeNodeParser;
 
+import java.util.List;
+
 public abstract sealed class StatementNode extends TreeNode permits AssignmentNode, WhileLoopNode, IfNode, ReturnNode,
                                                                     VariableDeclarationNode, MethodCallNode {
 
@@ -41,4 +43,9 @@ public abstract sealed class StatementNode extends TreeNode permits AssignmentNo
             };
         }
     };
+
+    @NotNull
+    public List<StatementNode> optimize() {
+        return List.of(this);
+    }
 }

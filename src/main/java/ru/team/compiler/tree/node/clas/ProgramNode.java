@@ -10,6 +10,7 @@ import ru.team.compiler.tree.node.TreeNodeParser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class ProgramNode extends TreeNode {
 
@@ -50,5 +51,12 @@ public final class ProgramNode extends TreeNode {
         }
 
         return initialContext;
+    }
+
+    @NotNull
+    public TreeNode optimize() {
+        return new ProgramNode(classes.stream()
+                .map(ClassNode::optimize)
+                .collect(Collectors.toList()));
     }
 }

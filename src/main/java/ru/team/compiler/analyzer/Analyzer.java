@@ -160,7 +160,7 @@ public final class Analyzer {
             classes.put(classReference, analyzableClass);
         }
 
-        return new AnalyzeContext(classes, Map.of(), "", null);
+        return new AnalyzeContext(classes, Map.of(), "", null, null);
     }
 
 }

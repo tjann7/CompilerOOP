@@ -15,6 +15,7 @@ import ru.team.compiler.tree.node.primary.ReferenceNode;
 import ru.team.compiler.tree.node.statement.AssignmentNode;
 import ru.team.compiler.tree.node.statement.BodyNode;
 import ru.team.compiler.tree.node.statement.ReturnNode;
+import ru.team.compiler.tree.node.statement.StatementNode;
 import ru.team.compiler.tree.node.statement.WhileLoopNode;
 
 import java.util.List;
@@ -67,5 +68,20 @@ public class WhileLoopTest {
                                         new ExpressionNode(new IntegerLiteralNode(1), List.of()))))),
                 node);
         assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void optimizeAlwaysFalseTest() {
+        WhileLoopNode node = new WhileLoopNode(
+                new ExpressionNode(new BooleanLiteralNode(false), List.of()),
+                new BodyNode(List.of(
+                        new ReturnNode(
+                                new ExpressionNode(new IntegerLiteralNode(1), List.of()))
+                ))
+        );
+
+        List<StatementNode> optimized = node.optimize();
+
+        assertEquals(List.of(), optimized);
     }
 }

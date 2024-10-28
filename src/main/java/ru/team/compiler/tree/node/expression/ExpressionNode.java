@@ -24,6 +24,7 @@ import ru.team.compiler.tree.node.primary.PrimaryNode;
 import ru.team.compiler.tree.node.primary.RealLiteralNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
 import ru.team.compiler.tree.node.primary.ThisNode;
+import ru.team.compiler.tree.node.statement.MethodCallNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,6 +90,27 @@ public final class ExpressionNode extends TreeNode {
         return idArgs;
     }
 
+    @NotNull
+    public ExpressionNode withIdArgs(@NotNull List<IdArg> idArgs) {
+        List<IdArg> newIdArgs = new ArrayList<>(this.idArgs.size() + idArgs.size());
+        newIdArgs.addAll(this.idArgs);
+        newIdArgs.addAll(idArgs);
+
+        return new ExpressionNode(primary, newIdArgs);
+    }
+
+    @Nullable
+    public MethodCallNode asMethodCall() {
+        for (int j = idArgs.size() - 1; j >= 0; j--) {
+            IdArg idArg = idArgs.get(j);
+            if (idArg.arguments != null) {
+                return new MethodCallNode(new ExpressionNode(primary, idArgs.subList(0, j + 1)));
+            }
+        }
+
+        return null;
+    }
+
     public record IdArg(@NotNull IdentifierNode name, @Nullable ArgumentsNode arguments) {
 
     }
@@ -110,18 +132,18 @@ public final class ExpressionNode extends TreeNode {
             AnalyzableClass analyzableClass = context.classes().get(referenceNode);
             if (analyzableClass != null) {
                 if (idArgs.isEmpty()) {
-                    throw new AnalyzerException("Expression in '%s' is invalid: reference to type"
+                    throw new AnalyzerException("Expression at '%s' is invalid: reference to type"
                             .formatted(context.currentPath()));
                 }
 
                 IdArg idArg = idArgs.get(0);
                 if (!idArg.name.value().equals("<init>")) {
-                    throw new AnalyzerException("Expression in '%s' is invalid: reference to static"
+                    throw new AnalyzerException("Expression at '%s' is invalid: reference to static"
                             .formatted(context.currentPath()));
                 }
 
                 if (idArg.arguments == null) {
-                    throw new AnalyzerException("Expression in '%s' is invalid: no arguments for constructor"
+                    throw new AnalyzerException("Expression at '%s' is invalid: no arguments for constructor"
                             .formatted(context.currentPath()));
                 }
 
@@ -135,7 +157,7 @@ public final class ExpressionNode extends TreeNode {
                 if (constructor == null) {
                     List<ReferenceNode> argumentsTypes = argumentTypes(context, idArg.arguments);
 
-                    throw new AnalyzerException("Expression in '%s' is invalid: reference to unknown constructor '(%s)' in type '%s'"
+                    throw new AnalyzerException("Expression at '%s' is invalid: reference to unknown constructor '(%s)' in type '%s'"
                             .formatted(
                                     context.currentPath(),
                                     argumentsTypes.stream()
@@ -149,7 +171,7 @@ public final class ExpressionNode extends TreeNode {
                 currentType = referenceNode;
             } else {
                 if (!idArgs.isEmpty() && idArgs.get(0).name.value().equals("<init>")) {
-                    throw new AnalyzerException("Expression in '%s' is invalid: reference to unknown type '%s'"
+                    throw new AnalyzerException("Expression at '%s' is invalid: reference to unknown type '%s'"
                             .formatted(context.currentPath(), referenceNode.value()));
                 }
 
@@ -157,7 +179,7 @@ public final class ExpressionNode extends TreeNode {
                 if (variable != null) {
                     currentType = variable.type();
                 } else {
-                    throw new AnalyzerException("Expression in '%s' is invalid: reference to unknown variable '%s'"
+                    throw new AnalyzerException("Expression at '%s' is invalid: reference to unknown variable '%s'"
                             .formatted(context.currentPath(), referenceNode.value()));
                 }
             }
@@ -172,7 +194,7 @@ public final class ExpressionNode extends TreeNode {
 
             currentType = currentClass.name().asReference();
         } else {
-            throw new AnalyzerException("Expression in '%s' is invalid: '%s' is not supported"
+            throw new AnalyzerException("Expression at '%s' is invalid: '%s' is not supported"
                     .formatted(context.currentPath(), primary));
         }
 
@@ -202,7 +224,7 @@ public final class ExpressionNode extends TreeNode {
                 if (method == null) {
                     List<ReferenceNode> argumentsTypes = argumentTypes(context, idArg.arguments);
 
-                    throw new AnalyzerException("Expression in '%s' is invalid: reference to unknown method '%s(%s)' in type '%s'"
+                    throw new AnalyzerException("Expression at '%s' is invalid: reference to unknown method '%s(%s)' in type '%s'"
                             .formatted(
                                     context.currentPath(),
                                     idArg.name.value(),
@@ -213,7 +235,7 @@ public final class ExpressionNode extends TreeNode {
                 }
 
                 if (method.returnType() == null) {
-                    throw new AnalyzerException("Expression in '%s' is invalid: reference to void method '%s(%s)' in type '%s'"
+                    throw new AnalyzerException("Expression at '%s' is invalid: reference to void method '%s(%s)' in type '%s'"
                             .formatted(
                                     context.currentPath(),
                                     idArg.name,

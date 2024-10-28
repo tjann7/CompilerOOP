@@ -76,7 +76,8 @@ public final class VariableDeclarationNode extends StatementNode {
                 context.classes(),
                 variables,
                 context.currentPath(),
-                context.currentClass()
+                context.currentClass(),
+                context.currentMethod()
         );
     }
 }

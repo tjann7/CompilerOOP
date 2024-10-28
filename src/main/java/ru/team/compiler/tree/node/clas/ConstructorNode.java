@@ -64,4 +64,13 @@ public final class ConstructorNode extends ClassMemberNode {
         return initialContext;
     }
 
+    @Override
+    @NotNull
+    public ConstructorNode optimize() {
+        return new ConstructorNode(
+                parameters,
+                body.optimize()
+        );
+    }
+
 }

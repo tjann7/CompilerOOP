@@ -39,7 +39,7 @@ public record AnalyzableClass(@NotNull IdentifierNode name,
 
             AnalyzableClass parentClass = context.classes().get(currentClass.parentClass());
             if (parentClass == null) {
-                throw new AnalyzerException("Expression in '%s' is invalid: class '%s' extends unknown '%s'"
+                throw new AnalyzerException("Expression at '%s' is invalid: class '%s' extends unknown '%s'"
                         .formatted(context.currentPath(), currentClass.name().value(),
                                 currentClass.parentClass().value()));
             }
@@ -57,7 +57,7 @@ public record AnalyzableClass(@NotNull IdentifierNode name,
 
         AnalyzableClass parentClass = context.classes().get(parentClass());
         if (parentClass == null) {
-            throw new AnalyzerException("%s in '%s' is invalid: class '%s' extends unknown '%s'"
+            throw new AnalyzerException("%s at '%s' is invalid: class '%s' extends unknown '%s'"
                     .formatted(messagePrefix, context.currentPath(), name().value(), parentClass().value()));
         }
 
@@ -83,7 +83,7 @@ public record AnalyzableClass(@NotNull IdentifierNode name,
         }
 
         if (field == null) {
-            throw new AnalyzerException("%s in '%s' is invalid: reference to unknown field '%s' in type '%s'"
+            throw new AnalyzerException("%s at '%s' is invalid: reference to unknown field '%s' in type '%s'"
                     .formatted(messagePrefix, context.currentPath(), key.name(), name().value()));
         }
 

@@ -2,6 +2,7 @@ package ru.team.compiler.test.tree.node.expression;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 import ru.team.compiler.token.Token;
@@ -10,8 +11,10 @@ import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.expression.ArgumentsNode;
 import ru.team.compiler.tree.node.expression.ExpressionNode;
 import ru.team.compiler.tree.node.expression.IdentifierNode;
+import ru.team.compiler.tree.node.primary.BooleanLiteralNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
 import ru.team.compiler.tree.node.primary.ThisNode;
+import ru.team.compiler.tree.node.statement.MethodCallNode;
 
 import java.util.List;
 
@@ -90,5 +93,41 @@ public class ExpressionNodeTest {
         );
         assertEquals(new ExpressionNode(new ThisNode(), list), node);
         assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void asMethodCallEmptyTest() {
+        ExpressionNode expressionNode = new ExpressionNode(new BooleanLiteralNode(true), List.of());
+
+        MethodCallNode methodCall = expressionNode.asMethodCall();
+        assertNull(methodCall);
+    }
+
+    @Test
+    void asMethodCallOnlyFieldsTest() {
+        ExpressionNode expressionNode = new ExpressionNode(new BooleanLiteralNode(true), List.of(
+                new ExpressionNode.IdArg(new IdentifierNode("a"), null),
+                new ExpressionNode.IdArg(new IdentifierNode("b"), null),
+                new ExpressionNode.IdArg(new IdentifierNode("c"), null)
+        ));
+
+        MethodCallNode methodCall = expressionNode.asMethodCall();
+        assertNull(methodCall);
+    }
+
+    @Test
+    void asMethodCallWithMethodsTest() {
+        ExpressionNode expressionNode = new ExpressionNode(new BooleanLiteralNode(true), List.of(
+                new ExpressionNode.IdArg(new IdentifierNode("a"), null),
+                new ExpressionNode.IdArg(new IdentifierNode("b"), new ArgumentsNode(List.of())),
+                new ExpressionNode.IdArg(new IdentifierNode("c"), null)
+        ));
+
+        MethodCallNode methodCall = expressionNode.asMethodCall();
+        assertEquals(new MethodCallNode(new ExpressionNode(new BooleanLiteralNode(true), List.of(
+                        new ExpressionNode.IdArg(new IdentifierNode("a"), null),
+                        new ExpressionNode.IdArg(new IdentifierNode("b"), new ArgumentsNode(List.of()))
+                ))),
+                methodCall);
     }
 }
