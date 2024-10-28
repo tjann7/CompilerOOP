@@ -5,6 +5,9 @@ import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import ru.team.compiler.analyzer.AnalyzableClass;
+import ru.team.compiler.analyzer.AnalyzableField;
+import ru.team.compiler.analyzer.AnalyzableMethod;
 import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.exception.AnalyzerException;
 import ru.team.compiler.exception.CompilerException;
@@ -12,6 +15,8 @@ import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNode;
 import ru.team.compiler.tree.node.TreeNodeParser;
+import ru.team.compiler.tree.node.clas.ClassNode;
+import ru.team.compiler.tree.node.clas.ParametersNode;
 import ru.team.compiler.tree.node.primary.PrimaryNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
 
@@ -77,14 +82,33 @@ public final class ExpressionNode extends TreeNode {
     @Override
     @NotNull
     public AnalyzeContext traverse(@NotNull AnalyzeContext context) {
+        List<ParametersNode.Par> pars = new ArrayList<>();
+
         if (primary instanceof ReferenceNode referenceNode) {
             if (!context.classes().containsKey(referenceNode) && !context.variables().containsKey(referenceNode)) {
                 throw new AnalyzerException("Expression in '%s' references to unknown type '%s'"
                         .formatted(context.currentPath(), referenceNode.value()));
+            } else if (context.classes().containsKey(referenceNode)) {
+                AnalyzableClass classContext = context.classes().get(referenceNode);
+                for (IdArg i : idArgs) {
+                    if (!context.variables().containsKey(i.name.value()))
+                        throw new AnalyzerException();
+                    pars.add(new ParametersNode.Par
+                            (i.name, new ReferenceNode(context.variables().get(i.name))));
+                }
+
+                ParametersNode params = new ParametersNode(pars);
+                AnalyzableMethod check = new AnalyzableMethod
+                        (new IdentifierNode(referenceNode.value()), params);
+
+                if (!classContext.methods().containsKey(check)) {
+                    throw new AnalyzerException();
+                }
+                // TODO: add check for each IdArg that it references to correct classes
+            } else {
+
             }
         }
-
-        // TODO: add check for each IdArg that it references to correct classes
 
         return context;
     }
