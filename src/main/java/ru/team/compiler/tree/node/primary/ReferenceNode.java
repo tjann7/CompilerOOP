@@ -7,6 +7,7 @@ import ru.team.compiler.token.Token;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNodeParser;
+import ru.team.compiler.tree.node.expression.IdentifierNode;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
@@ -30,5 +31,10 @@ public final class ReferenceNode extends PrimaryNode {
     @NotNull
     public String value() {
         return value;
+    }
+
+    @NotNull
+    public IdentifierNode asIdentifier() {
+        return new IdentifierNode(value);
     }
 }

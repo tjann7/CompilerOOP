@@ -41,6 +41,13 @@ public final class ExpressionNode extends TreeNode {
             PrimaryNode primary = PrimaryNode.PARSER.parse(iterator);
 
             List<IdArg> idArgs = new ArrayList<>();
+
+            if (primary instanceof ReferenceNode && iterator.lookup(TokenType.OPENING_PARENTHESIS)) {
+                ArgumentsNode argumentsNode = ArgumentsNode.PARSER.parse(iterator);
+
+                idArgs.add(new IdArg(new IdentifierNode("<init>"), argumentsNode));
+            }
+
             while (iterator.hasNext()) {
                 if (iterator.consume(TokenType.DOT)) {
                     IdentifierNode identifierNode = IdentifierNode.PARSER.parse(iterator);
@@ -100,7 +107,8 @@ public final class ExpressionNode extends TreeNode {
         int shift = 0;
 
         if (primary instanceof ReferenceNode referenceNode) {
-            if (context.hasClass(referenceNode)) {
+            AnalyzableClass analyzableClass = context.classes().get(referenceNode);
+            if (analyzableClass != null) {
                 if (idArgs.isEmpty()) {
                     throw new AnalyzerException("Expression in '%s' is invalid: reference to type"
                             .formatted(context.currentPath()));
@@ -117,10 +125,6 @@ public final class ExpressionNode extends TreeNode {
                             .formatted(context.currentPath()));
                 }
 
-                currentType = referenceNode;
-
-                AnalyzableClass analyzableClass = context.classes().get(referenceNode);
-
                 AnalyzableConstructor constructor = findMatchingExecutable(
                         context,
                         analyzableClass,
@@ -131,23 +135,31 @@ public final class ExpressionNode extends TreeNode {
                 if (constructor == null) {
                     List<ReferenceNode> argumentsTypes = argumentTypes(context, idArg.arguments);
 
-                    throw new AnalyzerException("Expression in '%s' is invalid: reference to unknown constructor '%s(%s)' in type '%s'"
+                    throw new AnalyzerException("Expression in '%s' is invalid: reference to unknown constructor '(%s)' in type '%s'"
                             .formatted(
                                     context.currentPath(),
-                                    idArg.name,
                                     argumentsTypes.stream()
                                             .map(ReferenceNode::value)
                                             .collect(Collectors.joining(",")),
-                                    currentType.value()));
+                                    referenceNode.value()));
                 }
 
                 shift = 1;
-            } else if (context.hasVariable(referenceNode)) {
-                AnalyzableVariable variable = context.variables().get(referenceNode);
-                currentType = variable.type();
+
+                currentType = referenceNode;
             } else {
-                throw new AnalyzerException("Expression in '%s' references to unknown type or variable '%s'"
-                        .formatted(context.currentPath(), referenceNode.value()));
+                if (!idArgs.isEmpty() && idArgs.get(0).name.value().equals("<init>")) {
+                    throw new AnalyzerException("Expression in '%s' is invalid: reference to unknown type '%s'"
+                            .formatted(context.currentPath(), referenceNode.value()));
+                }
+
+                AnalyzableVariable variable = context.variables().get(referenceNode);
+                if (variable != null) {
+                    currentType = variable.type();
+                } else {
+                    throw new AnalyzerException("Expression in '%s' is invalid: reference to unknown variable '%s'"
+                            .formatted(context.currentPath(), referenceNode.value()));
+                }
             }
         } else if (primary instanceof BooleanLiteralNode) {
             currentType = new ReferenceNode("Boolean");
@@ -156,11 +168,7 @@ public final class ExpressionNode extends TreeNode {
         } else if (primary instanceof RealLiteralNode) {
             currentType = new ReferenceNode("Real");
         } else if (primary instanceof ThisNode) {
-            AnalyzableClass currentClass = context.currentClass();
-            if (currentClass == null) {
-                throw new AnalyzerException("Expression in '%s' is invalid: reference to this outside of the class"
-                        .formatted(context.currentPath()));
-            }
+            AnalyzableClass currentClass = context.currentClass("Expression");
 
             currentType = currentClass.name().asReference();
         } else {
@@ -174,26 +182,10 @@ public final class ExpressionNode extends TreeNode {
             IdArg idArg = idArgs.get(i);
 
             if (idArg.arguments == null) {
-                AnalyzableField field;
-
-                AnalyzableField.Key key = new AnalyzableField.Key(idArg.name);
-                AnalyzableClass currentClass = analyzableClass;
-                while (true) {
-                    field = analyzableClass.fields().get(key);
-                    if (field != null) {
-                        break;
-                    }
-
-                    currentClass = parentClass(context, currentClass);
-                    if (currentClass == null) {
-                        break;
-                    }
-                }
-
-                if (field == null) {
-                    throw new AnalyzerException("Expression in '%s' is invalid: reference to unknown field '%s' in type '%s'"
-                            .formatted(context.currentPath(), idArg.name, currentType.value()));
-                }
+                AnalyzableField field = analyzableClass.getField(
+                        context,
+                        new AnalyzableField.Key(idArg.name),
+                        "Expression");
 
                 currentType = field.type();
             } else {
@@ -287,29 +279,12 @@ public final class ExpressionNode extends TreeNode {
                 break;
             }
 
-            currentClass = parentClass(context, currentClass);
+            currentClass = currentClass.findParentClass(context, "Expression");
             if (currentClass == null) {
                 break;
             }
         }
 
         return finalEntity;
-    }
-
-    @Nullable
-    private AnalyzableClass parentClass(@NotNull AnalyzeContext context, @NotNull AnalyzableClass currentClass) {
-        String name = currentClass.name().value();
-        if (name.equals("")) {
-            return null;
-        }
-
-        AnalyzableClass parentClass = context.classes().get(currentClass.parentClass());
-        if (parentClass == null) {
-            throw new AnalyzerException("Expression in '%s' is invalid: class '%s' extends unknown '%s'"
-                    .formatted(context.currentPath(), currentClass.name().value(),
-                            currentClass.parentClass().value()));
-        }
-
-        return parentClass;
     }
 }

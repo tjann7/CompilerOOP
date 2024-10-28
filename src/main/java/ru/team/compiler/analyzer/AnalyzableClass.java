@@ -1,6 +1,7 @@
 package ru.team.compiler.analyzer;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.team.compiler.exception.AnalyzerException;
 import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
@@ -45,5 +46,47 @@ public record AnalyzableClass(@NotNull IdentifierNode name,
 
             currentClass = parentClass;
         }
+    }
+
+    @Nullable
+    public AnalyzableClass findParentClass(@NotNull AnalyzeContext context, @NotNull String messagePrefix) {
+        String name = name().value();
+        if (name.equals("Any") || name.equals("")) {
+            return null;
+        }
+
+        AnalyzableClass parentClass = context.classes().get(parentClass());
+        if (parentClass == null) {
+            throw new AnalyzerException("%s in '%s' is invalid: class '%s' extends unknown '%s'"
+                    .formatted(messagePrefix, context.currentPath(), name().value(), parentClass().value()));
+        }
+
+        return parentClass;
+    }
+
+    @NotNull
+    public AnalyzableField getField(@NotNull AnalyzeContext context, @NotNull AnalyzableField.Key key,
+                                    @NotNull String messagePrefix) {
+        AnalyzableField field;
+
+        AnalyzableClass currentClass = this;
+        while (true) {
+            field = fields().get(key);
+            if (field != null) {
+                break;
+            }
+
+            currentClass = currentClass.findParentClass(context, messagePrefix);
+            if (currentClass == null) {
+                break;
+            }
+        }
+
+        if (field == null) {
+            throw new AnalyzerException("%s in '%s' is invalid: reference to unknown field '%s' in type '%s'"
+                    .formatted(messagePrefix, context.currentPath(), key.name(), name().value()));
+        }
+
+        return field;
     }
 }

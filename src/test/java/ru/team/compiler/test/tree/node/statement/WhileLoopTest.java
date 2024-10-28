@@ -60,7 +60,8 @@ public class WhileLoopTest {
                         new ExpressionNode(new BooleanLiteralNode(true), List.of()),
                         new BodyNode(List.of(
                                 new AssignmentNode(
-                                        new ExpressionNode(new ReferenceNode("variable"), List.of()),
+                                        true,
+                                        new ReferenceNode("variable"),
                                         new ExpressionNode(new RealLiteralNode(5), List.of())),
                                 new ReturnNode(
                                         new ExpressionNode(new IntegerLiteralNode(1), List.of()))))),

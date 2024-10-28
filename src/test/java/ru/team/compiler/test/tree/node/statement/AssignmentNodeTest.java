@@ -26,7 +26,8 @@ public class AssignmentNodeTest {
         TokenIterator iterator = new TokenIterator(tokens);
         AssignmentNode node = AssignmentNode.PARSER.parse(iterator);
         assertEquals(new AssignmentNode(
-                        new ExpressionNode(new ReferenceNode("variable"), List.of()),
+                        true,
+                        new ReferenceNode("variable"),
                         new ExpressionNode(new RealLiteralNode(5), List.of())),
                 node);
     }

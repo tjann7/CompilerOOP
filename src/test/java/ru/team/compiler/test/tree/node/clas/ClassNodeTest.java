@@ -14,7 +14,6 @@ import ru.team.compiler.tree.node.clas.ParametersNode;
 import ru.team.compiler.tree.node.expression.ExpressionNode;
 import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
-import ru.team.compiler.tree.node.primary.ThisNode;
 import ru.team.compiler.tree.node.statement.AssignmentNode;
 import ru.team.compiler.tree.node.statement.BodyNode;
 
@@ -132,9 +131,8 @@ public class ClassNodeTest {
                                                         new ReferenceNode("Integer")))),
                                         new BodyNode(List.of(
                                                 new AssignmentNode(
-                                                        new ExpressionNode(new ThisNode(), List.of(
-                                                                new ExpressionNode.IdArg(
-                                                                        new IdentifierNode("a"), null))),
+                                                        false,
+                                                        new ReferenceNode("a"),
                                                         new ExpressionNode(new ReferenceNode("a"), List.of()))
                                         ))))),
                 node);

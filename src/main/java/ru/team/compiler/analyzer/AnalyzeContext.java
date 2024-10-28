@@ -63,4 +63,14 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
 
         return classes.get(requiredClassName).isAssignableFrom(this, classes.get(className));
     }
+
+    @NotNull
+    public AnalyzableClass currentClass(@NotNull String messagePrefix) {
+        if (currentClass == null) {
+            throw new AnalyzerException("%s in '%s' is invalid: reference to this outside of the class"
+                    .formatted(messagePrefix, currentPath()));
+        }
+
+        return currentClass;
+    }
 }

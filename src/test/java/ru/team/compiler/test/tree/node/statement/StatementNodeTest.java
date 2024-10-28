@@ -37,7 +37,8 @@ public class StatementNodeTest {
         TokenIterator iterator = new TokenIterator(tokens);
         StatementNode node = StatementNode.PARSER.parse(iterator);
         assertEquals(new AssignmentNode(
-                        new ExpressionNode(new ReferenceNode("a"), List.of()),
+                        true,
+                        new ReferenceNode("a"),
                         new ExpressionNode(new IntegerLiteralNode(1), List.of())),
                 node);
         assertFalse(iterator.hasNext());
@@ -61,7 +62,8 @@ public class StatementNodeTest {
                         new ExpressionNode(new BooleanLiteralNode(true), List.of()),
                         new BodyNode(List.of(
                                 new AssignmentNode(
-                                        new ExpressionNode(new ReferenceNode("variable"), List.of()),
+                                        true,
+                                        new ReferenceNode("variable"),
                                         new ExpressionNode(new RealLiteralNode(5), List.of()))))),
                 node);
         assertFalse(iterator.hasNext());

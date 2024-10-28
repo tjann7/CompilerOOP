@@ -1,6 +1,7 @@
 package ru.team.compiler.tree;
 
 import ru.team.compiler.analyzer.Analyzer;
+import ru.team.compiler.exception.AnalyzerException;
 import ru.team.compiler.token.Token;
 import ru.team.compiler.token.Tokenizer;
 import ru.team.compiler.tree.node.NodeToStringHelper;
@@ -39,7 +40,11 @@ public class TreeMain {
                         System.out.println("ProgramNode was traversed successfully!");
                     }
                 } catch (Exception e) {
-                    System.out.println("ERROR: " + e);
+                    if (e instanceof AnalyzerException) {
+                        e.printStackTrace();
+                    } else {
+                        System.out.println("ERROR: " + e);
+                    }
                 }
                 stringBuilder = new StringBuilder();
 
