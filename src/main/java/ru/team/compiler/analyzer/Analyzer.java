@@ -1,7 +1,10 @@
 package ru.team.compiler.analyzer;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.team.compiler.exception.AnalyzerException;
+import ru.team.compiler.token.Token;
+import ru.team.compiler.token.Tokenizer;
 import ru.team.compiler.tree.node.clas.ClassMemberNode;
 import ru.team.compiler.tree.node.clas.ClassNode;
 import ru.team.compiler.tree.node.clas.ConstructorNode;
@@ -12,6 +15,10 @@ import ru.team.compiler.tree.node.clas.ProgramNode;
 import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,43 +31,52 @@ public final class Analyzer {
     }
 
     @NotNull
-    private static Map<ReferenceNode, AnalyzableClass> stdClasses() {
-        Map<ReferenceNode, AnalyzableClass> classes = new HashMap<>();
+    private static Map<ReferenceNode, AnalyzableClass> loadClasses(@NotNull InputStream inputStream) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            while (reader.ready()) {
+                stringBuilder.append(reader.readLine()).append("\n");
+            }
+        }
 
-        classes.put(
-                new ReferenceNode("Any"),
-                new AnalyzableClass(new IdentifierNode("Any"), new ReferenceNode(""),
-                        Map.of(), Map.of(), Map.of())
-        );
-        classes.put(
-                new ReferenceNode("Integer"),
-                new AnalyzableClass(new IdentifierNode("Integer"), new ReferenceNode("Any"),
-                        Map.of(), Map.of(), Map.of())
-        );
-        classes.put(
-                new ReferenceNode("Real"),
-                new AnalyzableClass(new IdentifierNode("Real"), new ReferenceNode("Any"),
-                        Map.of(), Map.of(), Map.of())
-        );
-        classes.put(
-                new ReferenceNode("Boolean"),
-                new AnalyzableClass(new IdentifierNode("Boolean"), new ReferenceNode("Any"),
-                        Map.of(), Map.of(), Map.of())
-        );
+        Tokenizer tokenizer = new Tokenizer(stringBuilder.toString());
+        List<Token> tokens = new ArrayList<>();
+        while (tokenizer.hasNext()) {
+            tokens.add(tokenizer.next());
+        }
 
-        return classes;
+        ProgramNode programNode = ProgramNode.PARSER.parse(tokens);
+        AnalyzeContext context = createContext(programNode, Map.of());
+        return context.classes();
     }
 
-    private static String hasCyclicDependency(Map<ReferenceNode, AnalyzableClass> classes, ReferenceNode current, ReferenceNode origin, List<String> path) {
+    @NotNull
+    private static Map<ReferenceNode, AnalyzableClass> stdClasses() {
+        InputStream inputStream = Analyzer.class.getClassLoader().getResourceAsStream("std.o");
+        if (inputStream == null) {
+            throw new AnalyzerException("Cannot read standard library: file not found");
+        }
+
+        try {
+            return loadClasses(inputStream);
+        } catch (IOException e) {
+            throw new AnalyzerException("Cannot read standard library", e);
+        }
+    }
+
+    @Nullable
+    private static String hasCyclicDependency(@NotNull Map<ReferenceNode, AnalyzableClass> classes,
+                                              @Nullable ReferenceNode current, @NotNull ReferenceNode origin,
+                                              @Nullable List<String> path) {
         if (path == null) {
             path = new ArrayList<>();
             path.add(origin.toString());
         }
         AnalyzableClass analyzableClass = classes.get(current);
-
         if (analyzableClass == null) {
             return null;
         }
+
         ReferenceNode parent = analyzableClass.parentClass();
         path.add(parent.toString());
 
@@ -71,9 +87,15 @@ public final class Analyzer {
         return hasCyclicDependency(classes, parent, origin, path);
     }
 
+    @NotNull
+    public static AnalyzeContext createContext(@NotNull ProgramNode programNode) {
+        return createContext(programNode, stdClasses());
+    }
 
-    public static void traverse(@NotNull ProgramNode programNode) {
-        Map<ReferenceNode, AnalyzableClass> classes = new HashMap<>(stdClasses());
+    @NotNull
+    private static AnalyzeContext createContext(@NotNull ProgramNode programNode,
+                                                @NotNull Map<ReferenceNode, AnalyzableClass> parentClasses) {
+        Map<ReferenceNode, AnalyzableClass> classes = new HashMap<>(parentClasses);
 
         for (ClassNode classNode : programNode.classes()) {
             ReferenceNode classReference = classNode.name().asReference();
@@ -138,7 +160,7 @@ public final class Analyzer {
             classes.put(classReference, analyzableClass);
         }
 
-        programNode.traverse(new AnalyzeContext(classes, Map.of(), "", null));
+        return new AnalyzeContext(classes, Map.of(), "", null);
     }
 
 }

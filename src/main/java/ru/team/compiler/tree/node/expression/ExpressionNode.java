@@ -205,7 +205,7 @@ public final class ExpressionNode extends TreeNode {
                     throw new AnalyzerException("Expression in '%s' is invalid: reference to unknown method '%s(%s)' in type '%s'"
                             .formatted(
                                     context.currentPath(),
-                                    idArg.name,
+                                    idArg.name.value(),
                                     argumentsTypes.stream()
                                             .map(ReferenceNode::value)
                                             .collect(Collectors.joining(",")),

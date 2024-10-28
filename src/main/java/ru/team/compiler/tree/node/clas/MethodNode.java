@@ -14,6 +14,8 @@ import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
 import ru.team.compiler.tree.node.statement.BodyNode;
 
+import java.util.List;
+
 @EqualsAndHashCode(callSuper = false)
 @ToString
 public final class MethodNode extends ClassMemberNode {
@@ -26,6 +28,8 @@ public final class MethodNode extends ClassMemberNode {
         public MethodNode parse(@NotNull TokenIterator iterator) throws CompilerException {
             iterator.next(TokenType.METHOD_KEYWORD);
 
+            boolean isNative = iterator.consume(TokenType.NATIVE_KEYWORD);
+
             IdentifierNode identifierNode = IdentifierNode.PARSER.parse(iterator);
 
             ParametersNode parametersNode = ParametersNode.PARSER.parse(iterator);
@@ -37,27 +41,38 @@ public final class MethodNode extends ClassMemberNode {
                 returnIdentifierNode = null;
             }
 
-            iterator.next(TokenType.IS_KEYWORD);
+            BodyNode bodyNode;
+            if (!isNative) {
+                iterator.next(TokenType.IS_KEYWORD);
 
-            BodyNode bodyNode = BODY_PARSER.parse(iterator);
+                bodyNode = BODY_PARSER.parse(iterator);
 
-            iterator.next(TokenType.END_KEYWORD);
+                iterator.next(TokenType.END_KEYWORD);
+            } else {
+                bodyNode = new BodyNode(List.of());
+            }
 
-            return new MethodNode(identifierNode, parametersNode, returnIdentifierNode, bodyNode);
+            return new MethodNode(isNative, identifierNode, parametersNode, returnIdentifierNode, bodyNode);
         }
     };
 
+    private final boolean isNative;
     private final IdentifierNode name;
     private final ParametersNode parameters;
     private final ReferenceNode returnType;
     private final BodyNode body;
 
-    public MethodNode(@NotNull IdentifierNode name, @NotNull ParametersNode parameters,
+    public MethodNode(boolean isNative, @NotNull IdentifierNode name, @NotNull ParametersNode parameters,
                       @Nullable ReferenceNode returnType, @NotNull BodyNode body) {
+        this.isNative = isNative;
         this.name = name;
         this.parameters = parameters;
         this.returnType = returnType;
         this.body = body;
+    }
+
+    public boolean isNative() {
+        return isNative;
     }
 
     @NotNull

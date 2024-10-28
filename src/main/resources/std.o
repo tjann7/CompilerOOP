@@ -1,0 +1,11 @@
+class Any is
+
+end
+
+class Integer extends Any is
+    method native toReal(): Real
+end
+
+class Real extends Any is
+    method native toInteger(): Integer
+end

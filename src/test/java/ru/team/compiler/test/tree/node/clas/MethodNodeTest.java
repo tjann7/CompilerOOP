@@ -36,6 +36,7 @@ public class MethodNodeTest {
         TokenIterator iterator = new TokenIterator(tokens);
         MethodNode node = MethodNode.PARSER.parse(iterator);
         assertEquals(new MethodNode(
+                        false,
                         new IdentifierNode("a"),
                         new ParametersNode(List.of(
                                 new ParametersNode.Par(
@@ -67,6 +68,7 @@ public class MethodNodeTest {
         TokenIterator iterator = new TokenIterator(tokens);
         MethodNode node = MethodNode.PARSER.parse(iterator);
         assertEquals(new MethodNode(
+                        false,
                         new IdentifierNode("a"),
                         new ParametersNode(List.of(
                                 new ParametersNode.Par(

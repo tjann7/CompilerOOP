@@ -60,6 +60,7 @@ public class ClassMemberNodeTest {
         TokenIterator iterator = new TokenIterator(tokens);
         ClassMemberNode node = ClassMemberNode.PARSER.parse(iterator);
         assertEquals(new MethodNode(
+                        false,
                         new IdentifierNode("a"),
                         new ParametersNode(List.of(
                                 new ParametersNode.Par(
@@ -68,6 +69,35 @@ public class ClassMemberNodeTest {
                         new BodyNode(List.of(
                                 new ReturnNode(
                                         new ExpressionNode(new ReferenceNode("b"), List.of()))))),
+                node);
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void parserNativeMethodTest() {
+        List<Token> tokens = List.of(
+                new Token(TokenType.METHOD_KEYWORD, "method"),
+                new Token(TokenType.NATIVE_KEYWORD, "native"),
+                new Token(TokenType.IDENTIFIER, "a"),
+                new Token(TokenType.OPENING_PARENTHESIS, "("),
+                new Token(TokenType.IDENTIFIER, "b"),
+                new Token(TokenType.COLON, ":"),
+                new Token(TokenType.IDENTIFIER, "Integer"),
+                new Token(TokenType.CLOSING_PARENTHESIS, ")"),
+                new Token(TokenType.COLON, ":"),
+                new Token(TokenType.IDENTIFIER, "Integer")
+        );
+
+        TokenIterator iterator = new TokenIterator(tokens);
+        ClassMemberNode node = ClassMemberNode.PARSER.parse(iterator);
+        assertEquals(new MethodNode(
+                        true,
+                        new IdentifierNode("a"),
+                        new ParametersNode(List.of(
+                                new ParametersNode.Par(
+                                        new IdentifierNode("b"), new ReferenceNode("Integer")))),
+                        new ReferenceNode("Integer"),
+                        new BodyNode(List.of())),
                 node);
         assertFalse(iterator.hasNext());
     }
