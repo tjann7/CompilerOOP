@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class Analyzer {
 
@@ -66,19 +67,20 @@ public final class Analyzer {
 
     @Nullable
     private static String hasCyclicDependency(@NotNull Map<ReferenceNode, AnalyzableClass> classes,
-                                              @Nullable ReferenceNode current, @NotNull ReferenceNode origin,
+                                              @NotNull ReferenceNode current, @NotNull ReferenceNode origin,
                                               @Nullable List<String> path) {
         if (path == null) {
             path = new ArrayList<>();
-            path.add(origin.toString());
+            path.add(origin.value());
         }
+
         AnalyzableClass analyzableClass = classes.get(current);
         if (analyzableClass == null) {
             return null;
         }
 
         ReferenceNode parent = analyzableClass.parentClass();
-        path.add(parent.toString());
+        path.add(parent.value());
 
         if (parent.equals(origin)) {
             return String.join(" -> ", path);
@@ -100,17 +102,13 @@ public final class Analyzer {
         for (ClassNode classNode : programNode.classes()) {
             ReferenceNode classReference = classNode.name().asReference();
             if (classes.containsKey(classReference)) {
-                throw new AnalyzerException("Class '%s' is already defined".formatted(classNode.name()));
+                throw new AnalyzerException("Class '%s' is already defined"
+                        .formatted(classNode.name().value()));
             }
 
             Map<AnalyzableConstructor.Key, AnalyzableConstructor> constructors = new HashMap<>();
             Map<AnalyzableMethod.Key, AnalyzableMethod> methods = new HashMap<>();
             Map<AnalyzableField.Key, AnalyzableField> fields = new HashMap<>();
-
-            var deps = hasCyclicDependency(classes, null, classReference, null);
-            if (deps != null) {
-                throw new AnalyzerException("Class '%s' has cyclic dependency: %s".formatted(classNode.name(), deps));
-            }
 
             ReferenceNode parentName = classNode.parentName();
             AnalyzableClass analyzableClass = new AnalyzableClass(
@@ -129,12 +127,19 @@ public final class Analyzer {
                     ReferenceNode type = methodNode.returnType();
 
                     AnalyzableMethod method = new AnalyzableMethod(name, parameters, type, analyzableClass);
+                    AnalyzableMethod.Key key = method.key();
 
-                    if (methods.containsKey(method.key())) {
-                        throw new AnalyzerException("Method '%s'.'%s' with the same signature already defined".formatted(classNode.name(), name));
+                    if (methods.containsKey(key)) {
+                        throw new AnalyzerException("Method '%s.%s(%s)' is already defined"
+                                .formatted(
+                                        classNode.name().value(),
+                                        name.value(),
+                                        key.parameterTypes().stream()
+                                                .map(ReferenceNode::value)
+                                                .collect(Collectors.joining(","))));
                     }
 
-                    methods.put(method.key(), method);
+                    methods.put(key, method);
                 } else if (classMemberNode instanceof FieldNode fieldNode) {
                     IdentifierNode name = fieldNode.name();
                     ReferenceNode type = fieldNode.type();
@@ -142,7 +147,8 @@ public final class Analyzer {
                     AnalyzableField field = new AnalyzableField(name, type, analyzableClass);
 
                     if (fields.containsKey(field.key())) {
-                        throw new AnalyzerException("Field '%s'.'%s' already defined".formatted(classNode.name(), name));
+                        throw new AnalyzerException("Field '%s.%s' is already defined"
+                                .formatted(classNode.name().value(), name.value()));
                     }
 
                     fields.put(field.key(), field);
@@ -150,14 +156,27 @@ public final class Analyzer {
                     ParametersNode parameters = constructorNode.parameters();
 
                     AnalyzableConstructor constructor = new AnalyzableConstructor(parameters, analyzableClass);
-                    if (constructors.containsKey(constructor.key())) {
-                        throw new AnalyzerException("Constructor with the same signature already defined");
+                    AnalyzableConstructor.Key key = constructor.key();
+                    if (constructors.containsKey(key)) {
+                        throw new AnalyzerException("Constructor '%s(%s)' is already defined"
+                                .formatted(
+                                        classNode.name().value(),
+                                        key.parameterTypes().stream()
+                                                .map(ReferenceNode::value)
+                                                .collect(Collectors.joining(","))));
                     }
-                    constructors.put(constructor.key(), constructor);
+                    constructors.put(key, constructor);
                 }
             }
 
             classes.put(classReference, analyzableClass);
+
+            String path = hasCyclicDependency(classes, classReference, classReference, null);
+            if (path != null) {
+                throw new AnalyzerException("Class '%s' has cyclic dependency: %s"
+                        .formatted(classNode.name().value(), path));
+            }
+
         }
 
         return new AnalyzeContext(classes, Map.of(), "", null, null);

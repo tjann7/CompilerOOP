@@ -138,7 +138,7 @@ public final class IfNode extends StatementNode {
             if (methodCall != null) {
                 List<StatementNode> optimized = new ArrayList<>(1 + thenBody.statements().size());
 
-                optimized.add(new MethodCallNode(condition));
+                optimized.add(methodCall);
                 optimized.addAll(thenBody.statements());
 
                 return optimized;

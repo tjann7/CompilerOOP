@@ -35,7 +35,11 @@ public final class ClassNode extends TreeNode {
             if (iterator.consume(TokenType.EXTENDS_KEYWORD)) {
                 parentIdentifierNode = ReferenceNode.PARSER.parse(iterator);
             } else {
-                parentIdentifierNode = null;
+                if (identifierNode.value().equals("Any")) {
+                    parentIdentifierNode = new ReferenceNode("");
+                } else {
+                    parentIdentifierNode = null;
+                }
             }
 
             iterator.next(TokenType.IS_KEYWORD);

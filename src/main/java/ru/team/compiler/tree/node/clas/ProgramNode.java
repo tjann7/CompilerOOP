@@ -1,5 +1,7 @@
 package ru.team.compiler.tree.node.clas;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import ru.team.compiler.analyzer.AnalyzeContext;
@@ -12,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@EqualsAndHashCode(callSuper = false)
+@ToString
 public final class ProgramNode extends TreeNode {
 
     public static final TreeNodeParser<ProgramNode> PARSER = new TreeNodeParser<>() {
@@ -54,7 +58,7 @@ public final class ProgramNode extends TreeNode {
     }
 
     @NotNull
-    public TreeNode optimize() {
+    public ProgramNode optimize() {
         return new ProgramNode(classes.stream()
                 .map(ClassNode::optimize)
                 .collect(Collectors.toList()));

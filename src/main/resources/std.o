@@ -3,7 +3,7 @@ class Any is
 end
 
 class Boolean extends Any is
-    method native not: Boolean
+    method native not(): Boolean
 end
 
 class Integer extends Any is
