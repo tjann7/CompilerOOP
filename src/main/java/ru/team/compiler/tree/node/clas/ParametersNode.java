@@ -79,7 +79,13 @@ public final class ParametersNode extends TreeNode {
                         .formatted(context.currentPath(), par.name.value(), par.type.value()));
             }
 
-            variables.put(par.name.asReference(), new AnalyzableVariable(par.name, par.type));
+            ReferenceNode name = par.name.asReference();
+            if (variables.containsKey(name)) {
+                throw new AnalyzerException("Parameter '%s.%s' is already defined"
+                        .formatted(context.currentPath(), name.value()));
+            }
+
+            variables.put(name, new AnalyzableVariable(par.name, par.type));
         }
 
         return new AnalyzeContext(

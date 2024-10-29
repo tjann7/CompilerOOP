@@ -84,7 +84,7 @@ public record AnalyzableClass(@NotNull IdentifierNode name,
 
         if (field == null) {
             throw new AnalyzerException("%s at '%s' is invalid: reference to unknown field '%s' in type '%s'"
-                    .formatted(messagePrefix, context.currentPath(), key.name(), name().value()));
+                    .formatted(messagePrefix, context.currentPath(), key.name().value(), name().value()));
         }
 
         return field;

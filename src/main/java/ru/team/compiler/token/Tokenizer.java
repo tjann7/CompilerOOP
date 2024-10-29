@@ -5,9 +5,11 @@ import org.jetbrains.annotations.Nullable;
 import ru.team.compiler.exception.NodeFormatException;
 import ru.team.compiler.util.Pair;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -36,6 +38,7 @@ public class Tokenizer {
             "true", "false"
     );
 
+    private final Queue<String> tokens = new ArrayDeque<>();
     private final String string;
     private int line = 1;
     private int column;
@@ -149,6 +152,10 @@ public class Tokenizer {
 
     @NotNull
     private String token() {
+        if (!tokens.isEmpty()) {
+            return tokens.remove();
+        }
+
         skipWhitespaces();
 
         StringBuilder stringBuilder = new StringBuilder();
@@ -173,9 +180,21 @@ public class Tokenizer {
             return Character.toString(c);
         }
 
-        boolean ignoreDot = Character.isDigit(c);
+        boolean number = Character.isDigit(c);
+
+        boolean dot = false;
+        int dotPos = -1;
+        int dotColumnShift = -1;
+        int lengthBeforeDot = -1;
 
         while (!Character.isWhitespace(c)) {
+            if (number && c != '.' && !Character.isDigit(c) && dot) {
+                pos = dotPos;
+                columnShift = dotColumnShift;
+                stringBuilder.delete(lengthBeforeDot, stringBuilder.length());
+                break;
+            }
+
             stringBuilder.append(c);
             if (end()) {
                 break;
@@ -184,11 +203,18 @@ public class Tokenizer {
             c = chr();
 
             if (singleTokens.containsKey(c)) {
-                if (ignoreDot && c == '.') {
+                if (number && c == '.') {
+                    if (dot) {
+                        break;
+                    }
+                    dot = true;
+                    dotPos = pos;
+                    dotColumnShift = columnShift;
+                    lengthBeforeDot = stringBuilder.length();
                     continue;
                 }
-                columnShift--;
                 pos--;
+                columnShift--;
                 return stringBuilder.toString();
             }
         }
