@@ -49,6 +49,10 @@ public final class BodyNode extends TreeNode {
         return initialContext;
     }
 
+    public boolean alwaysReturn() {
+        return statements.stream().anyMatch(StatementNode::alwaysReturn);
+    }
+
     @NotNull
     public BodyNode optimize() {
         AtomicBoolean atomicBoolean = new AtomicBoolean(false);

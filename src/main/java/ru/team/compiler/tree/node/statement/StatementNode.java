@@ -44,6 +44,10 @@ public abstract sealed class StatementNode extends TreeNode permits AssignmentNo
         }
     };
 
+    public boolean alwaysReturn() {
+        return false;
+    }
+
     @NotNull
     public List<StatementNode> optimize() {
         return List.of(this);

@@ -98,6 +98,11 @@ public final class IfNode extends StatementNode {
     }
 
     @Override
+    public boolean alwaysReturn() {
+        return thenBody.alwaysReturn() && (elseBody != null && elseBody().alwaysReturn());
+    }
+
+    @Override
     @NotNull
     public List<StatementNode> optimize() {
         if (condition.primary() instanceof BooleanLiteralNode booleanLiteralNode && condition.idArgs().isEmpty()) {

@@ -98,16 +98,21 @@ public final class MethodNode extends ClassMemberNode {
     @Override
     @NotNull
     public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
-        if (returnType != null && !context.hasClass(returnType)) {
-            throw new AnalyzerException("Method '%s.%s' references to unknown type '%s'"
-                    .formatted(context.currentPath(), name.value(), returnType.value()));
-        }
-
         AnalyzeContext initialContext = context;
+
+        if (returnType != null && !initialContext.hasClass(returnType)) {
+            throw new AnalyzerException("Method '%s.%s' references to unknown type '%s'"
+                    .formatted(initialContext.currentPath(), name.value(), returnType.value()));
+        }
 
         context = context.withMethod(this);
         context = parameters.analyze(context);
         body.analyze(context);
+
+        if (returnType != null && !body.alwaysReturn()) {
+            throw new AnalyzerException("Method '%s.%s' does not always return"
+                    .formatted(initialContext.currentPath(), name.value()));
+        }
 
         return initialContext;
     }

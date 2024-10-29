@@ -71,6 +71,11 @@ public final class WhileLoopNode extends StatementNode {
     }
 
     @Override
+    public boolean alwaysReturn() {
+        return body.alwaysReturn();
+    }
+
+    @Override
     @NotNull
     public List<StatementNode> optimize() {
         if (condition.primary() instanceof BooleanLiteralNode booleanLiteralNode

@@ -48,6 +48,11 @@ public final class ReturnNode extends StatementNode {
     }
 
     @Override
+    public boolean alwaysReturn() {
+        return true;
+    }
+
+    @Override
     @NotNull
     public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
         ReferenceNode type = expression != null ? expression.type(context) : null;
