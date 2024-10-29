@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @EqualsAndHashCode(callSuper = false)
@@ -50,10 +51,22 @@ public final class BodyNode extends TreeNode {
 
     @NotNull
     public BodyNode optimize() {
+        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
         return new BodyNode(
                 statements.stream()
                         .map(StatementNode::optimize)
                         .flatMap(Collection::stream)
+                        .takeWhile(statementNode -> {
+                            if (atomicBoolean.get()) {
+                                return false;
+                            }
+
+                            if (statementNode instanceof ReturnNode) {
+                                atomicBoolean.set(true);
+                            }
+
+                            return true;
+                        })
                         .collect(Collectors.toList())
         );
     }
@@ -85,7 +98,10 @@ public final class BodyNode extends TreeNode {
                     }
 
                     if (!statementNodes.isEmpty()) {
-                        iterator.next(TokenType.SEMICOLON);
+                        Token previous = iterator.previous();
+                        if (previous == null || previous.type() != TokenType.END_KEYWORD) {
+                            iterator.next(TokenType.SEMICOLON);
+                        }
                         while (iterator.consume(TokenType.SEMICOLON)) {
                         }
 

@@ -80,9 +80,12 @@ public final class TokenIterator {
         return false;
     }
 
-    public void previous() {
-        if (index > 0) {
-            index--;
+    @Nullable
+    public Token previous() {
+        if (index >= 1) {
+            return list.get(index - 1);
+        } else {
+            return null;
         }
     }
 
