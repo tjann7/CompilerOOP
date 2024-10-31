@@ -82,9 +82,9 @@ public final class AssignmentNode extends StatementNode {
             leftType = field.type();
         }
 
-        ReferenceNode rightType = valueExpression.type(context);
+        ReferenceNode rightType = valueExpression.type(context, false);
 
-        if (!leftType.equals(rightType)) {
+        if (!context.isAssignableFrom(leftType, rightType)) {
             throw new AnalyzerException("Assignment at '%s' is invalid: expected '%s' type on the right side, got '%s'"
                     .formatted(context.currentPath(), leftType.value(), rightType.value()));
         }

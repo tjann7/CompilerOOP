@@ -59,7 +59,7 @@ public final class WhileLoopNode extends StatementNode {
     @Override
     @NotNull
     public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
-        ReferenceNode type = condition.type(context);
+        ReferenceNode type = condition.type(context, false);
 
         if (!type.value().equals("Boolean")) {
             throw new AnalyzerException("While condition at '%s' is invalid: expected 'Boolean' type, got '%s'"

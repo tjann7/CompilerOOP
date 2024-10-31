@@ -18,6 +18,14 @@ public record AnalyzableConstructor(@NotNull ParametersNode parameters, @NotNull
         return new Key(parameterTypes);
     }
 
+    @Override
+    public String toString() {
+        return "AnalyzableConstructor{" +
+                "parameters=" + parameters +
+                ", declaredClass=" + declaredClass.name() +
+                '}';
+    }
+
     public record Key(@NotNull List<ReferenceNode> parameterTypes) {
 
     }

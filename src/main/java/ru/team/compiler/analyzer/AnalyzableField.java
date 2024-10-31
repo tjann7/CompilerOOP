@@ -12,6 +12,15 @@ public record AnalyzableField(@NotNull IdentifierNode name, @NotNull ReferenceNo
         return new Key(name);
     }
 
+    @Override
+    public String toString() {
+        return "AnalyzableField{" +
+                "name=" + name +
+                ", type=" + type +
+                ", declaredClass=" + declaredClass.name() +
+                '}';
+    }
+
     public record Key(@NotNull IdentifierNode name) {
 
     }

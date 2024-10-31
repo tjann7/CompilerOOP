@@ -21,6 +21,16 @@ public record AnalyzableMethod(@NotNull IdentifierNode name, @NotNull Parameters
         return new Key(name, parameterTypes);
     }
 
+    @Override
+    public String toString() {
+        return "AnalyzableMethod{" +
+                "name=" + name +
+                ", parameters=" + parameters +
+                ", returnType=" + returnType +
+                ", declaredClass=" + declaredClass.name() +
+                '}';
+    }
+
     public record Key(@NotNull IdentifierNode name, @NotNull List<ReferenceNode> parameterTypes) {
 
     }

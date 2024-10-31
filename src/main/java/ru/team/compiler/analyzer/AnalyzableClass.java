@@ -31,7 +31,7 @@ public record AnalyzableClass(@NotNull IdentifierNode name,
         AnalyzableClass currentClass = other;
 
         while (true) {
-            if (this.equals(currentClass)) {
+            if (name().equals(currentClass.name())) {
                 return true;
             } else if (currentClass.parentClass.value().equals("")) {
                 return false;

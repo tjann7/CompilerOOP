@@ -14,8 +14,6 @@ import ru.team.compiler.tree.node.TreeNodeParser;
 import ru.team.compiler.tree.node.expression.ExpressionNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
 
-import java.util.Objects;
-
 @EqualsAndHashCode(callSuper = false)
 @ToString
 public final class ReturnNode extends StatementNode {
@@ -55,10 +53,11 @@ public final class ReturnNode extends StatementNode {
     @Override
     @NotNull
     public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
-        ReferenceNode type = expression != null ? expression.type(context) : null;
+        ReferenceNode type = expression != null ? expression.type(context, false) : null;
 
         AnalyzableMethod currentMethod = context.currentMethod("Return");
-        if (!Objects.equals(type, currentMethod.returnType())) {
+        if (((type == null) != (currentMethod.returnType() == null))
+                || (type != null && !context.isAssignableFrom(type, currentMethod.returnType()))) {
             throw new AnalyzerException("Return at '%s' is invalid: expected '%s', got '%s'"
                     .formatted(context.currentPath(), prettyType(currentMethod.returnType()), prettyType(type)));
         }
@@ -68,6 +67,6 @@ public final class ReturnNode extends StatementNode {
 
     @NotNull
     private String prettyType(@Nullable ReferenceNode type) {
-        return type != null ? type.value() : "void";
+        return type != null ? type.value() : "Void";
     }
 }

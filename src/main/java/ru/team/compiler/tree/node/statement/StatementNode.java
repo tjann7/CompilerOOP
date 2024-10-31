@@ -5,7 +5,6 @@ import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.exception.NodeFormatException;
 import ru.team.compiler.token.Token;
 import ru.team.compiler.token.TokenIterator;
-import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNode;
 import ru.team.compiler.tree.node.TreeNodeParser;
 
@@ -27,12 +26,8 @@ public abstract sealed class StatementNode extends TreeNode permits AssignmentNo
                     try {
                         yield AssignmentNode.PARSER.parse(iterator);
                     } catch (NodeFormatException e) {
-                        if (token.type() == TokenType.IDENTIFIER) {
-                            iterator.index(index);
-                            yield MethodCallNode.PARSER.parse(iterator);
-                        } else {
-                            throw e;
-                        }
+                        iterator.index(index);
+                        yield MethodCallNode.PARSER.parse(iterator);
                     }
                 }
                 case WHILE_KEYWORD -> WhileLoopNode.PARSER.parse(iterator);

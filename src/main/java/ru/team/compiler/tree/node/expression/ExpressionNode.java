@@ -118,12 +118,12 @@ public final class ExpressionNode extends TreeNode {
     @Override
     @NotNull
     public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
-        type(context);
+        type(context, false);
         return context;
     }
 
     @NotNull
-    public ReferenceNode type(@NotNull AnalyzeContext context) {
+    public ReferenceNode type(@NotNull AnalyzeContext context, boolean allowVoid) {
         ReferenceNode currentType;
 
         int shift = 0;
@@ -234,18 +234,33 @@ public final class ExpressionNode extends TreeNode {
                                     currentType.value()));
                 }
 
-                if (method.returnType() == null) {
-                    throw new AnalyzerException("Expression at '%s' is invalid: reference to void method '%s(%s)' in type '%s'"
-                            .formatted(
-                                    context.currentPath(),
-                                    idArg.name,
-                                    method.parameters().pars().stream()
-                                            .map(par -> "? > " + par.type().value())
-                                            .collect(Collectors.joining(",")),
-                                    currentType.value()));
-                }
+                if (!allowVoid) {
+                    if (method.returnType() == null) {
+                        throw new AnalyzerException("Expression at '%s' is invalid: reference to void method '%s(%s)' in type '%s'"
+                                .formatted(
+                                        context.currentPath(),
+                                        idArg.name.value(),
+                                        method.parameters().pars().stream()
+                                                .map(par -> par.type().value())
+                                                .collect(Collectors.joining(",")),
+                                        currentType.value()));
+                    }
 
-                currentType = method.returnType();
+                    currentType = method.returnType();
+                } else {
+                    currentType = new ReferenceNode("<void>");
+
+                    if (i != idArgs.size() - 1) {
+                        throw new AnalyzerException("Expression at '%s' is invalid: reference after call of void method '%s(%s)' in type '%s'"
+                                .formatted(
+                                        context.currentPath(),
+                                        idArg.name.value(),
+                                        method.parameters().pars().stream()
+                                                .map(par -> par.type().value())
+                                                .collect(Collectors.joining(",")),
+                                        currentType.value()));
+                    }
+                }
             }
         }
 
@@ -256,7 +271,7 @@ public final class ExpressionNode extends TreeNode {
     private List<ReferenceNode> argumentTypes(@NotNull AnalyzeContext context, @NotNull ArgumentsNode arguments) {
         return arguments.expressions()
                 .stream()
-                .map(expressionNode -> expressionNode.type(context))
+                .map(expressionNode -> expressionNode.type(context, false))
                 .collect(Collectors.toList());
     }
 
@@ -286,7 +301,7 @@ public final class ExpressionNode extends TreeNode {
                     ReferenceNode argumentType = argumentsTypes.get(j);
                     ReferenceNode parameterType = parameters.pars().get(j).type();
 
-                    if (!context.isAssignableFrom(argumentType, parameterType)) {
+                    if (!context.isAssignableFrom(parameterType, argumentType)) {
                         finalEntity = null;
                         break;
                     }
