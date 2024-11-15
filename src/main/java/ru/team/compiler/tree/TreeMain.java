@@ -36,7 +36,7 @@ public class TreeMain {
                         tokens.add(tokenizer.next());
                     }
 
-                    TreeNode node = ProgramNode.PARSER.parse(tokens);
+                    TreeNode node = TreeNode.PARSER.parse(tokens);
                     System.out.println(NodeToStringHelper.toString(node, true));
 
                     TreeNode analyzeNode = node;
