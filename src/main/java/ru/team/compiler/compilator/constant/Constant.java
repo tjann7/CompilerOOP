@@ -29,7 +29,7 @@ public abstract sealed class Constant<T> permits ClassConstant, FieldRefConstant
 
     protected abstract Constant<T> withIndex(int index);
 
-    public abstract void serialize(@NotNull ConstantPool constantPool, @NotNull DataOutput dataOutput) throws IOException;
+    public abstract void compile(@NotNull ConstantPool constantPool, @NotNull DataOutput dataOutput) throws IOException;
 
     @Override
     public boolean equals(Object object) {

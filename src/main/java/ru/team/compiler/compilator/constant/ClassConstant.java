@@ -17,7 +17,7 @@ public final class ClassConstant extends Constant<Utf8Constant> {
     }
 
     @Override
-    public void serialize(@NotNull ConstantPool constantPool, @NotNull DataOutput dataOutput) throws IOException {
+    public void compile(@NotNull ConstantPool constantPool, @NotNull DataOutput dataOutput) throws IOException {
         dataOutput.writeByte(7);
 
         dataOutput.writeShort(value.index);

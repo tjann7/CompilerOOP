@@ -19,7 +19,7 @@ public final class MethodRefConstant extends Constant<Pair<ClassConstant, NameAn
     }
 
     @Override
-    public void serialize(@NotNull ConstantPool constantPool, @NotNull DataOutput dataOutput) throws IOException {
+    public void compile(@NotNull ConstantPool constantPool, @NotNull DataOutput dataOutput) throws IOException {
         dataOutput.writeByte(10);
 
         ClassConstant classRef = value.getLeft();

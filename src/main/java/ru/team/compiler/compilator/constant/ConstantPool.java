@@ -51,12 +51,12 @@ public final class ConstantPool {
     @NotNull
     private <T, C extends Constant<?>> C getConstant(@NotNull C nullConstant) {
         int i = objectToIndex.computeIfAbsent(nullConstant, k -> {
-            int index = constants.size();
+            int index = constants.size() + 1;
             constants.add(nullConstant.withIndex(index));
             return index;
         });
 
-        return (C) constants.get(i);
+        return (C) constants.get(i - 1);
     }
 
     @NotNull
@@ -65,16 +65,16 @@ public final class ConstantPool {
         return Collections.unmodifiableList(constants);
     }
 
-    public void serialize(@NotNull DataOutput dataOutput) throws IOException {
+    public void compile(@NotNull DataOutput dataOutput) throws IOException {
         if (constants.size() + 1 >= Unsigned.MAX_SHORT) {
-            throw new IOException("Cannot serialize ConstantPool with %d constants"
+            throw new IOException("Cannot compile ConstantPool with %d constants"
                     .formatted(constants.size()));
         }
 
         int size = constants.size();
         dataOutput.writeShort(size + 1);
         for (Constant<?> constant : constants) {
-            constant.serialize(this, dataOutput);
+            constant.compile(this, dataOutput);
         }
     }
 }

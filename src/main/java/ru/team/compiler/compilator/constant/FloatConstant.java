@@ -17,7 +17,7 @@ public final class FloatConstant extends Constant<Float> {
     }
 
     @Override
-    public void serialize(@NotNull ConstantPool constantPool, @NotNull DataOutput dataOutput) throws IOException {
+    public void compile(@NotNull ConstantPool constantPool, @NotNull DataOutput dataOutput) throws IOException {
         dataOutput.writeByte(4);
         dataOutput.writeFloat(value);
     }

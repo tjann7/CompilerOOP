@@ -19,13 +19,13 @@ public final class Utf8Constant extends Constant<String> {
     }
 
     @Override
-    public void serialize(@NotNull ConstantPool constantPool, @NotNull DataOutput dataOutput) throws IOException {
+    public void compile(@NotNull ConstantPool constantPool, @NotNull DataOutput dataOutput) throws IOException {
         dataOutput.writeByte(1);
 
         byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
 
         if (bytes.length > Unsigned.MAX_SHORT) {
-            throw new IOException("Cannot serialize Utf8Constant with %d-length string: %s"
+            throw new IOException("Cannot compile Utf8Constant with %d-length string: %s"
                     .formatted(value.length(), value));
         }
 

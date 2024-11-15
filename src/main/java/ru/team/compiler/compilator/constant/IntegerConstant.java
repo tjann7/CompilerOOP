@@ -17,7 +17,7 @@ public final class IntegerConstant extends Constant<Integer> {
     }
 
     @Override
-    public void serialize(@NotNull ConstantPool constantPool, @NotNull DataOutput dataOutput) throws IOException {
+    public void compile(@NotNull ConstantPool constantPool, @NotNull DataOutput dataOutput) throws IOException {
         dataOutput.writeByte(3);
         dataOutput.writeInt(value);
     }

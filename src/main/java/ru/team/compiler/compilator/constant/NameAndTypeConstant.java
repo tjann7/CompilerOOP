@@ -18,7 +18,7 @@ public final class NameAndTypeConstant extends Constant<Pair<Utf8Constant, Utf8C
     }
 
     @Override
-    public void serialize(@NotNull ConstantPool constantPool, @NotNull DataOutput dataOutput) throws IOException {
+    public void compile(@NotNull ConstantPool constantPool, @NotNull DataOutput dataOutput) throws IOException {
         dataOutput.writeByte(12);
         dataOutput.writeShort(value.getLeft().index);
         dataOutput.writeShort(value.getRight().index);
