@@ -22,7 +22,7 @@ public record CompilationMethod(@NotNull Utf8Constant name, @NotNull Utf8Constan
         Utf8Constant name = constantPool.getUtf(methodNode.name().value());
         Utf8Constant descriptor = constantPool.getUtf(CompilationUtils.descriptor(methodNode));
 
-        CodeAttribute codeAttribute = new CodeAttribute();
+        CodeAttribute codeAttribute = new CodeAttribute(constantPool, methodNode);
 
         return new CompilationMethod(name, descriptor, codeAttribute);
     }
@@ -31,13 +31,13 @@ public record CompilationMethod(@NotNull Utf8Constant name, @NotNull Utf8Constan
         return Modifier.PUBLIC;
     }
 
-    public void compile(@NotNull DataOutput dataOutput) throws IOException {
+    public void compile(@NotNull ConstantPool constantPool, @NotNull DataOutput dataOutput) throws IOException {
         dataOutput.writeShort(accessFlags());
         dataOutput.writeShort(name.index());
         dataOutput.writeShort(descriptor.index());
 
         // Attributes
         dataOutput.writeShort(1);
-        codeAttribute.compile(dataOutput);
+        codeAttribute.compile(constantPool, dataOutput);
     }
 }

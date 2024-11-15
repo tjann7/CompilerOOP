@@ -76,6 +76,30 @@ public final class BodyNode extends TreeNode {
     }
 
     @NotNull
+    public List<StatementNode> flatStatements() {
+        return statements.stream()
+                .map(statementNode -> {
+                    List<StatementNode> statementNodes = new ArrayList<>();
+                    if (statementNode instanceof WhileLoopNode whileLoopNode) {
+                        statementNodes.add(whileLoopNode);
+                        statementNodes.addAll(whileLoopNode.body().flatStatements());
+                    } else if (statementNode instanceof IfNode ifNode) {
+                        statementNodes.add(ifNode);
+                        statementNodes.addAll(ifNode.thenBody().flatStatements());
+                        if (ifNode.elseBody() != null) {
+                            statementNodes.addAll(ifNode.elseBody().flatStatements());
+                        }
+                    } else {
+                        statementNodes.add(statementNode);
+                    }
+
+                    return statementNodes;
+                })
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
+    @NotNull
     public static TreeNodeParser<BodyNode> parser(@NotNull TokenType @NotNull ... endTypes) {
         return parser(Set.of(endTypes));
     }

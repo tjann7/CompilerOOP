@@ -36,9 +36,15 @@ public record ClassFile(int minorVersion, int majorVersion, @NotNull ConstantPoo
 
         // Fields
         dataOutput.writeShort(fields.size());
+        for (CompilationField field : fields) {
+            field.compile(constantPool, dataOutput);
+        }
 
         // Methods
         dataOutput.writeShort(methods.size());
+        for (CompilationMethod method : methods) {
+            method.compile(constantPool, dataOutput);
+        }
 
         // Attributes
         dataOutput.writeShort(0);
