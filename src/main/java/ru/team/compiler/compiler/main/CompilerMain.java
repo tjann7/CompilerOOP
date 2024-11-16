@@ -31,11 +31,7 @@ public final class CompilerMain {
 
         Path path = Path.of(arguments.get(0));
 
-        if (options.contains("-bundle")) {
-            BundleCompilation.compile(path);
-        } else {
-            ClassCompilation.compile(path);
-        }
+        ClassCompilation.compile(path, options);
     }
 
     private static void printUsage() {
