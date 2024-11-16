@@ -69,6 +69,8 @@ public final class MethodCallNode extends StatementNode {
         if (!type.value().equals("<void>")) {
             // pop
             dataOutput.writeByte(Opcodes.POP);
+
+            context.decrementStackSize(1); // pop
         }
     }
 }

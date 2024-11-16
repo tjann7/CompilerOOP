@@ -71,7 +71,7 @@ public record ClassFile(@NotNull ConstantPool constantPool,
         ClassConstant superClass;
         if (superClassName != null) {
             if (superClassName.equals("")) {
-                superClass = constantPool.getClass(constantPool.getUtf("src/main/java/olang/Any"));
+                superClass = constantPool.getClass(constantPool.getUtf("olang/Any"));
             } else {
                 superClass = CompilationUtils.oClass(constantPool, superClassName);
             }

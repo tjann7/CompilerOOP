@@ -110,6 +110,8 @@ public final class AssignmentNode extends StatementNode {
         if (!local) {
             // aload_0 (this)
             dataOutput.writeByte(Opcodes.ALOAD_0);
+
+            context.incrementStackSize(1); // aload
         }
 
         valueExpression.compile(context, currentClass, constantPool, variablePool, dataOutput, false);
@@ -128,10 +130,14 @@ public final class AssignmentNode extends StatementNode {
 
             dataOutput.writeByte(Opcodes.PUTFIELD);
             dataOutput.writeShort(oField.index());
+
+            context.decrementStackSize(1); // putfield
         } else {
             // astore (#X)
             int index = variablePool.getIndex(referenceNode.value());
             dataOutput.write(Opcodes.astore(constantPool, index));
+
+            context.decrementStackSize(1); // astore
         }
     }
 }

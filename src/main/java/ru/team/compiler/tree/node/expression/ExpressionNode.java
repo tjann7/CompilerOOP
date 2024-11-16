@@ -353,11 +353,15 @@ public final class ExpressionNode extends TreeNode {
             byte[] iconst = Opcodes.iconst(constantPool, node.value());
             dataOutput.write(iconst);
 
+            context.incrementStackSize(3); // new + dup + fconst
+
             // invokevirtual (#Integer.<init>(int))
             MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool,
                     "Integer", "<init>", "(I)V");
             dataOutput.writeByte(Opcodes.INVOKEVIRTUAL);
             dataOutput.writeShort(oMethod.index());
+
+            context.decrementStackSize(2); // invokevirtual for this and int
 
             currentType = new ReferenceNode("Integer");
         } else if (primary instanceof RealLiteralNode node) {
@@ -372,11 +376,15 @@ public final class ExpressionNode extends TreeNode {
             // fconst (#X)
             dataOutput.write(Opcodes.fconst(constantPool, node.value()));
 
+            context.incrementStackSize(3); // new + dup + fconst
+
             // invokevirtual (#Real.<init>(float))
             MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool,
                     "Real", "<init>", "(F)V");
             dataOutput.writeByte(Opcodes.INVOKEVIRTUAL);
             dataOutput.writeShort(oMethod.index());
+
+            context.decrementStackSize(2); // invokevirtual for this and float
 
             currentType = new ReferenceNode("Real");
         } else if (primary instanceof BooleanLiteralNode node) {
@@ -391,11 +399,15 @@ public final class ExpressionNode extends TreeNode {
             // iconst (#X)
             dataOutput.writeByte(node.value() ? Opcodes.ICONST_1 : Opcodes.ICONST_0);
 
+            context.incrementStackSize(3); // new + dup + iconst
+
             // invokevirtual (#Boolean.<init>(boolean))
             MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool,
                     "Boolean", "<init>", "(Z)V");
             dataOutput.writeByte(Opcodes.INVOKEVIRTUAL);
             dataOutput.writeShort(oMethod.index());
+
+            context.decrementStackSize(2); // invokevirtual for this and boolean
 
             currentType = new ReferenceNode("Boolean");
         } else if (primary instanceof ReferenceNode referenceNode) {
@@ -428,6 +440,8 @@ public final class ExpressionNode extends TreeNode {
                 // dup
                 dataOutput.writeByte(Opcodes.DUP);
 
+                context.incrementStackSize(2); // new + dup
+
                 // compile arguments
                 for (ExpressionNode expressionNode : idArg.arguments.expressions()) {
                     expressionNode.compile(context, currentClass, constantPool, variablePool, dataOutput, false);
@@ -438,6 +452,9 @@ public final class ExpressionNode extends TreeNode {
                         constructor.constructorNode());
                 dataOutput.writeByte(Opcodes.INVOKEVIRTUAL);
                 dataOutput.writeShort(oMethod.index());
+
+                context.decrementStackSize(idArg.arguments.expressions().size() + 1); // invokevirtual for this and arguments
+
 
                 shift = 1;
 
@@ -451,6 +468,8 @@ public final class ExpressionNode extends TreeNode {
                 int index = variablePool.getIndex(referenceNode.value());
                 dataOutput.write(Opcodes.aload(constantPool, index));
 
+                context.incrementStackSize(1); // aload
+
                 AnalyzableVariable variable = context.analyzeContext().variables().get(referenceNode);
                 if (variable != null) {
                     currentType = variable.type();
@@ -461,6 +480,8 @@ public final class ExpressionNode extends TreeNode {
         } else if (primary instanceof ThisNode) {
             // aload_0
             dataOutput.writeByte(Opcodes.ALOAD_0);
+
+            context.incrementStackSize(1); // aload
 
             currentType = currentClass.name().asReference();
         } else {
@@ -514,9 +535,14 @@ public final class ExpressionNode extends TreeNode {
                 dataOutput.writeByte(Opcodes.INVOKEVIRTUAL);
                 dataOutput.writeShort(oMethod.index());
 
+                // invokevirtual for this and arguments, but there can be return value
+                context.decrementStackSize(method.parameters().pars().size());
+
                 currentType = method.returnType();
                 if (currentType == null) {
                     currentType = new ReferenceNode("<void>");
+
+                    context.decrementStackSize(1); // no return from invokevirtual
                 }
             }
         }

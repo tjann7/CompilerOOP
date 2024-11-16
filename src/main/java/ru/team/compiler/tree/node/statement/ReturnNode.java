@@ -97,11 +97,15 @@ public final class ReturnNode extends StatementNode {
                 dataOutput.write(Opcodes.aload(constantPool, index));
                 dataOutput.writeByte(Opcodes.ARETURN);
 
+                context.incrementStackSize(1); // aload
+
                 return;
             } else if (expression.primary() instanceof ThisNode) {
                 // aload_0
                 dataOutput.write(Opcodes.ALOAD_0);
                 dataOutput.writeByte(Opcodes.ARETURN);
+
+                context.incrementStackSize(1); // aload
 
                 return;
             }

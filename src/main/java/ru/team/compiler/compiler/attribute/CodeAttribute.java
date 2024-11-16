@@ -57,9 +57,6 @@ public final class CodeAttribute extends Attribute {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
         DataOutput byteDataOutput = new DataOutputStream(byteArrayOutputStream);
 
-        // TODO: calculate real max stack
-        int maxStack = 100;
-
         List<AnalyzableVariable> locals = new ArrayList<>();
 
         locals.addAll(parametersNode.pars().stream()
@@ -80,11 +77,6 @@ public final class CodeAttribute extends Attribute {
             variables.put(local.name().asReference(), local);
         }
 
-        int maxLocals = 1 + locals.size();
-
-        byteDataOutput.writeShort(maxStack);
-        byteDataOutput.writeShort(maxLocals);
-
         // Code
         context = new CompilationContext(context.analyzeContext()
                 .withClass(classNode)
@@ -103,7 +95,14 @@ public final class CodeAttribute extends Attribute {
 
         dataOutput.writeShort(attributeName.index());
 
-        dataOutput.writeInt(byteArrayOutputStream.size());
+        dataOutput.writeInt(4 + byteArrayOutputStream.size()); // maxStacks + maxLocals + code
+
+        int maxStack = context.maxStackSize().get();
+        dataOutput.writeShort(maxStack);
+
+        int maxLocals = 1 + locals.size();
+        dataOutput.writeShort(maxLocals);
+
         dataOutput.write(byteArrayOutputStream.toByteArray());
     }
 

@@ -26,6 +26,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -155,11 +156,12 @@ public final class ClassCompilation {
                         for (Path stdPath : stream) {
                             Path classOutputPath = classOutputPathFunction.apply(stdPath.getFileName().toString());
 
-                            Files.copy(stdPath, classOutputPath);
+                            Files.copy(stdPath, classOutputPath, StandardCopyOption.REPLACE_EXISTING);
                         }
                     }
                 } catch (URISyntaxException | IOException e) {
                     System.err.println("[ERROR] " + path + " | Failed on std bundling: " + e);
+                    return;
                 }
             }
 
@@ -174,6 +176,7 @@ public final class ClassCompilation {
                     classFile.compile(new CompilationContext(context), dataOutputStream);
                 } catch (Exception e) {
                     System.err.println("[ERROR] " + path + " | Failed on compilation: " + e);
+                    e.printStackTrace();
                     return;
                 }
             }
