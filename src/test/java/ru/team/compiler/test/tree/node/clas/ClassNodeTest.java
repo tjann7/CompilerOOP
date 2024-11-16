@@ -126,6 +126,7 @@ public class ClassNodeTest {
                         List.of(
                                 new FieldNode(new IdentifierNode("a"), new ReferenceNode("Integer")),
                                 new ConstructorNode(
+                                        false,
                                         new ParametersNode(List.of(
                                                 new ParametersNode.Par(new IdentifierNode("a"),
                                                         new ReferenceNode("Integer")))),

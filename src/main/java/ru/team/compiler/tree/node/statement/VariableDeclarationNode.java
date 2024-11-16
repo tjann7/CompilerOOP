@@ -5,14 +5,20 @@ import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import ru.team.compiler.analyzer.AnalyzableVariable;
 import ru.team.compiler.analyzer.AnalyzeContext;
+import ru.team.compiler.compilator.CompilationContext;
+import ru.team.compiler.compilator.attribute.CodeAttribute;
+import ru.team.compiler.compilator.constant.ConstantPool;
 import ru.team.compiler.exception.AnalyzerException;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNodeParser;
+import ru.team.compiler.tree.node.clas.ClassNode;
 import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
 
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,12 +78,12 @@ public final class VariableDeclarationNode extends StatementNode {
 
         variables.put(nameReference, new AnalyzableVariable(name, type));
 
-        return new AnalyzeContext(
-                context.classes(),
-                variables,
-                context.currentPath(),
-                context.currentClass(),
-                context.currentMethod()
-        );
+        return context.withVariables(variables);
+    }
+
+    @Override
+    public void compile(@NotNull CompilationContext context, @NotNull ClassNode currentClass, @NotNull ConstantPool constantPool, @NotNull CodeAttribute.VariablePool variablePool,
+                        @NotNull DataOutput dataOutput) throws IOException {
+
     }
 }

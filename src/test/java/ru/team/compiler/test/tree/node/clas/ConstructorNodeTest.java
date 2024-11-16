@@ -37,6 +37,7 @@ public class ConstructorNodeTest {
         TokenIterator iterator = new TokenIterator(tokens);
         ConstructorNode node = ConstructorNode.PARSER.parse(iterator);
         assertEquals(new ConstructorNode(
+                        false,
                         new ParametersNode(List.of(
                                 new ParametersNode.Par(
                                         new IdentifierNode("a"), new ReferenceNode("Integer")))),

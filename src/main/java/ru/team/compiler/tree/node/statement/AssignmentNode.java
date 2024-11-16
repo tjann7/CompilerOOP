@@ -7,13 +7,24 @@ import ru.team.compiler.analyzer.AnalyzableClass;
 import ru.team.compiler.analyzer.AnalyzableField;
 import ru.team.compiler.analyzer.AnalyzableVariable;
 import ru.team.compiler.analyzer.AnalyzeContext;
+import ru.team.compiler.compilator.CompilationUtils;
+import ru.team.compiler.compilator.CompilationContext;
+import ru.team.compiler.compilator.attribute.CodeAttribute;
+import ru.team.compiler.compilator.constant.ConstantPool;
+import ru.team.compiler.compilator.constant.FieldRefConstant;
 import ru.team.compiler.exception.AnalyzerException;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNodeParser;
+import ru.team.compiler.tree.node.clas.ClassNode;
 import ru.team.compiler.tree.node.expression.ExpressionNode;
+import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
+import ru.team.compiler.util.Opcodes;
+
+import java.io.DataOutput;
+import java.io.IOException;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
@@ -90,5 +101,37 @@ public final class AssignmentNode extends StatementNode {
         }
 
         return context;
+    }
+
+    @Override
+    public void compile(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
+                        @NotNull ConstantPool constantPool, @NotNull CodeAttribute.VariablePool variablePool,
+                        @NotNull DataOutput dataOutput) throws IOException {
+        if (!local) {
+            // aload_0 (this)
+            dataOutput.writeByte(Opcodes.ALOAD_0);
+        }
+
+        valueExpression.compile(context, currentClass, constantPool, variablePool, dataOutput, false);
+
+        if (!local) {
+            // putfield (#X)
+            AnalyzableClass analyzableClass = context.analyzeContext().classes().get(currentClass.name().asReference());
+
+            AnalyzableField field = analyzableClass.getField(
+                    context.analyzeContext(),
+                    new AnalyzableField.Key(new IdentifierNode(referenceNode.value())),
+                    "Assignment");
+
+            FieldRefConstant oField = CompilationUtils.oField(constantPool, currentClass.name().value(),
+                    field.fieldNode());
+
+            dataOutput.writeByte(Opcodes.PUTFIELD);
+            dataOutput.writeShort(oField.index());
+        } else {
+            // astore (#X)
+            int index = variablePool.getIndex(referenceNode.value());
+            dataOutput.write(Opcodes.astore(constantPool, index));
+        }
     }
 }

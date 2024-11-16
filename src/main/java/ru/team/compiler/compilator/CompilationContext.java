@@ -1,7 +1,8 @@
 package ru.team.compiler.compilator;
 
 import org.jetbrains.annotations.NotNull;
-import ru.team.compiler.compilator.constant.ConstantPool;
+import ru.team.compiler.analyzer.AnalyzeContext;
 
-public record CompilationContext(@NotNull ConstantPool constantPool) {
+public record CompilationContext(@NotNull AnalyzeContext analyzeContext) {
+
 }

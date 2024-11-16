@@ -126,7 +126,7 @@ public final class Analyzer {
                     ParametersNode parameters = methodNode.parameters();
                     ReferenceNode type = methodNode.returnType();
 
-                    AnalyzableMethod method = new AnalyzableMethod(name, parameters, type, analyzableClass);
+                    AnalyzableMethod method = new AnalyzableMethod(methodNode, name, parameters, type, analyzableClass);
                     AnalyzableMethod.Key key = method.key();
 
                     if (methods.containsKey(key)) {
@@ -144,7 +144,7 @@ public final class Analyzer {
                     IdentifierNode name = fieldNode.name();
                     ReferenceNode type = fieldNode.type();
 
-                    AnalyzableField field = new AnalyzableField(name, type, analyzableClass);
+                    AnalyzableField field = new AnalyzableField(fieldNode, name, type, analyzableClass);
 
                     if (fields.containsKey(field.key())) {
                         throw new AnalyzerException("Field '%s.%s' is already defined"
@@ -155,7 +155,8 @@ public final class Analyzer {
                 } else if (classMemberNode instanceof ConstructorNode constructorNode) {
                     ParametersNode parameters = constructorNode.parameters();
 
-                    AnalyzableConstructor constructor = new AnalyzableConstructor(parameters, analyzableClass);
+                    AnalyzableConstructor constructor = new AnalyzableConstructor(constructorNode, parameters,
+                            analyzableClass);
                     AnalyzableConstructor.Key key = constructor.key();
                     if (constructors.containsKey(key)) {
                         throw new AnalyzerException("Constructor '%s(%s)' is already defined"

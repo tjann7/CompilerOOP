@@ -1,6 +1,7 @@
 package ru.team.compiler.compilator.attribute;
 
 import org.jetbrains.annotations.NotNull;
+import ru.team.compiler.compilator.CompilationContext;
 import ru.team.compiler.compilator.constant.ConstantPool;
 import ru.team.compiler.compilator.constant.Utf8Constant;
 
@@ -15,6 +16,7 @@ public abstract sealed class Attribute permits CodeAttribute {
         this.attributeName = utfConstant;
     }
 
-    public abstract void compile(@NotNull ConstantPool constantPool, @NotNull DataOutput dataOutput) throws IOException;
+    public abstract void compile(@NotNull CompilationContext context, @NotNull ConstantPool constantPool,
+                                 @NotNull DataOutput dataOutput) throws IOException;
 
 }

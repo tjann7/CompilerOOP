@@ -7,12 +7,12 @@ import java.io.IOException;
 
 public final class IntegerConstant extends Constant<Integer> {
 
-    public IntegerConstant(int index, int value) {
+    public IntegerConstant(short index, int value) {
         super(index, value);
     }
 
     @Override
-    protected IntegerConstant withIndex(int index) {
+    protected IntegerConstant withIndex(short index) {
         return new IntegerConstant(index, value);
     }
 

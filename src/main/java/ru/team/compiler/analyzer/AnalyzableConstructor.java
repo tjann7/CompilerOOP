@@ -1,13 +1,15 @@
 package ru.team.compiler.analyzer;
 
 import org.jetbrains.annotations.NotNull;
+import ru.team.compiler.tree.node.clas.ConstructorNode;
 import ru.team.compiler.tree.node.clas.ParametersNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record AnalyzableConstructor(@NotNull ParametersNode parameters, @NotNull AnalyzableClass declaredClass) {
+public record AnalyzableConstructor(@NotNull ConstructorNode constructorNode, @NotNull ParametersNode parameters,
+                                    @NotNull AnalyzableClass declaredClass) {
 
     @NotNull
     public Key key() {

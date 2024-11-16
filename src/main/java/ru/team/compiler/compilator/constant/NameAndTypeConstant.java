@@ -8,12 +8,12 @@ import java.io.IOException;
 
 public final class NameAndTypeConstant extends Constant<Pair<Utf8Constant, Utf8Constant>> {
 
-    public NameAndTypeConstant(int index, @NotNull Utf8Constant name, @NotNull Utf8Constant descriptor) {
+    public NameAndTypeConstant(short index, @NotNull Utf8Constant name, @NotNull Utf8Constant descriptor) {
         super(index, Pair.of(name, descriptor));
     }
 
     @Override
-    protected NameAndTypeConstant withIndex(int index) {
+    protected NameAndTypeConstant withIndex(short index) {
         return new NameAndTypeConstant(index, value.getLeft(), value.getRight());
     }
 

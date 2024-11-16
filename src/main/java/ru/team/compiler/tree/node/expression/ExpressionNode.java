@@ -11,12 +11,20 @@ import ru.team.compiler.analyzer.AnalyzableField;
 import ru.team.compiler.analyzer.AnalyzableMethod;
 import ru.team.compiler.analyzer.AnalyzableVariable;
 import ru.team.compiler.analyzer.AnalyzeContext;
+import ru.team.compiler.compilator.CompilationContext;
+import ru.team.compiler.compilator.CompilationUtils;
+import ru.team.compiler.compilator.attribute.CodeAttribute;
+import ru.team.compiler.compilator.constant.ClassConstant;
+import ru.team.compiler.compilator.constant.ConstantPool;
+import ru.team.compiler.compilator.constant.FieldRefConstant;
+import ru.team.compiler.compilator.constant.MethodRefConstant;
 import ru.team.compiler.exception.AnalyzerException;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNode;
 import ru.team.compiler.tree.node.TreeNodeParser;
+import ru.team.compiler.tree.node.clas.ClassNode;
 import ru.team.compiler.tree.node.clas.ParametersNode;
 import ru.team.compiler.tree.node.primary.BooleanLiteralNode;
 import ru.team.compiler.tree.node.primary.IntegerLiteralNode;
@@ -25,7 +33,10 @@ import ru.team.compiler.tree.node.primary.RealLiteralNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
 import ru.team.compiler.tree.node.primary.ThisNode;
 import ru.team.compiler.tree.node.statement.MethodCallNode;
+import ru.team.compiler.util.Opcodes;
 
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -109,10 +120,6 @@ public final class ExpressionNode extends TreeNode {
         }
 
         return null;
-    }
-
-    public record IdArg(@NotNull IdentifierNode name, @Nullable ArgumentsNode arguments) {
-
     }
 
     @Override
@@ -323,5 +330,201 @@ public final class ExpressionNode extends TreeNode {
         }
 
         return finalEntity;
+    }
+
+    @NotNull
+    public ReferenceNode compile(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
+                                 @NotNull ConstantPool constantPool, @NotNull CodeAttribute.VariablePool variablePool,
+                                 @NotNull DataOutput dataOutput, boolean allowVoid) throws IOException {
+        ReferenceNode currentType;
+
+        int shift = 0;
+
+        if (primary instanceof IntegerLiteralNode node) {
+            // new (Integer)
+            ClassConstant oClass = CompilationUtils.oClass(constantPool, "Integer");
+            dataOutput.writeByte(Opcodes.NEW);
+            dataOutput.writeShort(oClass.index());
+
+            // dup
+            dataOutput.writeByte(Opcodes.DUP);
+
+            // iconst #X (value)
+            byte[] iconst = Opcodes.iconst(constantPool, node.value());
+            dataOutput.write(iconst);
+
+            // invokespecial #X (Integer.<init>(int))
+            MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool,
+                    "Integer", "<init>", "(I)V");
+            dataOutput.writeByte(Opcodes.INVOKESPECIAL);
+            dataOutput.writeShort(oMethod.index());
+
+            currentType = new ReferenceNode("Integer");
+        } else if (primary instanceof RealLiteralNode node) {
+            // new (Real)
+            ClassConstant oClass = CompilationUtils.oClass(constantPool, "Real");
+            dataOutput.writeByte(Opcodes.NEW);
+            dataOutput.writeShort(oClass.index());
+
+            // dup
+            dataOutput.writeByte(Opcodes.DUP);
+
+            // fconst #X (value)
+            dataOutput.write(Opcodes.fconst(constantPool, node.value()));
+
+            // invokespecial #X (Real.<init>(float))
+            MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool,
+                    "Real", "<init>", "(F)V");
+            dataOutput.writeByte(Opcodes.INVOKESPECIAL);
+            dataOutput.writeShort(oMethod.index());
+
+            currentType = new ReferenceNode("Real");
+        } else if (primary instanceof BooleanLiteralNode node) {
+            // new (Boolean)
+            ClassConstant oClass = CompilationUtils.oClass(constantPool, "Boolean");
+            dataOutput.writeByte(Opcodes.NEW);
+            dataOutput.writeShort(oClass.index());
+
+            // dup
+            dataOutput.writeByte(Opcodes.DUP);
+
+            // iconst #X (value)
+            dataOutput.writeByte(node.value() ? Opcodes.ICONST_1 : Opcodes.ICONST_0);
+
+            // invokespecial #X (Boolean.<init>(boolean))
+            MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool,
+                    "Boolean", "<init>", "(Z)V");
+            dataOutput.writeByte(Opcodes.INVOKESPECIAL);
+            dataOutput.writeShort(oMethod.index());
+
+            currentType = new ReferenceNode("Boolean");
+        } else if (primary instanceof ReferenceNode referenceNode) {
+            AnalyzableClass analyzableClass = context.analyzeContext().classes().get(referenceNode);
+            if (analyzableClass != null) {
+                if (idArgs.isEmpty()) {
+                    throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
+                }
+
+                IdArg idArg = idArgs.get(0);
+                if (!idArg.name.value().equals("<init>") || idArg.arguments == null) {
+                    throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
+                }
+
+                AnalyzableConstructor constructor = findMatchingExecutable(
+                        context.analyzeContext(),
+                        analyzableClass,
+                        idArg.arguments,
+                        currentClass1 -> new ArrayList<>(currentClass1.constructors().values()),
+                        AnalyzableConstructor::parameters);
+                if (constructor == null) {
+                    throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
+                }
+
+                // new (#X)
+                ClassConstant oClass = CompilationUtils.oClass(constantPool, analyzableClass.name().value());
+                dataOutput.writeByte(Opcodes.NEW);
+                dataOutput.writeShort(oClass.index());
+
+                // dup
+                dataOutput.writeByte(Opcodes.DUP);
+
+                // compile arguments
+                for (ExpressionNode expressionNode : idArg.arguments.expressions()) {
+                    expressionNode.compile(context, currentClass, constantPool, variablePool, dataOutput, false);
+                }
+
+                // invokespecial (#X.<init>(X))
+                MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool, oClass.value().value(),
+                        constructor.constructorNode());
+                dataOutput.writeByte(Opcodes.INVOKESPECIAL);
+                dataOutput.writeShort(oMethod.index());
+
+                shift = 1;
+
+                currentType = analyzableClass.name().asReference();
+            } else {
+                if (!idArgs.isEmpty() && idArgs.get(0).name.value().equals("<init>")) {
+                    throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
+                }
+
+                // aload #X
+                int index = variablePool.getIndex(referenceNode.value());
+                dataOutput.write(Opcodes.aload(constantPool, index));
+
+                AnalyzableVariable variable = context.analyzeContext().variables().get(referenceNode);
+                if (variable != null) {
+                    currentType = variable.type();
+                } else {
+                    throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
+                }
+            }
+        } else if (primary instanceof ThisNode) {
+            // aload_0
+            dataOutput.writeByte(Opcodes.ALOAD_0);
+
+            currentType = currentClass.name().asReference();
+        } else {
+            throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
+        }
+
+        // handle call chain
+        for (int i = shift; i < idArgs.size(); i++) {
+            AnalyzableClass analyzableClass = context.analyzeContext().classes().get(currentType);
+
+            IdArg idArg = idArgs.get(i);
+
+            if (idArg.arguments == null) {
+                AnalyzableField field = analyzableClass.getField(
+                        context.analyzeContext(),
+                        new AnalyzableField.Key(idArg.name),
+                        "Expression");
+
+                // getfield (#X.X)
+                FieldRefConstant oField = CompilationUtils.oField(constantPool, currentType.value(),
+                        field.fieldNode());
+
+                dataOutput.writeByte(Opcodes.GETFIELD);
+                dataOutput.writeShort(oField.index());
+
+                currentType = field.type();
+            } else {
+                AnalyzableMethod method = findMatchingExecutable(
+                        context.analyzeContext(),
+                        analyzableClass,
+                        idArg.arguments,
+                        currentClass1 -> currentClass1.methods().values()
+                                .stream()
+                                .filter(m -> m.name().equals(idArg.name))
+                                .collect(Collectors.toList()),
+                        AnalyzableMethod::parameters);
+
+                if (method == null || (!allowVoid && method.returnType() == null)) {
+                    throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
+                }
+
+                // compile arguments
+                for (ExpressionNode expressionNode : idArg.arguments.expressions()) {
+                    expressionNode.compile(context, currentClass, constantPool, variablePool, dataOutput, false);
+                }
+
+                // invokespecial (#X.x(X))
+                MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool, currentType.value(),
+                        method.methodNode());
+
+                dataOutput.writeByte(Opcodes.INVOKESPECIAL);
+                dataOutput.writeShort(oMethod.index());
+
+                currentType = method.returnType();
+                if (currentType == null) {
+                    currentType = new ReferenceNode("<void>");
+                }
+            }
+        }
+
+        return currentType;
+    }
+
+    public record IdArg(@NotNull IdentifierNode name, @Nullable ArgumentsNode arguments) {
+
     }
 }

@@ -15,43 +15,49 @@ import java.util.Map;
 public final class ConstantPool {
 
     private final List<Constant<?>> constants = new ArrayList<>();
-    private final Map<Constant<?>, Integer> objectToIndex = new HashMap<>();
+    private final Map<Constant<?>, Short> constantToIndex = new HashMap<>();
 
     @NotNull
     public ClassConstant getClass(@NotNull Utf8Constant constant) {
-        return getConstant(new ClassConstant(-1, constant));
+        return getConstant(new ClassConstant((short) -1, constant));
     }
 
     @NotNull
     public FieldRefConstant getFieldRef(@NotNull ClassConstant classConstant,
                                         @NotNull NameAndTypeConstant nameAndTypeConstant) {
-        return getConstant(new FieldRefConstant(-1, classConstant, nameAndTypeConstant));
+        return getConstant(new FieldRefConstant((short) -1, classConstant, nameAndTypeConstant));
+    }
+
+    @NotNull
+    public MethodRefConstant getMethodRef(@NotNull ClassConstant classConstant,
+                                          @NotNull NameAndTypeConstant nameAndTypeConstant) {
+        return getConstant(new MethodRefConstant((short) -1, classConstant, nameAndTypeConstant));
     }
 
     @NotNull
     public IntegerConstant getInt(int i) {
-        return getConstant(new IntegerConstant(-1, i));
+        return getConstant(new IntegerConstant((short) -1, i));
     }
 
     @NotNull
     public FloatConstant getFloat(float f) {
-        return getConstant(new FloatConstant(-1, f));
+        return getConstant(new FloatConstant((short) -1, f));
     }
 
     @NotNull
     public Utf8Constant getUtf(@NotNull String string) {
-        return getConstant(new Utf8Constant(-1, string));
+        return getConstant(new Utf8Constant((short) -1, string));
     }
 
     @NotNull
     public NameAndTypeConstant getNameAndType(@NotNull Utf8Constant name, @NotNull Utf8Constant descriptor) {
-        return getConstant(new NameAndTypeConstant(-1, name, descriptor));
+        return getConstant(new NameAndTypeConstant((short) -1, name, descriptor));
     }
 
     @NotNull
-    private <T, C extends Constant<?>> C getConstant(@NotNull C nullConstant) {
-        int i = objectToIndex.computeIfAbsent(nullConstant, k -> {
-            int index = constants.size() + 1;
+    private <C extends Constant<?>> C getConstant(@NotNull C nullConstant) {
+        short i = constantToIndex.computeIfAbsent(nullConstant, k -> {
+            short index = (short) (constants.size() + 1);
             constants.add(nullConstant.withIndex(index));
             return index;
         });
@@ -61,7 +67,7 @@ public final class ConstantPool {
 
     @NotNull
     @UnmodifiableView
-    public List<Constant<?>> getConstants() {
+    public List<Constant<?>> constants() {
         return Collections.unmodifiableList(constants);
     }
 

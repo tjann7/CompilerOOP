@@ -27,12 +27,12 @@ public final class RealLiteralNode extends PrimaryNode {
             String value = token.value();
 
             try {
-                return new RealLiteralNode(Double.parseDouble(value));
+                return new RealLiteralNode(Float.parseFloat(value));
             } catch (NumberFormatException e) {
-                throw new NodeFormatException("double", value, token);
+                throw new NodeFormatException("float", value, token);
             }
         }
     };
 
-    private final double value;
+    private final float value;
 }

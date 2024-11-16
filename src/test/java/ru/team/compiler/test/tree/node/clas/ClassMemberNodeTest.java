@@ -120,6 +120,7 @@ public class ClassMemberNodeTest {
         TokenIterator iterator = new TokenIterator(tokens);
         ClassMemberNode node = ClassMemberNode.PARSER.parse(iterator);
         assertEquals(new ConstructorNode(
+                        false,
                         new ParametersNode(List.of(
                                 new ParametersNode.Par(
                                         new IdentifierNode("a"), new ReferenceNode("Integer")))),

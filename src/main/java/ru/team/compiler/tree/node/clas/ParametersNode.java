@@ -88,13 +88,7 @@ public final class ParametersNode extends TreeNode {
             variables.put(name, new AnalyzableVariable(par.name, par.type));
         }
 
-        return new AnalyzeContext(
-                context.classes(),
-                variables,
-                context.currentPath(),
-                context.currentClass(),
-                context.currentMethod()
-        );
+        return context.withVariables(variables);
     }
 
     public record Par(@NotNull IdentifierNode name, @NotNull ReferenceNode type) {

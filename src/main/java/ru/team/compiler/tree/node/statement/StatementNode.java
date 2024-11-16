@@ -1,13 +1,19 @@
 package ru.team.compiler.tree.node.statement;
 
 import org.jetbrains.annotations.NotNull;
+import ru.team.compiler.compilator.CompilationContext;
+import ru.team.compiler.compilator.attribute.CodeAttribute;
+import ru.team.compiler.compilator.constant.ConstantPool;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.exception.NodeFormatException;
 import ru.team.compiler.token.Token;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.tree.node.TreeNode;
 import ru.team.compiler.tree.node.TreeNodeParser;
+import ru.team.compiler.tree.node.clas.ClassNode;
 
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.List;
 
 public abstract sealed class StatementNode extends TreeNode permits AssignmentNode, WhileLoopNode, IfNode, ReturnNode,
@@ -47,4 +53,9 @@ public abstract sealed class StatementNode extends TreeNode permits AssignmentNo
     public List<StatementNode> optimize() {
         return List.of(this);
     }
+
+    public abstract void compile(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
+                                 @NotNull ConstantPool constantPool, @NotNull CodeAttribute.VariablePool variablePool,
+                                 @NotNull DataOutput dataOutput) throws IOException;
+
 }

@@ -83,6 +83,17 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
         );
     }
 
+    @NotNull
+    public AnalyzeContext withVariables(@NotNull Map<ReferenceNode, AnalyzableVariable> variables) {
+        return new AnalyzeContext(
+                classes,
+                variables,
+                currentPath,
+                currentClass,
+                currentMethod
+        );
+    }
+
     public boolean isAssignableFrom(@NotNull ReferenceNode requiredClassName, @NotNull ReferenceNode className) {
         if (!hasClass(requiredClassName)) {
             throw new AnalyzerException("Class '%s' cannot be found at '%s'"

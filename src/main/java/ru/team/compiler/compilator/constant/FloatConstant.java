@@ -7,12 +7,12 @@ import java.io.IOException;
 
 public final class FloatConstant extends Constant<Float> {
 
-    public FloatConstant(int index, float value) {
+    public FloatConstant(short index, float value) {
         super(index, value);
     }
 
     @Override
-    protected Constant<Float> withIndex(int index) {
+    protected Constant<Float> withIndex(short index) {
         return new FloatConstant(index, value);
     }
 

@@ -46,7 +46,21 @@ public class Tokenizer {
     private int pos;
 
     public Tokenizer(@NotNull String string) {
-        this.string = string;
+        this.string = removeComments(string);
+    }
+
+    @NotNull
+    private String removeComments(@NotNull String string) {
+        String[] split = string.replace("\r\n", "\n").split("\n");
+
+        for (int i = 0; i < split.length; i++) {
+            int index = split[i].indexOf("//");
+            if (index > -1) {
+                split[i] = split[i].substring(0, index);
+            }
+        }
+
+        return String.join("\n", split);
     }
 
     public boolean hasNext() {
@@ -135,9 +149,7 @@ public class Tokenizer {
             line++;
             column = 0;
             columnShift = 0;
-        } else if (chr == '\t') {
-            column += 4;
-        } else if (Character.isWhitespace(chr)) {
+        } else if (Character.isWhitespace(chr) || chr == '\t') {
             column++;
         }
     }
@@ -173,6 +185,7 @@ public class Tokenizer {
                         return ":=";
                     } else {
                         pos--;
+                        columnShift--;
                     }
                 }
             }

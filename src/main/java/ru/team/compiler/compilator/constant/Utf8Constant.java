@@ -9,12 +9,12 @@ import java.nio.charset.StandardCharsets;
 
 public final class Utf8Constant extends Constant<String> {
 
-    public Utf8Constant(int index, @NotNull String value) {
+    public Utf8Constant(short index, @NotNull String value) {
         super(index, value);
     }
 
     @Override
-    protected Utf8Constant withIndex(int index) {
+    protected Utf8Constant withIndex(short index) {
         return new Utf8Constant(index, value);
     }
 
@@ -29,6 +29,7 @@ public final class Utf8Constant extends Constant<String> {
                     .formatted(value.length(), value));
         }
 
+        dataOutput.writeShort(bytes.length);
         dataOutput.write(bytes);
     }
 }

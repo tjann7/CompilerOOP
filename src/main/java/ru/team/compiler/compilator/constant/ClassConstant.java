@@ -7,12 +7,12 @@ import java.io.IOException;
 
 public final class ClassConstant extends Constant<Utf8Constant> {
 
-    public ClassConstant(int index, @NotNull Utf8Constant value) {
+    public ClassConstant(short index, @NotNull Utf8Constant value) {
         super(index, value);
     }
 
     @Override
-    protected ClassConstant withIndex(int index) {
+    protected ClassConstant withIndex(short index) {
         return new ClassConstant(index, value);
     }
 

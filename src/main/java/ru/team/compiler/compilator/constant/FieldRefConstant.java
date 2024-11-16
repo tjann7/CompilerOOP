@@ -8,13 +8,13 @@ import java.io.IOException;
 
 public final class FieldRefConstant extends Constant<Pair<ClassConstant, NameAndTypeConstant>> {
 
-    public FieldRefConstant(int index, @NotNull ClassConstant classConstant,
+    public FieldRefConstant(short index, @NotNull ClassConstant classConstant,
                             @NotNull NameAndTypeConstant nameAndTypeConstant) {
         super(index, Pair.of(classConstant, nameAndTypeConstant));
     }
 
     @Override
-    protected FieldRefConstant withIndex(int index) {
+    protected FieldRefConstant withIndex(short index) {
         return new FieldRefConstant(index, value.getLeft(), value.getRight());
     }
 

@@ -8,13 +8,13 @@ import java.io.IOException;
 
 public final class MethodRefConstant extends Constant<Pair<ClassConstant, NameAndTypeConstant>> {
 
-    public MethodRefConstant(int index, @NotNull ClassConstant classConstant,
+    public MethodRefConstant(short index, @NotNull ClassConstant classConstant,
                             @NotNull NameAndTypeConstant nameAndTypeConstant) {
         super(index, Pair.of(classConstant, nameAndTypeConstant));
     }
 
     @Override
-    protected MethodRefConstant withIndex(int index) {
+    protected MethodRefConstant withIndex(short index) {
         return new MethodRefConstant(index, value.getLeft(), value.getRight());
     }
 

@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import ru.team.compiler.compilator.attribute.CodeAttribute;
 import ru.team.compiler.compilator.constant.ConstantPool;
 import ru.team.compiler.compilator.constant.Utf8Constant;
+import ru.team.compiler.tree.node.clas.ClassNode;
 import ru.team.compiler.tree.node.clas.MethodNode;
 
 import java.io.DataOutput;
@@ -14,7 +15,8 @@ public record CompilationMethod(@NotNull Utf8Constant name, @NotNull Utf8Constan
                                 @NotNull CodeAttribute codeAttribute) {
 
     @NotNull
-    public static CompilationMethod fromNode(@NotNull ConstantPool constantPool, @NotNull MethodNode methodNode) {
+    public static CompilationMethod fromNode(@NotNull ConstantPool constantPool, @NotNull ClassNode classNode,
+                                             @NotNull MethodNode methodNode) {
         if (methodNode.isNative()) {
             throw new IllegalArgumentException("Cannot convert native MethodNode to CompilationMethod");
         }
@@ -22,7 +24,7 @@ public record CompilationMethod(@NotNull Utf8Constant name, @NotNull Utf8Constan
         Utf8Constant name = constantPool.getUtf(methodNode.name().value());
         Utf8Constant descriptor = constantPool.getUtf(CompilationUtils.descriptor(methodNode));
 
-        CodeAttribute codeAttribute = new CodeAttribute(constantPool, methodNode);
+        CodeAttribute codeAttribute = new CodeAttribute(constantPool, classNode, methodNode);
 
         return new CompilationMethod(name, descriptor, codeAttribute);
     }
@@ -31,13 +33,14 @@ public record CompilationMethod(@NotNull Utf8Constant name, @NotNull Utf8Constan
         return Modifier.PUBLIC;
     }
 
-    public void compile(@NotNull ConstantPool constantPool, @NotNull DataOutput dataOutput) throws IOException {
+    public void compile(@NotNull CompilationContext context, @NotNull ConstantPool constantPool,
+                        @NotNull DataOutput dataOutput) throws IOException {
         dataOutput.writeShort(accessFlags());
         dataOutput.writeShort(name.index());
         dataOutput.writeShort(descriptor.index());
 
         // Attributes
         dataOutput.writeShort(1);
-        codeAttribute.compile(constantPool, dataOutput);
+        codeAttribute.compile(context, constantPool, dataOutput);
     }
 }

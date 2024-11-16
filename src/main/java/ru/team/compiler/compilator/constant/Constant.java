@@ -10,15 +10,15 @@ public abstract sealed class Constant<T> permits ClassConstant, FieldRefConstant
                                                  IntegerConstant, FloatConstant,
                                                  NameAndTypeConstant, Utf8Constant {
 
-    protected final int index;
+    protected final short index;
     protected final T value;
 
-    public Constant(int index, @NotNull T value) {
+    public Constant(short index, @NotNull T value) {
         this.index = index;
         this.value = value;
     }
 
-    public final int index() {
+    public final short index() {
         return index;
     }
 
@@ -27,7 +27,7 @@ public abstract sealed class Constant<T> permits ClassConstant, FieldRefConstant
         return value;
     }
 
-    protected abstract Constant<T> withIndex(int index);
+    protected abstract Constant<T> withIndex(short index);
 
     public abstract void compile(@NotNull ConstantPool constantPool, @NotNull DataOutput dataOutput) throws IOException;
 
@@ -46,5 +46,13 @@ public abstract sealed class Constant<T> permits ClassConstant, FieldRefConstant
     @Override
     public int hashCode() {
         return Objects.hash(index, value);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{" +
+                "index=" + index +
+                ", value=" + value +
+                '}';
     }
 }

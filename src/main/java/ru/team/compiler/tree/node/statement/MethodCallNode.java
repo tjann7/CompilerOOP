@@ -4,13 +4,21 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import ru.team.compiler.analyzer.AnalyzeContext;
+import ru.team.compiler.compilator.CompilationContext;
+import ru.team.compiler.compilator.attribute.CodeAttribute;
+import ru.team.compiler.compilator.constant.ConstantPool;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.exception.NodeFormatException;
 import ru.team.compiler.token.Token;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.tree.node.TreeNodeParser;
+import ru.team.compiler.tree.node.clas.ClassNode;
 import ru.team.compiler.tree.node.expression.ExpressionNode;
+import ru.team.compiler.tree.node.primary.ReferenceNode;
+import ru.team.compiler.util.Opcodes;
 
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = false)
@@ -50,5 +58,17 @@ public final class MethodCallNode extends StatementNode {
     public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
         expression.type(context, true);
         return context;
+    }
+
+    @Override
+    public void compile(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
+                        @NotNull ConstantPool constantPool, @NotNull CodeAttribute.VariablePool variablePool,
+                        @NotNull DataOutput dataOutput) throws IOException {
+        ReferenceNode type = expression.compile(context, currentClass, constantPool, variablePool, dataOutput, true);
+
+        if (!type.value().equals("<void>")) {
+            // pop
+            dataOutput.writeByte(Opcodes.POP);
+        }
     }
 }

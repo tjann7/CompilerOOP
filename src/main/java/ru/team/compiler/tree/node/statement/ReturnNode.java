@@ -6,13 +6,20 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.team.compiler.analyzer.AnalyzableMethod;
 import ru.team.compiler.analyzer.AnalyzeContext;
+import ru.team.compiler.compilator.CompilationContext;
+import ru.team.compiler.compilator.attribute.CodeAttribute;
+import ru.team.compiler.compilator.constant.ConstantPool;
 import ru.team.compiler.exception.AnalyzerException;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNodeParser;
+import ru.team.compiler.tree.node.clas.ClassNode;
 import ru.team.compiler.tree.node.expression.ExpressionNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
+
+import java.io.DataOutput;
+import java.io.IOException;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
@@ -68,5 +75,13 @@ public final class ReturnNode extends StatementNode {
     @NotNull
     private String prettyType(@Nullable ReferenceNode type) {
         return type != null ? type.value() : "Void";
+    }
+
+    @Override
+    public void compile(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
+                        @NotNull ConstantPool constantPool, @NotNull CodeAttribute.VariablePool variablePool,
+                        @NotNull DataOutput dataOutput) throws IOException {
+        // TODO: implement
+        throw new UnsupportedOperationException();
     }
 }

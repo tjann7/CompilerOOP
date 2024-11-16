@@ -5,7 +5,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.team.compiler.tree.node.clas.ParametersNode;
 import ru.team.compiler.tree.node.expression.ExpressionNode;
+import ru.team.compiler.util.Color;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -35,14 +40,14 @@ public final class NodeToStringHelper {
     public static String toString(@NotNull TreeNode treeNode, boolean colored, int depth) {
         StringBuilder stringBuilder = new StringBuilder();
 
-        String color = colored ? color(depth).code : "";
+        String color = colored ? color(depth).code() : "";
         stringBuilder.append(color).append(treeNode.getClass().getSimpleName()).append("(");
 
         AtomicBoolean hasNode = new AtomicBoolean(false);
         boolean hasFields = false;
         Field[] fields = treeNode.getClass().getDeclaredFields();
         for (Field field : fields) {
-            if (Modifier.isStatic(field.getModifiers())) {
+            if (Modifier.isStatic(field.getModifiers()) || field.getAnnotation(Ignore.class) != null) {
                 continue;
             }
 
@@ -82,7 +87,7 @@ public final class NodeToStringHelper {
                     ? toString(idArg.arguments(), colored, depth + 1).replace("\n", "\n    ")
                     : toString(null, colored, depth + 1, hasNode);
 
-            String color = colored ? color(depth).code : "";
+            String color = colored ? color(depth).code() : "";
 
             return (color + "IdArg(\n    name=" + name
                     + color + ",\n    arguments=" + arguments
@@ -93,7 +98,7 @@ public final class NodeToStringHelper {
             String name = toString(par.name(), colored, depth + 1).replace("\n", "\n    ");
             String type = toString(par.type(), colored, depth + 1).replace("\n", "\n    ");
 
-            String color = colored ? color(depth).code : "";
+            String color = colored ? color(depth).code() : "";
 
             return (color + "Par(\n    name=" + name
                     + color + ",\n    type=" + type
@@ -101,7 +106,7 @@ public final class NodeToStringHelper {
         } else if (object instanceof List<?> list) {
             AtomicBoolean line = new AtomicBoolean(false);
 
-            String color = colored ? color(depth).code : "";
+            String color = colored ? color(depth).code() : "";
 
             String value = list.stream()
                     .map(o -> {
@@ -123,7 +128,7 @@ public final class NodeToStringHelper {
             value = value.substring(0, value.length() - 1) + color + "]";
             return value;
         } else {
-            String color = colored ? color(depth).code : "";
+            String color = colored ? color(depth).code() : "";
             return color + object;
         }
     }
@@ -133,21 +138,10 @@ public final class NodeToStringHelper {
         return AVAILABLE_COLORS.get(Math.abs(depth) % AVAILABLE_COLORS.size());
     }
 
-    private enum Color {
-        BLACK("\u001B[30m"),
-        RED("\u001B[31m"),
-        GREEN("\u001B[32m"),
-        YELLOW("\u001B[33m"),
-        BLUE("\u001B[34m"),
-        PURPLE("\u001B[35m"),
-        CYAN("\u001B[36m"),
-        WHITE("\u001B[37m");
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    public @interface Ignore {
 
-        private final String code;
-
-        Color(@NotNull String code) {
-            this.code = code;
-        }
     }
 
 }

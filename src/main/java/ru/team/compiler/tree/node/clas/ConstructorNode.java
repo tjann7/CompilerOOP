@@ -10,6 +10,8 @@ import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNodeParser;
 import ru.team.compiler.tree.node.statement.BodyNode;
 
+import java.util.List;
+
 @EqualsAndHashCode(callSuper = false)
 @ToString
 public final class ConstructorNode extends ClassMemberNode {
@@ -22,24 +24,37 @@ public final class ConstructorNode extends ClassMemberNode {
         public ConstructorNode parse(@NotNull TokenIterator iterator) throws CompilerException {
             iterator.next(TokenType.THIS_KEYWORD);
 
+            boolean isNative = iterator.consume(TokenType.NATIVE_KEYWORD);
+
             ParametersNode parametersNode = ParametersNode.PARSER.parse(iterator);
 
-            iterator.next(TokenType.IS_KEYWORD);
+            BodyNode bodyNode;
+            if (!isNative) {
+                iterator.next(TokenType.IS_KEYWORD);
 
-            BodyNode bodyNode = BODY_PARSER.parse(iterator);
+                bodyNode = BODY_PARSER.parse(iterator);
 
-            iterator.next(TokenType.END_KEYWORD);
+                iterator.next(TokenType.END_KEYWORD);
+            } else {
+                bodyNode = new BodyNode(List.of());
+            }
 
-            return new ConstructorNode(parametersNode, bodyNode);
+            return new ConstructorNode(isNative, parametersNode, bodyNode);
         }
     };
 
+    private final boolean isNative;
     private final ParametersNode parameters;
     private final BodyNode body;
 
-    public ConstructorNode(@NotNull ParametersNode parameters, @NotNull BodyNode body) {
+    public ConstructorNode(boolean isNative, @NotNull ParametersNode parameters, @NotNull BodyNode body) {
+        this.isNative = isNative;
         this.parameters = parameters;
         this.body = body;
+    }
+
+    public boolean isNative() {
+        return isNative;
     }
 
     @NotNull
@@ -68,6 +83,7 @@ public final class ConstructorNode extends ClassMemberNode {
     @NotNull
     public ConstructorNode optimize() {
         return new ConstructorNode(
+                isNative,
                 parameters,
                 body.optimize()
         );
