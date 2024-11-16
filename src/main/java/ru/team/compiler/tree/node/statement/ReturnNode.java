@@ -17,6 +17,8 @@ import ru.team.compiler.tree.node.TreeNodeParser;
 import ru.team.compiler.tree.node.clas.ClassNode;
 import ru.team.compiler.tree.node.expression.ExpressionNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
+import ru.team.compiler.tree.node.primary.ThisNode;
+import ru.team.compiler.util.Opcodes;
 
 import java.io.DataOutput;
 import java.io.IOException;
@@ -81,7 +83,32 @@ public final class ReturnNode extends StatementNode {
     public void compile(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
                         @NotNull ConstantPool constantPool, @NotNull CodeAttribute.VariablePool variablePool,
                         @NotNull DataOutput dataOutput) throws IOException {
-        // TODO: implement
-        throw new UnsupportedOperationException();
+        if (expression == null) {
+            dataOutput.writeByte(Opcodes.RETURN);
+            return;
+        }
+
+        if (expression.idArgs().isEmpty()) {
+
+            if (expression.primary() instanceof ReferenceNode referenceNode) {
+                int index = variablePool.getIndex(referenceNode);
+
+                // aload (#X)
+                dataOutput.write(Opcodes.aload(constantPool, index));
+                dataOutput.writeByte(Opcodes.ARETURN);
+
+                return;
+            } else if (expression.primary() instanceof ThisNode) {
+                // aload_0
+                dataOutput.write(Opcodes.ALOAD_0);
+                dataOutput.writeByte(Opcodes.ARETURN);
+
+                return;
+            }
+
+        }
+
+        expression.compile(context, currentClass, constantPool, variablePool, dataOutput, false);
+        dataOutput.writeByte(Opcodes.ARETURN);
     }
 }
