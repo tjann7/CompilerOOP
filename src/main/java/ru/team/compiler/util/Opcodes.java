@@ -5,7 +5,6 @@ import ru.team.compiler.compiler.constant.ConstantPool;
 
 public interface Opcodes {
 
-    // TODO: maybe replace type with byte
     int ICONST_M1 = 2;
     int ICONST_0 = 3;
     int ICONST_1 = 4;

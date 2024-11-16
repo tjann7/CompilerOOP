@@ -217,7 +217,6 @@ public final class Analyzer {
                     AnalyzableField field = new AnalyzableField(fieldNode, name, type, analyzableClass);
 
                     if (fields.containsKey(field.key())) {
-                        // TODO: check that there is no such field in parent
                         throw new AnalyzerException("Field '%s.%s' is already defined"
                                 .formatted(classNode.name().value(), name.value()));
                     }
@@ -247,6 +246,25 @@ public final class Analyzer {
                         .formatted(classNode.name().value(), path));
             }
 
+        }
+
+        for (AnalyzableClass analyzableClass : classes.values()) {
+            for (AnalyzableField.Key key : analyzableClass.fields().keySet()) {
+                AnalyzableClass currentClass = analyzableClass;
+
+                while (true) {
+                    currentClass = classes.get(currentClass.parentClass());
+                    if (currentClass == null) {
+                        break;
+                    }
+
+                    if (currentClass.fields().containsKey(key)) {
+                        throw new AnalyzerException("Field '%s.%s' is already defined in super class '%s'"
+                                .formatted(analyzableClass.name().value(), key.name().value(), currentClass.name().value()));
+                    }
+                }
+
+            }
         }
 
         return new AnalyzeContext(

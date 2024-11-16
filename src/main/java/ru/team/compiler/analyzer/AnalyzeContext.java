@@ -8,15 +8,12 @@ import ru.team.compiler.tree.node.clas.ConstructorNode;
 import ru.team.compiler.tree.node.clas.MethodNode;
 import ru.team.compiler.tree.node.clas.ParametersNode;
 import ru.team.compiler.tree.node.expression.ArgumentsNode;
-import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classes,
@@ -195,86 +192,6 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
                 .stream()
                 .map(expressionNode -> expressionNode.type(this, false, checkInitialized))
                 .collect(Collectors.toList());
-    }
-
-    // TODO: move methods to AnalyzableClass
-    @Nullable
-    public AnalyzableConstructor findMatchingConstructor(@NotNull AnalyzableClass analyzableClass,
-                                                         @NotNull ArgumentsNode arguments,
-                                                         boolean checkInitialized) {
-        return findMatchingExecutable(
-                analyzableClass,
-                arguments,
-                currentClass -> new ArrayList<>(currentClass.constructors().values()),
-                AnalyzableConstructor::parameters,
-                false,
-                checkInitialized);
-    }
-
-    @Nullable
-    public AnalyzableMethod findMatchingMethod(@NotNull AnalyzableClass analyzableClass,
-                                               @NotNull IdentifierNode name, @NotNull ArgumentsNode arguments,
-                                               boolean checkInitialized) {
-        return findMatchingExecutable(
-                analyzableClass,
-                arguments,
-                currentClass -> currentClass.methods().values()
-                        .stream()
-                        .filter(m -> m.name().equals(name))
-                        .collect(Collectors.toList()),
-                AnalyzableMethod::parameters,
-                true,
-                checkInitialized);
-    }
-
-    @Nullable
-    private <E> E findMatchingExecutable(@NotNull AnalyzableClass analyzableClass, @NotNull ArgumentsNode arguments,
-                                         @NotNull Function<AnalyzableClass, List<E>> entitiesFromClass,
-                                         @NotNull Function<E, ParametersNode> entityParameters,
-                                         boolean lookupParent, boolean checkInitialized) {
-        List<ReferenceNode> argumentsTypes = argumentTypes(arguments, checkInitialized);
-
-        E finalEntity = null;
-
-        AnalyzableClass currentClass = analyzableClass;
-        while (true) {
-            List<E> entities = entitiesFromClass.apply(currentClass);
-
-            for (E entity : entities) {
-                ParametersNode parameters = entityParameters.apply(entity);
-                int size = arguments.expressions().size();
-                if (size != parameters.pars().size()) {
-                    continue;
-                }
-
-                finalEntity = entity;
-
-                for (int j = 0; j < size; j++) {
-                    ReferenceNode argumentType = argumentsTypes.get(j);
-                    ReferenceNode parameterType = parameters.pars().get(j).type();
-
-                    if (!isAssignableFrom(parameterType, argumentType)) {
-                        finalEntity = null;
-                        break;
-                    }
-                }
-
-                if (finalEntity != null) {
-                    break;
-                }
-            }
-
-            if (!lookupParent || finalEntity != null) {
-                break;
-            }
-
-            currentClass = currentClass.findParentClass(this, "Expression");
-            if (currentClass == null) {
-                break;
-            }
-        }
-
-        return finalEntity;
     }
 
     @NotNull

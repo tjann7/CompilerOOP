@@ -73,7 +73,6 @@ public final class TreeMain {
                         context = null;
 
                         System.out.println("\n---\n[!] Node was not traversed: " + e + "\n---");
-                        e.printStackTrace();
                     }
 
                     TreeNode optimized = null;

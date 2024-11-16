@@ -164,8 +164,8 @@ public final class ExpressionNode extends TreeNode {
                             .formatted(context.currentPath()));
                 }
 
-                AnalyzableConstructor constructor = context.findMatchingConstructor(
-                        analyzableClass, idArg.arguments, checkUninitialized);
+                AnalyzableConstructor constructor = analyzableClass.findMatchingConstructor(
+                        context, idArg.arguments, checkUninitialized);
 
                 if (constructor == null) {
                     List<ReferenceNode> argumentsTypes = context.argumentTypes(idArg.arguments);
@@ -250,8 +250,8 @@ public final class ExpressionNode extends TreeNode {
                             .formatted(context.currentPath()));
                 }
 
-                AnalyzableConstructor constructor = context.findMatchingConstructor(
-                        parentClass, idArg.arguments, checkUninitialized);
+                AnalyzableConstructor constructor = parentClass.findMatchingConstructor(
+                        context, idArg.arguments, checkUninitialized);
                 if (constructor == null) {
                     List<ReferenceNode> argumentsTypes = context.argumentTypes(idArg.arguments);
 
@@ -306,8 +306,8 @@ public final class ExpressionNode extends TreeNode {
 
                 currentType = field.type();
             } else {
-                AnalyzableMethod method = context.findMatchingMethod(
-                        analyzableClass, idArg.name, idArg.arguments, checkUninitialized);
+                AnalyzableMethod method = analyzableClass.findMatchingMethod(
+                        context, idArg.name, idArg.arguments, checkUninitialized);
 
                 if (method == null) {
                     boolean superCall = i == 0 && primary instanceof SuperNode;
@@ -449,8 +449,8 @@ public final class ExpressionNode extends TreeNode {
                     throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
                 }
 
-                AnalyzableConstructor constructor = context.analyzeContext()
-                        .findMatchingConstructor(analyzableClass, idArg.arguments, false);
+                AnalyzableConstructor constructor = analyzableClass.findMatchingConstructor(
+                        context.analyzeContext(), idArg.arguments, false);
 
                 if (constructor == null) {
                     throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
@@ -537,8 +537,8 @@ public final class ExpressionNode extends TreeNode {
                     throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
                 }
 
-                AnalyzableConstructor constructor = context.analyzeContext().findMatchingConstructor(
-                        parentClass, idArg.arguments, false);
+                AnalyzableConstructor constructor = parentClass.findMatchingConstructor(
+                        context.analyzeContext(), idArg.arguments, false);
                 if (constructor == null) {
                     throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
                 }
@@ -601,8 +601,8 @@ public final class ExpressionNode extends TreeNode {
 
                 currentType = field.type();
             } else {
-                AnalyzableMethod method = context.analyzeContext()
-                        .findMatchingMethod(analyzableClass, idArg.name, idArg.arguments, false);
+                AnalyzableMethod method = analyzableClass.findMatchingMethod(
+                        context.analyzeContext(), idArg.name, idArg.arguments, false);
 
                 if (method == null || (!allowVoid && method.returnType() == null)) {
                     throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
@@ -613,7 +613,6 @@ public final class ExpressionNode extends TreeNode {
                     expressionNode.compile(context, currentClass, constantPool, variablePool, currentExecutable, dataOutput, false);
                 }
 
-                // TODO: currentType can have another return type
                 // invokevirtual (#X.x(X)) for generic call / invokespecial (#X.x(X)) for super call
                 MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool, currentType.value(),
                         method.methodNode());
