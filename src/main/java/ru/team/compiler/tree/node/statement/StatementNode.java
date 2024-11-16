@@ -1,9 +1,9 @@
 package ru.team.compiler.tree.node.statement;
 
 import org.jetbrains.annotations.NotNull;
-import ru.team.compiler.compilator.CompilationContext;
-import ru.team.compiler.compilator.attribute.CodeAttribute;
-import ru.team.compiler.compilator.constant.ConstantPool;
+import ru.team.compiler.compiler.CompilationContext;
+import ru.team.compiler.compiler.attribute.CodeAttribute;
+import ru.team.compiler.compiler.constant.ConstantPool;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.exception.NodeFormatException;
 import ru.team.compiler.token.Token;

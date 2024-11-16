@@ -1,4 +1,4 @@
-package ru.team.compiler.compilator.constant;
+package ru.team.compiler.compiler.constant;
 
 import org.jetbrains.annotations.NotNull;
 import ru.team.compiler.util.Pair;
@@ -6,21 +6,21 @@ import ru.team.compiler.util.Pair;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public final class FieldRefConstant extends Constant<Pair<ClassConstant, NameAndTypeConstant>> {
+public final class MethodRefConstant extends Constant<Pair<ClassConstant, NameAndTypeConstant>> {
 
-    public FieldRefConstant(short index, @NotNull ClassConstant classConstant,
+    public MethodRefConstant(short index, @NotNull ClassConstant classConstant,
                             @NotNull NameAndTypeConstant nameAndTypeConstant) {
         super(index, Pair.of(classConstant, nameAndTypeConstant));
     }
 
     @Override
-    protected FieldRefConstant withIndex(short index) {
-        return new FieldRefConstant(index, value.getLeft(), value.getRight());
+    protected MethodRefConstant withIndex(short index) {
+        return new MethodRefConstant(index, value.getLeft(), value.getRight());
     }
 
     @Override
     public void compile(@NotNull ConstantPool constantPool, @NotNull DataOutput dataOutput) throws IOException {
-        dataOutput.writeByte(9);
+        dataOutput.writeByte(10);
 
         ClassConstant classRef = value.getLeft();
         NameAndTypeConstant nameAndType = value.getRight();

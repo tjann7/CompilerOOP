@@ -2,8 +2,8 @@ package ru.team.compiler.tree;
 
 import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.analyzer.Analyzer;
-import ru.team.compiler.compilator.ClassFile;
-import ru.team.compiler.compilator.CompilationContext;
+import ru.team.compiler.compiler.ClassFile;
+import ru.team.compiler.compiler.CompilationContext;
 import ru.team.compiler.token.Token;
 import ru.team.compiler.token.Tokenizer;
 import ru.team.compiler.tree.node.NodeToStringHelper;

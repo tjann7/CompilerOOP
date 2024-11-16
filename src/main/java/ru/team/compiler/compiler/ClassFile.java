@@ -1,10 +1,10 @@
-package ru.team.compiler.compilator;
+package ru.team.compiler.compiler;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.team.compiler.analyzer.AnalyzeContext;
-import ru.team.compiler.compilator.constant.ClassConstant;
-import ru.team.compiler.compilator.constant.ConstantPool;
+import ru.team.compiler.compiler.constant.ClassConstant;
+import ru.team.compiler.compiler.constant.ConstantPool;
 import ru.team.compiler.tree.node.clas.ClassMemberNode;
 import ru.team.compiler.tree.node.clas.ClassNode;
 import ru.team.compiler.tree.node.clas.FieldNode;

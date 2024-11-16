@@ -1,12 +1,12 @@
-package ru.team.compiler.compilator;
+package ru.team.compiler.compiler;
 
 import org.jetbrains.annotations.NotNull;
-import ru.team.compiler.compilator.constant.ClassConstant;
-import ru.team.compiler.compilator.constant.ConstantPool;
-import ru.team.compiler.compilator.constant.FieldRefConstant;
-import ru.team.compiler.compilator.constant.MethodRefConstant;
-import ru.team.compiler.compilator.constant.NameAndTypeConstant;
-import ru.team.compiler.compilator.constant.Utf8Constant;
+import ru.team.compiler.compiler.constant.ClassConstant;
+import ru.team.compiler.compiler.constant.ConstantPool;
+import ru.team.compiler.compiler.constant.FieldRefConstant;
+import ru.team.compiler.compiler.constant.MethodRefConstant;
+import ru.team.compiler.compiler.constant.NameAndTypeConstant;
+import ru.team.compiler.compiler.constant.Utf8Constant;
 import ru.team.compiler.tree.node.clas.ConstructorNode;
 import ru.team.compiler.tree.node.clas.FieldNode;
 import ru.team.compiler.tree.node.clas.MethodNode;

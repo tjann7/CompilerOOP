@@ -1,9 +1,9 @@
-package ru.team.compiler.compilator.attribute;
+package ru.team.compiler.compiler.attribute;
 
 import org.jetbrains.annotations.NotNull;
-import ru.team.compiler.compilator.CompilationContext;
-import ru.team.compiler.compilator.constant.ConstantPool;
-import ru.team.compiler.compilator.constant.Utf8Constant;
+import ru.team.compiler.compiler.CompilationContext;
+import ru.team.compiler.compiler.constant.ConstantPool;
+import ru.team.compiler.compiler.constant.Utf8Constant;
 
 import java.io.DataOutput;
 import java.io.IOException;

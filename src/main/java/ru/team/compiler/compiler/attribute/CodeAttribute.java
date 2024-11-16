@@ -1,9 +1,9 @@
-package ru.team.compiler.compilator.attribute;
+package ru.team.compiler.compiler.attribute;
 
 import org.jetbrains.annotations.NotNull;
 import ru.team.compiler.analyzer.AnalyzableVariable;
-import ru.team.compiler.compilator.CompilationContext;
-import ru.team.compiler.compilator.constant.ConstantPool;
+import ru.team.compiler.compiler.CompilationContext;
+import ru.team.compiler.compiler.constant.ConstantPool;
 import ru.team.compiler.tree.node.clas.ClassNode;
 import ru.team.compiler.tree.node.clas.ConstructorNode;
 import ru.team.compiler.tree.node.clas.MethodNode;

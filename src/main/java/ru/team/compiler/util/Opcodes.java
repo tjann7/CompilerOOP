@@ -1,7 +1,7 @@
 package ru.team.compiler.util;
 
 import org.jetbrains.annotations.NotNull;
-import ru.team.compiler.compilator.constant.ConstantPool;
+import ru.team.compiler.compiler.constant.ConstantPool;
 
 public interface Opcodes {
 

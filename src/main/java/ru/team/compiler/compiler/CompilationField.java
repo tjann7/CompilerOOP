@@ -1,8 +1,8 @@
-package ru.team.compiler.compilator;
+package ru.team.compiler.compiler;
 
 import org.jetbrains.annotations.NotNull;
-import ru.team.compiler.compilator.constant.ConstantPool;
-import ru.team.compiler.compilator.constant.Utf8Constant;
+import ru.team.compiler.compiler.constant.ConstantPool;
+import ru.team.compiler.compiler.constant.Utf8Constant;
 import ru.team.compiler.tree.node.clas.ClassNode;
 import ru.team.compiler.tree.node.clas.FieldNode;
 

@@ -1,4 +1,4 @@
-package ru.team.compiler.compilator.constant;
+package ru.team.compiler.compiler.constant;
 
 import org.jetbrains.annotations.NotNull;
 import ru.team.compiler.util.Pair;
