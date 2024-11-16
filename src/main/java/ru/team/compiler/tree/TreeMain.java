@@ -24,7 +24,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class TreeMain {
+public final class TreeMain {
+
+    private TreeMain() {
+
+    }
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -96,46 +100,60 @@ public class TreeMain {
                         System.out.println("\nOptimization is not supported\n");
                     }
 
-                    if (node instanceof ClassNode classNode && context != null) {
-                        String name = classNode.name().value();
-
-                        Path path = Path.of(name + ".class");
-                        try (OutputStream outputStream = Files.newOutputStream(path);
-                             DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
-
-                            // TODO: compile optimized class node
-                            ClassFile classFile = ClassFile.fromNode(context, classNode);
-
-                            classFile.compile(new CompilationContext(context), dataOutputStream);
-
-                            System.out.println("---\n\nCompiled to: " + name + ".class");
-                        } catch (Exception e) {
-                            System.out.println("---\n\n[!] Class " + name + " was not compiled: " + e.getMessage());
-                            e.printStackTrace();
+                    if (context != null) {
+                        ProgramNode compileNode;
+                        if (optimized instanceof ProgramNode programNode) {
+                            compileNode = programNode.optimize();
+                        } else if (optimized instanceof ClassNode classNode) {
+                            compileNode = new ProgramNode(List.of(classNode));
+                        } else {
+                            compileNode = null;
                         }
 
-                        try (InputStream inputStream = Files.newInputStream(path)) {
-                            System.out.println();
-                            int i = 0;
+                        if (compileNode != null) {
+                            for (ClassNode classNode : compileNode.classes()) {
+                                String name = classNode.name().value();
 
-                            while (inputStream.available() > 0) {
-                                if (i > 0 && i % 10 == 0) {
-                                    System.out.println();
+                                Path path = Path.of("out/" + name + ".class");
+                                Files.createDirectories(path.getParent());
+
+                                try (OutputStream outputStream = Files.newOutputStream(path);
+                                     DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
+
+                                    ClassFile classFile = ClassFile.fromNode(context, classNode);
+
+                                    classFile.compile(new CompilationContext(context), dataOutputStream);
+
+                                    System.out.println("---\n\nCompiled to: " + name + ".class");
+
+                                    try (InputStream inputStream = Files.newInputStream(path)) {
+                                        System.out.println();
+                                        int i = 0;
+
+                                        while (inputStream.available() > 0) {
+                                            if (i > 0 && i % 10 == 0) {
+                                                System.out.println();
+                                            }
+
+                                            int b = inputStream.read();
+                                            String hex = Integer.toString(b, 16);
+
+                                            String space = " ".repeat(1 + 2 - hex.length());
+                                            String s = hex + space + b;
+
+                                            System.out.print(Color.BLACK.code() + hex.toUpperCase() + space
+                                                    + Color.PURPLE.code() + b + " ".repeat(9 - s.length()));
+
+                                            i++;
+                                        }
+
+                                        System.out.println("\n");
+                                    }
+                                } catch (Exception e) {
+                                    System.out.println("---\n\n[!] Class " + name + " was not compiled: " + e.getMessage());
+                                    e.printStackTrace();
                                 }
-
-                                int b = inputStream.read();
-                                String hex = Integer.toString(b, 16);
-
-                                String space = " ".repeat(1 + 2 - hex.length());
-                                String s = hex + space + b;
-
-                                System.out.print(Color.BLACK.code() + hex.toUpperCase() + space + Color.PURPLE.code() + b
-                                        + " ".repeat(9 - s.length()));
-
-                                i++;
                             }
-
-                            System.out.println("\n");
                         }
                     }
                 } catch (Exception e) {

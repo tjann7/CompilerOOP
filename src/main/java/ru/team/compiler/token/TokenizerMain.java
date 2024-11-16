@@ -2,7 +2,11 @@ package ru.team.compiler.token;
 
 import java.util.Scanner;
 
-public class TokenizerMain {
+public final class TokenizerMain {
+
+    private TokenizerMain() {
+
+    }
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
