@@ -18,7 +18,7 @@ public class RealLiteralNodeTest {
         for (String value : List.of("1.5", "123.2", "5892.9")) {
             TokenIterator iterator = new TokenIterator(List.of(new Token(TokenType.REAL_LITERAL, value)));
             RealLiteralNode node = RealLiteralNode.PARSER.parse(iterator);
-            assertEquals(new RealLiteralNode(Double.parseDouble(value)), node);
+            assertEquals(new RealLiteralNode(Float.parseFloat(value)), node);
             assertFalse(iterator.hasNext());
         }
     }

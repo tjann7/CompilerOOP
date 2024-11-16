@@ -16,16 +16,32 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    include
+}
+
 dependencies {
     implementation 'org.jetbrains:annotations:22.0.0'
 
     compileOnly 'org.projectlombok:lombok:1.18.34'
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
 
+    include project(':olang-std')
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+    configurations.implementation.extendsFrom(configurations.include)
 }
 
 test {
     useJUnitPlatform()
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+
+    from {
+        configurations.include.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }

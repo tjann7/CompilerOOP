@@ -66,7 +66,7 @@ public class IfNodeTest {
         assertEquals(new IfNode(
                         new ExpressionNode(new BooleanLiteralNode(true), List.of()),
                         new BodyNode(List.of(
-                                new ReturnNode(new ExpressionNode(new RealLiteralNode(1.1), List.of())))),
+                                new ReturnNode(new ExpressionNode(new RealLiteralNode(1.1f), List.of())))),
                         new BodyNode(List.of())),
                 node);
         assertFalse(iterator.hasNext());
@@ -91,9 +91,9 @@ public class IfNodeTest {
         assertEquals(new IfNode(
                         new ExpressionNode(new BooleanLiteralNode(true), List.of()),
                         new BodyNode(List.of(
-                                new ReturnNode(new ExpressionNode(new RealLiteralNode(1.1), List.of())))),
+                                new ReturnNode(new ExpressionNode(new RealLiteralNode(1.1f), List.of())))),
                         new BodyNode(List.of(
-                                new ReturnNode(new ExpressionNode(new RealLiteralNode(2.2), List.of()))))),
+                                new ReturnNode(new ExpressionNode(new RealLiteralNode(2.2f), List.of()))))),
                 node);
         assertFalse(iterator.hasNext());
     }

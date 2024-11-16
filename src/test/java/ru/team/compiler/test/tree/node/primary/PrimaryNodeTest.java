@@ -34,7 +34,7 @@ public class PrimaryNodeTest {
             TokenIterator iterator = new TokenIterator(List.of(new Token(TokenType.REAL_LITERAL, value)));
             PrimaryNode node = PrimaryNode.PARSER.parse(iterator);
             assertFalse(iterator.hasNext());
-            assertEquals(new RealLiteralNode(Double.parseDouble(value)), node);
+            assertEquals(new RealLiteralNode(Float.parseFloat(value)), node);
         }
     }
 

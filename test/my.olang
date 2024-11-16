@@ -1,0 +1,56 @@
+include lib;
+
+class IncludeCheck is
+  this(lib: AwesomeLib) is
+    Console().println(lib.magicConstant)
+  end
+end
+
+class A is
+  var a: Integer
+
+  this() is
+
+  end
+
+  method foo() is
+    this.a := 1;
+
+    var b: List;
+    b := List();
+    b.add(this);
+
+    var c: Set;
+    c := Set(b);
+
+    var console: Console;
+    console := Console();
+
+    if c.size().greaterOrEqual(1) then
+      console.print(true);
+    else
+      console.print(false);
+    end
+  end
+end
+
+class B is
+  this() is
+
+  end
+
+  method foo(): Integer is
+  	var c: Console;
+	c := Console();
+
+    var a: Integer;
+	a := 100;
+
+	while a.greater(0) loop
+	  c.print(1);
+	  a := a.subtract(1);
+	end
+
+	return a;
+  end
+end

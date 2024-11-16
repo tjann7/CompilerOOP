@@ -16,7 +16,7 @@ import ru.team.compiler.tree.node.primary.ReferenceNode;
 
 public final class CompilationUtils {
 
-    public static final String OLANG_PACKAGE = "olang";
+    public static final String OLANG_PACKAGE = "src/main/java/olang";
 
     private CompilationUtils() {
 

@@ -1,5 +1,6 @@
 package ru.team.compiler.compiler.main;
 
+import olang.Any;
 import org.jetbrains.annotations.NotNull;
 import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.analyzer.Analyzer;
@@ -12,12 +13,15 @@ import ru.team.compiler.tree.node.clas.ClassNode;
 import ru.team.compiler.tree.node.clas.IncludeNode;
 import ru.team.compiler.tree.node.clas.ProgramNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
+import ru.team.compiler.util.GeneralUtils;
 
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -37,13 +41,16 @@ public final class ClassCompilation {
     }
 
     public static void compile(@NotNull Path path, @NotNull Set<String> options) {
+        boolean jar = options.contains("-jar");
+        boolean bundle = options.contains("-bundle");
+
         if (Files.isDirectory(path)) {
             System.err.println("[ERROR] " + path + " | Must be file");
             return;
         }
 
         Path outputPath = path.resolveSibling("out");
-        if (!options.contains("-jar")) {
+        if (!jar) {
             try {
                 Files.createDirectories(outputPath);
             } catch (IOException e) {
@@ -80,7 +87,7 @@ public final class ClassCompilation {
             return;
         }
 
-        if (options.contains("-bundle")) {
+        if (bundle) {
             programNode = flatProgramNode(path.getParent(), programNode);
         }
 
@@ -103,10 +110,10 @@ public final class ClassCompilation {
         // ---
 
         FileSystem fileSystem = null;
-        Function<ClassNode, Path> classOutputPathFunction;
+        Function<String, Path> classOutputPathFunction;
         try {
-            if (options.contains("-jar")) {
-                Path jarOutputPath = Path.of(path + (options.contains("-bundle") ? ".bundle" : "")+ ".jar");
+            if (jar) {
+                Path jarOutputPath = Path.of(path + (bundle ? ".bundle" : "")+ ".jar");
                 try {
                     Files.deleteIfExists(jarOutputPath);
                 } catch (IOException e) {
@@ -122,24 +129,42 @@ public final class ClassCompilation {
 
                     fileSystem = FileSystems.newFileSystem(uri, env);
 
-                    Files.createDirectories(fileSystem.getPath("/olang"));
+                    Files.createDirectories(fileSystem.getPath("/olang/"));
 
                     FileSystem finalFileSystem = fileSystem;
-                    classOutputPathFunction = classNode -> {
-                        return finalFileSystem.getPath("/olang/").resolve(classNode.name().value() + ".class");
+                    classOutputPathFunction = name -> {
+                        return finalFileSystem.getPath("/olang/").resolve(name);
                     };
                 } catch (URISyntaxException | IOException e) {
                     System.err.println("[ERROR] " + jarOutputPath + " | Failed on jar create: " + e);
                     return;
                 }
             } else {
-                classOutputPathFunction = classNode -> {
-                    return outputPath.resolve(classNode.name().value() + ".class");
-                };
+                classOutputPathFunction = outputPath::resolve;
+            }
+
+            if (bundle) {
+                File file = GeneralUtils.getDeclaringJarFile(Any.class);
+
+                try {
+                    URI uri = new URI("jar:" + file.toURI() + "!/");
+                    try (FileSystem stdFileSystem = FileSystems.newFileSystem(uri, Map.of());
+                         DirectoryStream<Path> stream = Files.newDirectoryStream(
+                                 stdFileSystem.getPath("/olang/"), "*.class")) {
+
+                        for (Path stdPath : stream) {
+                            Path classOutputPath = classOutputPathFunction.apply(stdPath.getFileName().toString());
+
+                            Files.copy(stdPath, classOutputPath);
+                        }
+                    }
+                } catch (URISyntaxException | IOException e) {
+                    System.err.println("[ERROR] " + path + " | Failed on std bundling: " + e);
+                }
             }
 
             for (ClassNode classNode : programNode.classes()) {
-                Path classOutputPath = classOutputPathFunction.apply(classNode);
+                Path classOutputPath = classOutputPathFunction.apply(classNode.name().value() + ".class");
 
                 try (OutputStream outputStream = Files.newOutputStream(classOutputPath);
                      DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
