@@ -1,9 +1,0 @@
-class LibConstant is
-  var value: Any
-end
-
-class AwesomeLib is
-  var magicConstant: LibConstant
-
-  this native ()
-end
