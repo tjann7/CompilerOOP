@@ -49,5 +49,12 @@ public record AnalyzableConstructor(@NotNull ConstructorNode constructorNode, @N
 
     public record Key(@NotNull List<ReferenceNode> parameterTypes) {
 
+        @NotNull
+        public String parameterTypesAsString() {
+            return parameterTypes.stream()
+                    .map(ReferenceNode::value)
+                    .collect(Collectors.joining(","));
+        }
+
     }
 }

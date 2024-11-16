@@ -28,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public final class Analyzer {
 
@@ -207,9 +206,7 @@ public final class Analyzer {
                                 .formatted(
                                         classNode.name().value(),
                                         name.value(),
-                                        key.parameterTypes().stream()
-                                                .map(ReferenceNode::value)
-                                                .collect(Collectors.joining(","))));
+                                        key.parameterTypesAsString()));
                     }
 
                     methods.put(key, method);
@@ -235,9 +232,7 @@ public final class Analyzer {
                         throw new AnalyzerException("Constructor '%s(%s)' is already defined"
                                 .formatted(
                                         classNode.name().value(),
-                                        key.parameterTypes().stream()
-                                                .map(ReferenceNode::value)
-                                                .collect(Collectors.joining(","))));
+                                        key.parameterTypesAsString()));
                     }
                     constructors.put(key, constructor);
                 }
@@ -253,7 +248,7 @@ public final class Analyzer {
 
         }
 
-        return new AnalyzeContext(classes, Map.of(), "", null, null);
+        return new AnalyzeContext(classes, Map.of(), Set.of(), Set.of(), "", null, null);
     }
 
 }

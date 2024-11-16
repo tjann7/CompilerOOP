@@ -25,6 +25,8 @@ import ru.team.compiler.util.Opcodes;
 
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
@@ -100,7 +102,15 @@ public final class AssignmentNode extends StatementNode {
                     .formatted(context.currentPath(), leftType.value(), rightType.value()));
         }
 
-        return context;
+        if (local) {
+            Set<ReferenceNode> initializedVariables = new HashSet<>(context.initializedVariables());
+            initializedVariables.add(referenceNode);
+            return context.withInitializedVariables(initializedVariables);
+        } else {
+            Set<ReferenceNode> initializedFields = new HashSet<>(context.initializedFields());
+            initializedFields.add(referenceNode);
+            return context.withInitializedFields(initializedFields);
+        }
     }
 
     @Override

@@ -77,8 +77,7 @@ public final class WhileLoopNode extends StatementNode {
                     .formatted(context.currentPath(), type.value()));
         }
 
-        body.analyze(context);
-        return context;
+        return body.analyze(context);
     }
 
     @Override

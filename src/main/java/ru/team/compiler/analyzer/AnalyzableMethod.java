@@ -57,5 +57,12 @@ public record AnalyzableMethod(@NotNull MethodNode methodNode, @NotNull Identifi
 
     public record Key(@NotNull IdentifierNode name, @NotNull List<ReferenceNode> parameterTypes) {
 
+        @NotNull
+        public String parameterTypesAsString() {
+            return parameterTypes.stream()
+                    .map(ReferenceNode::value)
+                    .collect(Collectors.joining(","));
+        }
+
     }
 }

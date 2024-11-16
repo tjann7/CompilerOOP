@@ -12,9 +12,12 @@ import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNode;
 import ru.team.compiler.tree.node.TreeNodeParser;
+import ru.team.compiler.tree.node.primary.ReferenceNode;
+import ru.team.compiler.util.Sets;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -46,7 +49,15 @@ public final class BodyNode extends TreeNode {
             context = statementNode.analyze(context);
         }
 
-        return initialContext;
+        Set<ReferenceNode> initializedVariables = new HashSet<>(initialContext.initializedVariables());
+        context.initializedVariables().stream()
+                .filter(initialContext::hasVariable)
+                .forEach(initializedVariables::add);
+
+        Set<ReferenceNode> initializedFields = Sets.union(initialContext.initializedFields(), context.initializedFields());
+
+        return initialContext.withInitializedVariables(initializedVariables)
+                .withInitializedFields(initializedFields);
     }
 
     public boolean alwaysReturn() {

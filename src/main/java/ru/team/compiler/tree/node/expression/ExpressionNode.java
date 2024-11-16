@@ -183,12 +183,17 @@ public final class ExpressionNode extends TreeNode {
                 }
 
                 AnalyzableVariable variable = context.variables().get(referenceNode);
-                if (variable != null) {
-                    currentType = variable.type();
-                } else {
+                if (variable == null) {
                     throw new AnalyzerException("Expression at '%s' is invalid: reference to unknown variable '%s'"
                             .formatted(context.currentPath(), referenceNode.value()));
                 }
+
+                if (!context.initializedVariables().contains(variable.name().asReference())) {
+                    throw new AnalyzerException("Expression at '%s' is invalid: reference to uninitialized variable '%s'"
+                            .formatted(context.currentPath(), referenceNode.value()));
+                }
+
+                currentType = variable.type();
             }
         } else if (primary instanceof BooleanLiteralNode) {
             currentType = new ReferenceNode("Boolean");
@@ -198,6 +203,16 @@ public final class ExpressionNode extends TreeNode {
             currentType = new ReferenceNode("Real");
         } else if (primary instanceof ThisNode) {
             AnalyzableClass currentClass = context.currentClass("Expression");
+
+            if (context.currentMethod() == null && !idArgs.isEmpty()) {
+                IdArg idArg = idArgs.get(0);
+
+                // TODO: maybe also forbid method calls if all fields are not initialized
+                if (idArg.arguments == null && !context.initializedFields().contains(idArg.name.asReference())) {
+                    throw new AnalyzerException("Expression at '%s' is invalid: reference to uninitialized field '%s'"
+                            .formatted(context.currentPath(), idArg.name.value()));
+                }
+            }
 
             currentType = currentClass.name().asReference();
         } else {

@@ -22,6 +22,7 @@ import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.BooleanLiteralNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
 import ru.team.compiler.util.Opcodes;
+import ru.team.compiler.util.Sets;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutput;
@@ -29,6 +30,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
@@ -101,10 +103,24 @@ public final class IfNode extends StatementNode {
                     .formatted(context.currentPath(), type.value()));
         }
 
-        thenBody.analyze(context);
+        AnalyzeContext thenContext = thenBody.analyze(context);
         if (elseBody != null) {
-            elseBody.analyze(context);
+            AnalyzeContext elseContext = elseBody.analyze(context);
+
+            Set<ReferenceNode> initializedFields = Sets.intersection(
+                    thenContext.initializedFields(), elseContext.initializedFields()
+            );
+            initializedFields = Sets.union(context.initializedFields(), initializedFields);
+
+            Set<ReferenceNode> initializedVariables = Sets.intersection(
+                    thenContext.initializedVariables(), elseContext.initializedVariables()
+            );
+            initializedVariables = Sets.union(context.initializedVariables(), initializedVariables);
+
+            return context.withInitializedVariables(initializedVariables)
+                    .withInitializedFields(initializedFields);
         }
+
         return context;
     }
 
