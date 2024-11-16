@@ -24,8 +24,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class Analyzer {
@@ -94,11 +96,24 @@ public final class Analyzer {
 
     @NotNull
     public static AnalyzeContext createContext(@NotNull Path path, @NotNull ProgramNode programNode) {
+        Set<Path> visited = new HashSet<>();
+        visited.add(path.toAbsolutePath());
+        return createContext(path, programNode, visited);
+    }
+
+    @NotNull
+    public static AnalyzeContext createContext(@NotNull Path path, @NotNull ProgramNode programNode,
+                                               @NotNull Set<Path> visited) {
         Map<ReferenceNode, AnalyzableClass> includedClasses = new HashMap<>(stdClasses());
 
         for (IncludeNode includeNode : programNode.includeNodes()) {
             ReferenceNode referenceNode = includeNode.fileName();
             Path includePath = path.resolve(referenceNode.value() + ".olang");
+            if (!visited.add(includePath)) {
+                throw new AnalyzerException("Program includes '%s' that includes it too at '%s'"
+                        .formatted(referenceNode.value(), includePath));
+            }
+
             if (!Files.exists(includePath)) {
                 throw new AnalyzerException("Program includes '%s' that cannot be found at '%s'"
                         .formatted(referenceNode.value(), includePath));
@@ -136,8 +151,6 @@ public final class Analyzer {
                 throw new AnalyzerException("Program includes '%s' that failed on syntax analysis from '%s': %s"
                         .formatted(referenceNode.value(), includePath, e));
             }
-
-            // TODO: check for cyclic dependency of includes
 
             AnalyzeContext context = createContext(path, includedProgramNode);
             context.classes().forEach((k, v) -> {
