@@ -135,11 +135,7 @@ public class TreeMain {
                                 i++;
                             }
 
-                            System.out.println();
-
-                            if (i > 0 && i % 10 != 0) {
-                                System.out.println();
-                            }
+                            System.out.println("\n");
                         }
                     }
                 } catch (Exception e) {

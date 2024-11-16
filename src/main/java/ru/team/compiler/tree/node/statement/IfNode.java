@@ -199,8 +199,10 @@ public final class IfNode extends StatementNode {
 
             // Secondly, define GOTO with known size of else body
             // goto (#X)
+            offset = 3 + compiledElseBody.length;
+
             dataOutput.writeByte(Opcodes.GOTO);
-            dataOutput.writeShort(3 + compiledElseBody.length);
+            dataOutput.writeShort(offset);
 
             dataOutput.write(compiledElseBody);
         }

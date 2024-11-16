@@ -18,6 +18,9 @@ public interface Opcodes {
     int FCONST_1 = 12;
     int FCONST_2 = 13;
 
+    int BIPUSH = 16;
+    int SIPUSH = 17;
+
     int LDC = 18;
 
     int ALOAD = 25;
@@ -60,7 +63,15 @@ public interface Opcodes {
             case 3 -> Bytes.of((byte) ICONST_3);
             case 4 -> Bytes.of((byte) ICONST_4);
             case 5 -> Bytes.of((byte) ICONST_5);
-            default -> Bytes.byteAndShort((byte) LDC, constantPool.getInt(value).index());
+            default -> {
+                if (Byte.MIN_VALUE <= value && value <= Byte.MAX_VALUE) {
+                    yield Bytes.of((byte) BIPUSH, (byte) value);
+                } else if (Short.MIN_VALUE <= value && value <= Short.MAX_VALUE) {
+                    yield Bytes.byteAndShort((byte) SIPUSH, (short) value);
+                } else {
+                    yield Bytes.byteAndShort((byte) LDC, constantPool.getInt(value).index());
+                }
+            }
         };
     }
 

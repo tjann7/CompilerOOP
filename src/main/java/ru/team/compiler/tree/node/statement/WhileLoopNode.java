@@ -5,8 +5,10 @@ import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.compilator.CompilationContext;
+import ru.team.compiler.compilator.CompilationUtils;
 import ru.team.compiler.compilator.attribute.CodeAttribute;
 import ru.team.compiler.compilator.constant.ConstantPool;
+import ru.team.compiler.compilator.constant.MethodRefConstant;
 import ru.team.compiler.exception.AnalyzerException;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.token.TokenIterator;
@@ -16,8 +18,11 @@ import ru.team.compiler.tree.node.clas.ClassNode;
 import ru.team.compiler.tree.node.expression.ExpressionNode;
 import ru.team.compiler.tree.node.primary.BooleanLiteralNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
+import ru.team.compiler.util.Opcodes;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -97,7 +102,48 @@ public final class WhileLoopNode extends StatementNode {
     public void compile(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
                         @NotNull ConstantPool constantPool, @NotNull CodeAttribute.VariablePool variablePool,
                         @NotNull DataOutput dataOutput) throws IOException {
-        // TODO: implement
-        throw new UnsupportedOperationException();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
+        DataOutputStream byteDataOutput = new DataOutputStream(byteArrayOutputStream);
+
+        // Firstly, compile condition and body because we need to know offset for IFEQ and GOTO opcodes
+        condition.compile(context, currentClass, constantPool, variablePool, byteDataOutput, false);
+
+        // olang.Boolean -> boolean primitive
+        // invokevirtual (#Boolean.java$value()Z)
+        byteDataOutput.writeByte(Opcodes.INVOKEVIRTUAL);
+        MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool,
+                "Boolean", "java$value", "()Z");
+        byteDataOutput.writeShort(oMethod.index());
+
+        byte[] compiledBody = compileBodyNode(context, currentClass, constantPool, variablePool);
+
+        // ifeq (#X)
+        int offset = 3 + compiledBody.length + 3;
+
+        byteDataOutput.writeByte(Opcodes.IFEQ);
+        byteDataOutput.writeShort(offset);
+
+        byteDataOutput.write(compiledBody);
+
+        // Secondly, define GOTO with known offset
+        offset = -byteDataOutput.size();
+
+        byteDataOutput.writeByte(Opcodes.GOTO);
+        byteDataOutput.writeShort(offset);
+
+        dataOutput.write(byteArrayOutputStream.toByteArray());
+    }
+
+    private byte @NotNull [] compileBodyNode(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
+                                             @NotNull ConstantPool constantPool,
+                                             @NotNull CodeAttribute.VariablePool variablePool) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
+        DataOutputStream byteDataOutput = new DataOutputStream(byteArrayOutputStream);
+
+        for (StatementNode statementNode : body.statements()) {
+            statementNode.compile(context, currentClass, constantPool, variablePool, byteDataOutput);
+        }
+
+        return byteArrayOutputStream.toByteArray();
     }
 }
