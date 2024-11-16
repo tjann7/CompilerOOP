@@ -25,7 +25,8 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
                              @NotNull Set<ReferenceNode> initializedFields,
                              @NotNull String currentPath,
                              @Nullable AnalyzableClass currentClass,
-                             @Nullable AnalyzableMethod currentMethod) {
+                             @Nullable AnalyzableMethod currentMethod,
+                             @Nullable AnalyzableConstructor currentConstructor) {
 
     public AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classes,
                           @NotNull Map<ReferenceNode, AnalyzableVariable> variables,
@@ -33,7 +34,12 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
                           @NotNull Set<ReferenceNode> initializedFields,
                           @NotNull String currentPath,
                           @Nullable AnalyzableClass currentClass,
-                          @Nullable AnalyzableMethod currentMethod) {
+                          @Nullable AnalyzableMethod currentMethod,
+                          @Nullable AnalyzableConstructor currentConstructor) {
+        if (currentMethod != null && currentConstructor != null) {
+            throw new IllegalArgumentException("Cannot create context with both not-null current method and constructor");
+        }
+
         this.classes = Collections.unmodifiableMap(classes);
         this.variables = Collections.unmodifiableMap(variables);
         this.initializedVariables = Collections.unmodifiableSet(initializedVariables);
@@ -41,6 +47,7 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
         this.currentPath = currentPath;
         this.currentClass = currentClass;
         this.currentMethod = currentMethod;
+        this.currentConstructor = currentConstructor;
     }
 
     public boolean hasClass(@NotNull ReferenceNode className) {
@@ -55,7 +62,8 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
     public AnalyzeContext concatPath(@NotNull String path) {
         return new AnalyzeContext(
                 classes, variables, initializedVariables, initializedFields,
-                currentPath.isEmpty() ? path : currentPath + "." + path, currentClass, currentMethod
+                currentPath.isEmpty() ? path : currentPath + "." + path, currentClass,
+                currentMethod, currentConstructor
         );
     }
 
@@ -69,15 +77,14 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
         String path = classNode.name().value();
         return new AnalyzeContext(
                 classes, variables, initializedVariables, initializedFields,
-                currentPath.isEmpty() ? path : currentPath + "." + path, analyzableClass, currentMethod
+                currentPath.isEmpty() ? path : currentPath + "." + path, analyzableClass,
+                currentMethod, currentConstructor
         );
     }
 
     @NotNull
     public AnalyzeContext withMethod(@NotNull MethodNode method) {
-        AnalyzableMethod.Key key = new AnalyzableMethod.Key(method.name(), method.parameters().pars().stream()
-                .map(ParametersNode.Par::type)
-                .collect(Collectors.toList()));
+        AnalyzableMethod.Key key = AnalyzableMethod.Key.fromNode(method);
 
         if (currentClass == null) {
             throw new AnalyzerException("'%s' is invalid: outside of the class context"
@@ -93,7 +100,8 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
         String path = analyzableMethod.name().value() + "(" + key.parameterTypesAsString() + ")";
         return new AnalyzeContext(
                 classes, variables, initializedVariables, initializedFields,
-                currentPath.isEmpty() ? path : currentPath + "." + path, currentClass, analyzableMethod
+                currentPath.isEmpty() ? path : currentPath + "." + path, currentClass,
+                analyzableMethod, null
         );
     }
 
@@ -118,7 +126,7 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
         return new AnalyzeContext(
                 classes, variables, initializedVariables, initializedFields,
                 currentPath.isEmpty() ? path : currentPath + "." + path, currentClass,
-                null
+                null, new AnalyzableConstructor(constructorNode, constructorNode.parameters(), currentClass)
         );
     }
 
@@ -131,7 +139,8 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
                 initializedFields,
                 currentPath,
                 currentClass,
-                currentMethod
+                currentMethod,
+                currentConstructor
         );
     }
 
@@ -144,7 +153,8 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
                 initializedFields,
                 currentPath,
                 currentClass,
-                currentMethod
+                currentMethod,
+                currentConstructor
         );
     }
 
@@ -157,7 +167,8 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
                 initializedFields,
                 currentPath,
                 currentClass,
-                currentMethod
+                currentMethod,
+                currentConstructor
         );
     }
 
@@ -175,25 +186,35 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
 
     @NotNull
     public List<ReferenceNode> argumentTypes(@NotNull ArgumentsNode arguments) {
+        return argumentTypes(arguments, true);
+    }
+
+    @NotNull
+    public List<ReferenceNode> argumentTypes(@NotNull ArgumentsNode arguments, boolean checkInitialized) {
         return arguments.expressions()
                 .stream()
-                .map(expressionNode -> expressionNode.type(this, false))
+                .map(expressionNode -> expressionNode.type(this, false, checkInitialized))
                 .collect(Collectors.toList());
     }
 
+    // TODO: move methods to AnalyzableClass
     @Nullable
     public AnalyzableConstructor findMatchingConstructor(@NotNull AnalyzableClass analyzableClass,
-                                                         @NotNull ArgumentsNode arguments) {
+                                                         @NotNull ArgumentsNode arguments,
+                                                         boolean checkInitialized) {
         return findMatchingExecutable(
                 analyzableClass,
                 arguments,
                 currentClass -> new ArrayList<>(currentClass.constructors().values()),
-                AnalyzableConstructor::parameters);
+                AnalyzableConstructor::parameters,
+                false,
+                checkInitialized);
     }
 
     @Nullable
     public AnalyzableMethod findMatchingMethod(@NotNull AnalyzableClass analyzableClass,
-                                               @NotNull IdentifierNode name, @NotNull ArgumentsNode arguments) {
+                                               @NotNull IdentifierNode name, @NotNull ArgumentsNode arguments,
+                                               boolean checkInitialized) {
         return findMatchingExecutable(
                 analyzableClass,
                 arguments,
@@ -201,14 +222,17 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
                         .stream()
                         .filter(m -> m.name().equals(name))
                         .collect(Collectors.toList()),
-                AnalyzableMethod::parameters);
+                AnalyzableMethod::parameters,
+                true,
+                checkInitialized);
     }
 
     @Nullable
     private <E> E findMatchingExecutable(@NotNull AnalyzableClass analyzableClass, @NotNull ArgumentsNode arguments,
                                          @NotNull Function<AnalyzableClass, List<E>> entitiesFromClass,
-                                         @NotNull Function<E, ParametersNode> entityParameters) {
-        List<ReferenceNode> argumentsTypes = argumentTypes(arguments);
+                                         @NotNull Function<E, ParametersNode> entityParameters,
+                                         boolean lookupParent, boolean checkInitialized) {
+        List<ReferenceNode> argumentsTypes = argumentTypes(arguments, checkInitialized);
 
         E finalEntity = null;
 
@@ -240,7 +264,7 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
                 }
             }
 
-            if (finalEntity != null) {
+            if (!lookupParent || finalEntity != null) {
                 break;
             }
 

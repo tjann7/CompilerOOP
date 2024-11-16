@@ -8,7 +8,8 @@ import ru.team.compiler.tree.node.TreeNode;
 import ru.team.compiler.tree.node.TreeNodeParser;
 
 public abstract sealed class PrimaryNode extends TreeNode permits IntegerLiteralNode, RealLiteralNode,
-                                                                  BooleanLiteralNode, ThisNode, ReferenceNode {
+                                                                  BooleanLiteralNode, ThisNode, SuperNode,
+                                                                  ReferenceNode {
 
     public static final TreeNodeParser<PrimaryNode> PARSER = new TreeNodeParser<>() {
         @Override
@@ -21,8 +22,9 @@ public abstract sealed class PrimaryNode extends TreeNode permits IntegerLiteral
                 case REAL_LITERAL -> RealLiteralNode.PARSER.parse(iterator);
                 case BOOLEAN_LITERAL -> BooleanLiteralNode.PARSER.parse(iterator);
                 case THIS_KEYWORD -> ThisNode.PARSER.parse(iterator);
+                case SUPER_KEYWORD -> SuperNode.PARSER.parse(iterator);
                 case IDENTIFIER -> ReferenceNode.PARSER.parse(iterator);
-                default -> throw new NodeFormatException("integer/real/boolean/this/reference identifier", token);
+                default -> throw new NodeFormatException("integer/real/boolean/this/super/reference identifier", token);
             };
         }
     };

@@ -10,6 +10,7 @@ import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.compiler.CompilationContext;
 import ru.team.compiler.compiler.CompilationUtils;
 import ru.team.compiler.compiler.attribute.CodeAttribute;
+import ru.team.compiler.compiler.attribute.CompilationExecutable;
 import ru.team.compiler.compiler.constant.ConstantPool;
 import ru.team.compiler.compiler.constant.FieldRefConstant;
 import ru.team.compiler.exception.AnalyzerException;
@@ -116,7 +117,7 @@ public final class AssignmentNode extends StatementNode {
     @Override
     public void compile(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
                         @NotNull ConstantPool constantPool, @NotNull CodeAttribute.VariablePool variablePool,
-                        @NotNull DataOutput dataOutput) throws IOException {
+                        @NotNull CompilationExecutable currentExecutable, @NotNull DataOutput dataOutput) throws IOException {
         if (!local) {
             // aload_0 (this)
             dataOutput.writeByte(Opcodes.ALOAD_0);
@@ -124,7 +125,7 @@ public final class AssignmentNode extends StatementNode {
             context.incrementStackSize(1); // aload
         }
 
-        valueExpression.compile(context, currentClass, constantPool, variablePool, dataOutput, false);
+        valueExpression.compile(context, currentClass, constantPool, variablePool, currentExecutable, dataOutput, false);
 
         if (!local) {
             // putfield (#X)

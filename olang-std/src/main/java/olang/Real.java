@@ -4,6 +4,10 @@ public class Real extends Any {
 
     private final float value;
 
+    public Real() {
+        this(0);
+    }
+
     public Real(float value) {
         this.value = value;
     }

@@ -18,8 +18,10 @@ import ru.team.compiler.tree.node.primary.ReferenceNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
@@ -72,6 +74,7 @@ public final class ParametersNode extends TreeNode {
     @NotNull
     public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
         Map<ReferenceNode, AnalyzableVariable> variables = new HashMap<>(context.variables());
+        Set<ReferenceNode> initializedVariables = new HashSet<>(context.initializedVariables());
 
         for (Par par : pars) {
             if (!context.hasClass(par.type)) {
@@ -86,9 +89,11 @@ public final class ParametersNode extends TreeNode {
             }
 
             variables.put(name, new AnalyzableVariable(par.name, par.type));
+            initializedVariables.add(name);
         }
 
-        return context.withVariables(variables);
+        return context.withVariables(variables)
+                .withInitializedVariables(initializedVariables);
     }
 
     public record Par(@NotNull IdentifierNode name, @NotNull ReferenceNode type) {

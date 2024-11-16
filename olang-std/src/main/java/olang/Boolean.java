@@ -4,6 +4,10 @@ public class Boolean extends Any {
 
     private final boolean value;
 
+    public Boolean() {
+        this(false);
+    }
+
     public Boolean(boolean value) {
         this.value = value;
     }

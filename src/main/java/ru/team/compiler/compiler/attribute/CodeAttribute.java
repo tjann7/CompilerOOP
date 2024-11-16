@@ -29,26 +29,32 @@ import java.util.stream.Collectors;
 public final class CodeAttribute extends Attribute {
 
     private final ClassNode classNode;
+    private final IdentifierNode name;
     private final ParametersNode parametersNode;
     private final BodyNode bodyNode;
+    private final CompilationExecutable compilationExecutable;
 
     public CodeAttribute(@NotNull ConstantPool constantPool, @NotNull ClassNode classNode,
-                         @NotNull ParametersNode parametersNode, @NotNull BodyNode bodyNode) {
+                         @NotNull IdentifierNode name, @NotNull ParametersNode parametersNode,
+                         @NotNull BodyNode bodyNode) {
         super(constantPool.getUtf("Code"));
 
         this.classNode = classNode;
+        this.name = name;
         this.parametersNode = parametersNode;
         this.bodyNode = bodyNode;
+        this.compilationExecutable = new CompilationExecutable(classNode, name, parametersNode);
     }
 
     public CodeAttribute(@NotNull ConstantPool constantPool, @NotNull ClassNode classNode,
                          @NotNull MethodNode methodNode) {
-        this(constantPool, classNode, methodNode.parameters(), methodNode.body());
+        this(constantPool, classNode, methodNode.name(), methodNode.parameters(), methodNode.body());
     }
 
     public CodeAttribute(@NotNull ConstantPool constantPool, @NotNull ClassNode classNode,
                          @NotNull ConstructorNode constructorNode) {
-        this(constantPool, classNode, constructorNode.parameters(), constructorNode.body());
+        this(constantPool, classNode, new IdentifierNode("<init>"), constructorNode.parameters(),
+                constructorNode.body());
     }
 
     @Override
@@ -113,7 +119,7 @@ public final class CodeAttribute extends Attribute {
 
         StatementNode lastStatement = null;
         for (StatementNode statementNode : bodyNode.statements()) {
-            statementNode.compile(context, classNode, constantPool, variablePool, byteDataOutput);
+            statementNode.compile(context, classNode, constantPool, variablePool, compilationExecutable, byteDataOutput);
             lastStatement = statementNode;
         }
 

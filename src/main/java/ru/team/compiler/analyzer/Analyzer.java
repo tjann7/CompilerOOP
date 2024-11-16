@@ -217,6 +217,7 @@ public final class Analyzer {
                     AnalyzableField field = new AnalyzableField(fieldNode, name, type, analyzableClass);
 
                     if (fields.containsKey(field.key())) {
+                        // TODO: check that there is no such field in parent
                         throw new AnalyzerException("Field '%s.%s' is already defined"
                                 .formatted(classNode.name().value(), name.value()));
                     }
@@ -248,7 +249,9 @@ public final class Analyzer {
 
         }
 
-        return new AnalyzeContext(classes, Map.of(), Set.of(), Set.of(), "", null, null);
+        return new AnalyzeContext(
+                classes, Map.of(), Set.of(), Set.of(), "", null, null, null
+        );
     }
 
 }

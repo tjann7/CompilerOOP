@@ -1,4 +1,5 @@
 class Any is
+    this native ()
     method native hash(): Integer
     method native equals(other: Any): Boolean
 end
@@ -6,6 +7,7 @@ end
 // Math
 
 class Boolean extends Any is
+    this native ()
     method native not(): Boolean
     method native and(other: Boolean): Boolean
     method native or(other: Boolean): Boolean
@@ -13,6 +15,7 @@ class Boolean extends Any is
 end
 
 class Integer extends Any is
+    this native ()
     method native add(other: Integer): Integer
     method native subtract(other: Integer): Integer
     method native divide(other: Integer): Integer
@@ -28,6 +31,7 @@ class Integer extends Any is
 end
 
 class Real extends Any is
+    this native ()
     method native add(other: Real): Real
     method native subtract(other: Real): Real
     method native divide(other: Real): Real

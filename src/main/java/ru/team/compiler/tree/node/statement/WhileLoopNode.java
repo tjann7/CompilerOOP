@@ -7,6 +7,7 @@ import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.compiler.CompilationContext;
 import ru.team.compiler.compiler.CompilationUtils;
 import ru.team.compiler.compiler.attribute.CodeAttribute;
+import ru.team.compiler.compiler.attribute.CompilationExecutable;
 import ru.team.compiler.compiler.constant.ConstantPool;
 import ru.team.compiler.compiler.constant.MethodRefConstant;
 import ru.team.compiler.exception.AnalyzerException;
@@ -100,12 +101,12 @@ public final class WhileLoopNode extends StatementNode {
     @Override
     public void compile(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
                         @NotNull ConstantPool constantPool, @NotNull CodeAttribute.VariablePool variablePool,
-                        @NotNull DataOutput dataOutput) throws IOException {
+                        @NotNull CompilationExecutable currentExecutable, @NotNull DataOutput dataOutput) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
         DataOutputStream byteDataOutput = new DataOutputStream(byteArrayOutputStream);
 
         // Firstly, compile condition and body because we need to know offset for IFEQ and GOTO opcodes
-        condition.compile(context, currentClass, constantPool, variablePool, byteDataOutput, false);
+        condition.compile(context, currentClass, constantPool, variablePool, currentExecutable, byteDataOutput, false);
 
         // olang.Boolean -> boolean primitive
         // invokevirtual (#Boolean.java$value()Z)
@@ -114,7 +115,7 @@ public final class WhileLoopNode extends StatementNode {
                 "Boolean", "java$value", "()Z");
         byteDataOutput.writeShort(oMethod.index());
 
-        byte[] compiledBody = compileBodyNode(context, currentClass, constantPool, variablePool);
+        byte[] compiledBody = compileBodyNode(context, currentClass, constantPool, variablePool, currentExecutable);
 
         // ifeq (#X)
         int offset = 3 + compiledBody.length + 3;
@@ -135,12 +136,13 @@ public final class WhileLoopNode extends StatementNode {
 
     private byte @NotNull [] compileBodyNode(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
                                              @NotNull ConstantPool constantPool,
-                                             @NotNull CodeAttribute.VariablePool variablePool) throws IOException {
+                                             @NotNull CodeAttribute.VariablePool variablePool,
+                                             @NotNull CompilationExecutable currentExecutable) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
         DataOutputStream byteDataOutput = new DataOutputStream(byteArrayOutputStream);
 
         for (StatementNode statementNode : body.statements()) {
-            statementNode.compile(context, currentClass, constantPool, variablePool, byteDataOutput);
+            statementNode.compile(context, currentClass, constantPool, variablePool, currentExecutable, byteDataOutput);
         }
 
         return byteArrayOutputStream.toByteArray();

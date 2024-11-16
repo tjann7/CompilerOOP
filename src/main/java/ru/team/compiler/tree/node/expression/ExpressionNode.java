@@ -14,6 +14,7 @@ import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.compiler.CompilationContext;
 import ru.team.compiler.compiler.CompilationUtils;
 import ru.team.compiler.compiler.attribute.CodeAttribute;
+import ru.team.compiler.compiler.attribute.CompilationExecutable;
 import ru.team.compiler.compiler.constant.ClassConstant;
 import ru.team.compiler.compiler.constant.ConstantPool;
 import ru.team.compiler.compiler.constant.FieldRefConstant;
@@ -25,11 +26,13 @@ import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNode;
 import ru.team.compiler.tree.node.TreeNodeParser;
 import ru.team.compiler.tree.node.clas.ClassNode;
+import ru.team.compiler.tree.node.clas.ConstructorNode;
 import ru.team.compiler.tree.node.primary.BooleanLiteralNode;
 import ru.team.compiler.tree.node.primary.IntegerLiteralNode;
 import ru.team.compiler.tree.node.primary.PrimaryNode;
 import ru.team.compiler.tree.node.primary.RealLiteralNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
+import ru.team.compiler.tree.node.primary.SuperNode;
 import ru.team.compiler.tree.node.primary.ThisNode;
 import ru.team.compiler.tree.node.statement.MethodCallNode;
 import ru.team.compiler.util.Opcodes;
@@ -53,6 +56,10 @@ public final class ExpressionNode extends TreeNode {
             List<IdArg> idArgs = new ArrayList<>();
 
             if (primary instanceof ReferenceNode && iterator.lookup(TokenType.OPENING_PARENTHESIS)) {
+                ArgumentsNode argumentsNode = ArgumentsNode.PARSER.parse(iterator);
+
+                idArgs.add(new IdArg(new IdentifierNode("<init>"), argumentsNode));
+            } else if (primary instanceof SuperNode && iterator.lookup(TokenType.OPENING_PARENTHESIS)) {
                 ArgumentsNode argumentsNode = ArgumentsNode.PARSER.parse(iterator);
 
                 idArgs.add(new IdArg(new IdentifierNode("<init>"), argumentsNode));
@@ -129,6 +136,11 @@ public final class ExpressionNode extends TreeNode {
 
     @NotNull
     public ReferenceNode type(@NotNull AnalyzeContext context, boolean allowVoid) {
+        return type(context, allowVoid, true);
+    }
+
+    @NotNull
+    public ReferenceNode type(@NotNull AnalyzeContext context, boolean allowVoid, boolean checkUninitialized) {
         ReferenceNode currentType;
 
         int shift = 0;
@@ -152,7 +164,8 @@ public final class ExpressionNode extends TreeNode {
                             .formatted(context.currentPath()));
                 }
 
-                AnalyzableConstructor constructor = context.findMatchingConstructor(analyzableClass, idArg.arguments);
+                AnalyzableConstructor constructor = context.findMatchingConstructor(
+                        analyzableClass, idArg.arguments, checkUninitialized);
 
                 if (constructor == null) {
                     List<ReferenceNode> argumentsTypes = context.argumentTypes(idArg.arguments);
@@ -181,7 +194,7 @@ public final class ExpressionNode extends TreeNode {
                             .formatted(context.currentPath(), referenceNode.value()));
                 }
 
-                if (!context.initializedVariables().contains(variable.name().asReference())) {
+                if (checkUninitialized && !context.initializedVariables().contains(variable.name().asReference())) {
                     throw new AnalyzerException("Expression at '%s' is invalid: reference to uninitialized variable '%s'"
                             .formatted(context.currentPath(), referenceNode.value()));
                 }
@@ -197,17 +210,84 @@ public final class ExpressionNode extends TreeNode {
         } else if (primary instanceof ThisNode) {
             AnalyzableClass currentClass = context.currentClass("Expression");
 
-            if (context.currentMethod() == null && !idArgs.isEmpty()) {
+            if (context.currentConstructor() != null && !idArgs.isEmpty()) {
                 IdArg idArg = idArgs.get(0);
 
                 // TODO: maybe also forbid method calls if all fields are not initialized
-                if (idArg.arguments == null && !context.initializedFields().contains(idArg.name.asReference())) {
+                if (checkUninitialized && idArg.arguments == null
+                        && !context.initializedFields().contains(idArg.name.asReference())) {
                     throw new AnalyzerException("Expression at '%s' is invalid: reference to uninitialized field '%s'"
                             .formatted(context.currentPath(), idArg.name.value()));
                 }
             }
 
             currentType = currentClass.name().asReference();
+        } else if (primary instanceof SuperNode) {
+            AnalyzableClass currentClass = context.currentClass("Expression");
+
+            currentType = currentClass.parentClass();
+
+            if (idArgs.isEmpty()) {
+                throw new AnalyzerException("Expression at '%s' is invalid: incomplete reference to super");
+            }
+
+            IdArg idArg = idArgs.get(0);
+            if (idArg.arguments == null) {
+                throw new AnalyzerException("Expression at '%s' is invalid: reference to field super.%s"
+                        .formatted(context.currentPath(), idArg.name.value()));
+            }
+
+            if (idArg.name.value().equals("<init>")) {
+                AnalyzableConstructor currentConstructor = context.currentConstructor();
+                if (currentConstructor == null) {
+                    throw new AnalyzerException("Expression at '%s' is invalid: reference to super constructor outside of the constructor context"
+                            .formatted(context.currentPath()));
+                }
+
+                AnalyzableClass parentClass = currentClass.findParentClass(context, "Expression");
+                if (parentClass == null) {
+                    throw new AnalyzerException("Expression at '%s' is invalid: reference to super without any parents"
+                            .formatted(context.currentPath()));
+                }
+
+                AnalyzableConstructor constructor = context.findMatchingConstructor(
+                        parentClass, idArg.arguments, checkUninitialized);
+                if (constructor == null) {
+                    List<ReferenceNode> argumentsTypes = context.argumentTypes(idArg.arguments);
+
+                    ConstructorNode constructorNode = currentConstructor.constructorNode();
+
+                    if (constructorNode.syntheticSuperCall()) {
+                        throw new AnalyzerException(
+                                ("Constructor at '%s' is invalid: there is no super constructor " +
+                                        "with no arguments, so it must be defined explicitly")
+                                        .formatted(context.currentPath()));
+                    }
+
+                    throw new AnalyzerException("Expression at '%s' is invalid: reference to unknown super constructor '%s(%s)'"
+                            .formatted(
+                                    context.currentPath(),
+                                    parentClass.name().value(),
+                                    argumentsTypes.stream()
+                                            .map(ReferenceNode::value)
+                                            .collect(Collectors.joining(","))));
+                }
+
+                if (idArgs.size() != 1) {
+                    List<ReferenceNode> argumentsTypes = context.argumentTypes(idArg.arguments);
+
+                    throw new AnalyzerException("Expression at '%s' is invalid: reference after call of super constructor '(%s)'"
+                            .formatted(
+                                    context.currentPath(),
+                                    argumentsTypes.stream()
+                                            .map(ReferenceNode::value)
+                                            .collect(Collectors.joining(","))));
+                }
+
+                currentType = new ReferenceNode("<void>");
+
+                shift = 1;
+            }
         } else {
             throw new AnalyzerException("Expression at '%s' is invalid: '%s' is not supported"
                     .formatted(context.currentPath(), primary));
@@ -226,19 +306,23 @@ public final class ExpressionNode extends TreeNode {
 
                 currentType = field.type();
             } else {
-                AnalyzableMethod method = context.findMatchingMethod(analyzableClass, idArg.name, idArg.arguments);
+                AnalyzableMethod method = context.findMatchingMethod(
+                        analyzableClass, idArg.name, idArg.arguments, checkUninitialized);
 
                 if (method == null) {
+                    boolean superCall = i == 0 && primary instanceof SuperNode;
+
                     List<ReferenceNode> argumentsTypes = context.argumentTypes(idArg.arguments);
 
-                    throw new AnalyzerException("Expression at '%s' is invalid: reference to unknown method '%s(%s)' in type '%s'"
+                    throw new AnalyzerException("Expression at '%s' is invalid: reference to unknown %smethod '%s(%s)' in type '%s'"
                             .formatted(
                                     context.currentPath(),
+                                    superCall ? "super " : "",
                                     idArg.name.value(),
                                     argumentsTypes.stream()
                                             .map(ReferenceNode::value)
                                             .collect(Collectors.joining(",")),
-                                    currentType.value()));
+                                    superCall ? analyzableClass.parentClass().value() : currentType.value()));
                 }
 
                 if (!allowVoid) {
@@ -277,6 +361,7 @@ public final class ExpressionNode extends TreeNode {
     @NotNull
     public ReferenceNode compile(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
                                  @NotNull ConstantPool constantPool, @NotNull CodeAttribute.VariablePool variablePool,
+                                 @NotNull CompilationExecutable currentExecutable,
                                  @NotNull DataOutput dataOutput, boolean allowVoid) throws IOException {
         ReferenceNode currentType;
 
@@ -365,7 +450,7 @@ public final class ExpressionNode extends TreeNode {
                 }
 
                 AnalyzableConstructor constructor = context.analyzeContext()
-                        .findMatchingConstructor(analyzableClass, idArg.arguments);
+                        .findMatchingConstructor(analyzableClass, idArg.arguments, false);
 
                 if (constructor == null) {
                     throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
@@ -383,7 +468,7 @@ public final class ExpressionNode extends TreeNode {
 
                 // compile arguments
                 for (ExpressionNode expressionNode : idArg.arguments.expressions()) {
-                    expressionNode.compile(context, currentClass, constantPool, variablePool, dataOutput, false);
+                    expressionNode.compile(context, currentClass, constantPool, variablePool, currentExecutable, dataOutput, false);
                 }
 
                 // invokevirtual (#X.<init>(X))
@@ -393,7 +478,6 @@ public final class ExpressionNode extends TreeNode {
                 dataOutput.writeShort(oMethod.index());
 
                 context.decrementStackSize(idArg.arguments.expressions().size() + 1); // invokevirtual for this and arguments
-
 
                 shift = 1;
 
@@ -410,11 +494,11 @@ public final class ExpressionNode extends TreeNode {
                 context.incrementStackSize(1); // aload
 
                 AnalyzableVariable variable = context.analyzeContext().variables().get(referenceNode);
-                if (variable != null) {
-                    currentType = variable.type();
-                } else {
+                if (variable == null) {
                     throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
                 }
+
+                currentType = variable.type();
             }
         } else if (primary instanceof ThisNode) {
             // aload_0
@@ -423,6 +507,75 @@ public final class ExpressionNode extends TreeNode {
             context.incrementStackSize(1); // aload
 
             currentType = currentClass.name().asReference();
+        } else if (primary instanceof SuperNode) {
+            currentType = currentClass.parentName();
+            if (currentType == null) {
+                currentType = new ReferenceNode("Any");
+            }
+
+            if (idArgs.isEmpty()) {
+                throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
+            }
+
+            IdArg idArg = idArgs.get(0);
+            if (idArg.arguments == null) {
+                throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
+            }
+
+            if (idArg.name.value().equals("<init>")) {
+                if (!currentExecutable.isConstructor()) {
+                    throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
+                }
+
+                AnalyzableClass analyzableClass = context.analyzeContext().classes().get(currentClass.name().asReference());
+                if (analyzableClass == null) {
+                    throw new IllegalStateException("Got unknown class '%s'".formatted(currentClass.name().value()));
+                }
+
+                AnalyzableClass parentClass = analyzableClass.findParentClass(context.analyzeContext(), "Expression");
+                if (parentClass == null) {
+                    throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
+                }
+
+                AnalyzableConstructor constructor = context.analyzeContext().findMatchingConstructor(
+                        parentClass, idArg.arguments, false);
+                if (constructor == null) {
+                    throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
+                }
+
+                // aload_0
+                dataOutput.writeByte(Opcodes.ALOAD_0);
+
+                context.incrementStackSize(1); // aload
+
+                // compile arguments
+                for (ExpressionNode expressionNode : idArg.arguments.expressions()) {
+                    expressionNode.compile(context, currentClass, constantPool, variablePool, currentExecutable, dataOutput, false);
+                }
+
+                MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool, parentClass.name().value(),
+                        constructor.constructorNode());
+
+                // invokespecial (#X.<init>(X))
+                dataOutput.writeByte(Opcodes.INVOKESPECIAL);
+                dataOutput.writeShort(oMethod.index());
+
+                context.decrementStackSize(idArg.arguments.expressions().size()); // invokevirtual for arguments
+
+                shift = 1;
+
+                currentType = new ReferenceNode("<void>");
+            } else {
+                // aload_0
+                dataOutput.writeByte(Opcodes.ALOAD_0);
+
+                context.incrementStackSize(1); // aload
+
+                currentType = currentClass.parentName();
+                if (currentType == null) {
+                    currentType = new ReferenceNode("Any");
+                }
+            }
         } else {
             throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
         }
@@ -449,7 +602,7 @@ public final class ExpressionNode extends TreeNode {
                 currentType = field.type();
             } else {
                 AnalyzableMethod method = context.analyzeContext()
-                        .findMatchingMethod(analyzableClass, idArg.name, idArg.arguments);
+                        .findMatchingMethod(analyzableClass, idArg.name, idArg.arguments, false);
 
                 if (method == null || (!allowVoid && method.returnType() == null)) {
                     throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
@@ -457,14 +610,20 @@ public final class ExpressionNode extends TreeNode {
 
                 // compile arguments
                 for (ExpressionNode expressionNode : idArg.arguments.expressions()) {
-                    expressionNode.compile(context, currentClass, constantPool, variablePool, dataOutput, false);
+                    expressionNode.compile(context, currentClass, constantPool, variablePool, currentExecutable, dataOutput, false);
                 }
 
-                // invokevirtual (#X.x(X))
+                // TODO: currentType can have another return type
+                // invokevirtual (#X.x(X)) for generic call / invokespecial (#X.x(X)) for super call
                 MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool, currentType.value(),
                         method.methodNode());
 
-                dataOutput.writeByte(Opcodes.INVOKEVIRTUAL);
+                boolean superCall = i == 0 && primary instanceof SuperNode;
+                if (superCall) {
+                    dataOutput.writeByte(Opcodes.INVOKESPECIAL);
+                } else {
+                    dataOutput.writeByte(Opcodes.INVOKEVIRTUAL);
+                }
                 dataOutput.writeShort(oMethod.index());
 
                 // invokevirtual for this and arguments, but there can be return value

@@ -8,6 +8,7 @@ import ru.team.compiler.analyzer.AnalyzableMethod;
 import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.compiler.CompilationContext;
 import ru.team.compiler.compiler.attribute.CodeAttribute;
+import ru.team.compiler.compiler.attribute.CompilationExecutable;
 import ru.team.compiler.compiler.constant.ConstantPool;
 import ru.team.compiler.exception.AnalyzerException;
 import ru.team.compiler.exception.CompilerException;
@@ -66,7 +67,7 @@ public final class ReturnNode extends StatementNode {
 
         AnalyzableMethod currentMethod = context.currentMethod("Return");
         if (((type == null) != (currentMethod.returnType() == null))
-                || (type != null && !context.isAssignableFrom(type, currentMethod.returnType()))) {
+                || (type != null && !context.isAssignableFrom(currentMethod.returnType(), type))) {
             throw new AnalyzerException("Return at '%s' is invalid: expected '%s', got '%s'"
                     .formatted(context.currentPath(), prettyType(currentMethod.returnType()), prettyType(type)));
         }
@@ -82,7 +83,7 @@ public final class ReturnNode extends StatementNode {
     @Override
     public void compile(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
                         @NotNull ConstantPool constantPool, @NotNull CodeAttribute.VariablePool variablePool,
-                        @NotNull DataOutput dataOutput) throws IOException {
+                        @NotNull CompilationExecutable currentExecutable, @NotNull DataOutput dataOutput) throws IOException {
         if (expression == null) {
             dataOutput.writeByte(Opcodes.RETURN);
             return;
@@ -112,7 +113,7 @@ public final class ReturnNode extends StatementNode {
 
         }
 
-        expression.compile(context, currentClass, constantPool, variablePool, dataOutput, false);
+        expression.compile(context, currentClass, constantPool, variablePool, currentExecutable, dataOutput, false);
         dataOutput.writeByte(Opcodes.ARETURN);
     }
 }

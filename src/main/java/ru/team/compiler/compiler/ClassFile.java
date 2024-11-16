@@ -71,12 +71,12 @@ public record ClassFile(@NotNull ConstantPool constantPool,
         ClassConstant superClass;
         if (superClassName != null) {
             if (superClassName.equals("")) {
-                superClass = constantPool.getClass(constantPool.getUtf("olang/Any"));
+                superClass = constantPool.getClass(constantPool.getUtf("java/lang/Object"));
             } else {
                 superClass = CompilationUtils.oClass(constantPool, superClassName);
             }
         } else {
-            superClass = constantPool.getClass(constantPool.getUtf("java/lang/Object"));
+            superClass = constantPool.getClass(constantPool.getUtf("olang/Any"));
         }
 
         // Firstly, compile methods and fields, because they change ConstantPool

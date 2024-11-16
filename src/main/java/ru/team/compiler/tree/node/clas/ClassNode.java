@@ -12,8 +12,13 @@ import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNode;
 import ru.team.compiler.tree.node.TreeNodeParser;
+import ru.team.compiler.tree.node.expression.ArgumentsNode;
+import ru.team.compiler.tree.node.expression.ExpressionNode;
 import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
+import ru.team.compiler.tree.node.primary.SuperNode;
+import ru.team.compiler.tree.node.statement.BodyNode;
+import ru.team.compiler.tree.node.statement.MethodCallNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,14 +50,34 @@ public final class ClassNode extends TreeNode {
             iterator.next(TokenType.IS_KEYWORD);
 
             List<ClassMemberNode> classMemberNodes = new ArrayList<>();
+            boolean hasConstructor = false;
 
             while (iterator.hasNext()) {
                 if (iterator.consume(TokenType.END_KEYWORD)) {
+                    if (!hasConstructor) {
+                        classMemberNodes.add(
+                                new ConstructorNode(
+                                        false,
+                                        new ParametersNode(List.of()),
+                                        new BodyNode(List.of(
+                                                new MethodCallNode(
+                                                        new ExpressionNode(
+                                                                new SuperNode(), List.of(
+                                                                new ExpressionNode.IdArg(
+                                                                        new IdentifierNode("<init>"),
+                                                                        new ArgumentsNode(List.of()))))))),
+                                        true));
+                    }
+
                     return new ClassNode(identifierNode, parentIdentifierNode, classMemberNodes);
                 }
 
                 ClassMemberNode classMemberNode = ClassMemberNode.PARSER.parse(iterator);
                 classMemberNodes.add(classMemberNode);
+
+                if (classMemberNode instanceof ConstructorNode) {
+                    hasConstructor = true;
+                }
             }
 
             throw new NodeFormatException("end", NodeFormatException.END_OF_STRING, iterator.lastToken());

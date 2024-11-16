@@ -64,5 +64,12 @@ public record AnalyzableMethod(@NotNull MethodNode methodNode, @NotNull Identifi
                     .collect(Collectors.joining(","));
         }
 
+        @NotNull
+        public static Key fromNode(@NotNull MethodNode method) {
+            return new AnalyzableMethod.Key(method.name(), method.parameters().pars().stream()
+                    .map(ParametersNode.Par::type)
+                    .collect(Collectors.toList()));
+        }
+
     }
 }

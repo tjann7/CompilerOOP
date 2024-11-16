@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.compiler.CompilationContext;
 import ru.team.compiler.compiler.attribute.CodeAttribute;
+import ru.team.compiler.compiler.attribute.CompilationExecutable;
 import ru.team.compiler.compiler.constant.ConstantPool;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.exception.NodeFormatException;
@@ -63,8 +64,8 @@ public final class MethodCallNode extends StatementNode {
     @Override
     public void compile(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
                         @NotNull ConstantPool constantPool, @NotNull CodeAttribute.VariablePool variablePool,
-                        @NotNull DataOutput dataOutput) throws IOException {
-        ReferenceNode type = expression.compile(context, currentClass, constantPool, variablePool, dataOutput, true);
+                        @NotNull CompilationExecutable currentExecutable, @NotNull DataOutput dataOutput) throws IOException {
+        ReferenceNode type = expression.compile(context, currentClass, constantPool, variablePool, currentExecutable, dataOutput, true);
 
         if (!type.value().equals("<void>")) {
             // pop

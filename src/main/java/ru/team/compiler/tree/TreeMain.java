@@ -73,6 +73,7 @@ public final class TreeMain {
                         context = null;
 
                         System.out.println("\n---\n[!] Node was not traversed: " + e + "\n---");
+                        e.printStackTrace();
                     }
 
                     TreeNode optimized = null;
@@ -148,11 +149,10 @@ public final class TreeMain {
                                             i++;
                                         }
 
-                                        System.out.println("\n");
+                                        System.out.println(Color.BLACK.code() + "\n");
                                     }
                                 } catch (Exception e) {
                                     System.out.println("---\n\n[!] Class " + name + " was not compiled: " + e.getMessage());
-                                    e.printStackTrace();
                                 }
                             }
                         }

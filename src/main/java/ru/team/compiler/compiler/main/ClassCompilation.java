@@ -176,7 +176,6 @@ public final class ClassCompilation {
                     classFile.compile(new CompilationContext(context), dataOutputStream);
                 } catch (Exception e) {
                     System.err.println("[ERROR] " + path + " | Failed on compilation: " + e);
-                    e.printStackTrace();
                     return;
                 }
             }

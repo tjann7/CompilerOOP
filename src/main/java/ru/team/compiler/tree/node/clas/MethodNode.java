@@ -4,6 +4,8 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ru.team.compiler.analyzer.AnalyzableClass;
+import ru.team.compiler.analyzer.AnalyzableMethod;
 import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.exception.AnalyzerException;
 import ru.team.compiler.exception.CompilerException;
@@ -109,12 +111,34 @@ public final class MethodNode extends ClassMemberNode {
         context = parameters.analyze(context);
         body.analyze(context);
 
+        AnalyzableClass analyzableClass = context.currentClass("Method");
+
+        AnalyzableClass parentClass = analyzableClass.findParentClass(context, "Method");
+        if (parentClass != null) {
+            AnalyzableMethod.Key key = AnalyzableMethod.Key.fromNode(this);
+
+            AnalyzableMethod method = parentClass.methods().get(key);
+            if (method != null) {
+                if ((method.returnType() == null) != (returnType == null)
+                        || returnType != null && !context.isAssignableFrom(method.returnType(), returnType)) {
+                    throw new AnalyzerException("Method '%s.%s' overrides method with incorrect return type '%s' (expected '%s')"
+                            .formatted(initialContext.currentPath(), name.value(),
+                                    prettyType(returnType), prettyType(method.returnType())));
+                }
+            }
+        }
+
         if (returnType != null && !body.alwaysReturn()) {
             throw new AnalyzerException("Method '%s.%s' does not always return"
                     .formatted(initialContext.currentPath(), name.value()));
         }
 
         return initialContext;
+    }
+
+    @NotNull
+    private String prettyType(@Nullable ReferenceNode type) {
+        return type != null ? type.value() : "Void";
     }
 
     @Override

@@ -4,6 +4,10 @@ public class Integer extends Any {
 
     private final int value;
 
+    public Integer() {
+        this(0);
+    }
+
     public Integer(int value) {
         this.value = value;
     }

@@ -8,6 +8,7 @@ import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.compiler.CompilationContext;
 import ru.team.compiler.compiler.CompilationUtils;
 import ru.team.compiler.compiler.attribute.CodeAttribute;
+import ru.team.compiler.compiler.attribute.CompilationExecutable;
 import ru.team.compiler.compiler.constant.ConstantPool;
 import ru.team.compiler.compiler.constant.MethodRefConstant;
 import ru.team.compiler.exception.AnalyzerException;
@@ -185,8 +186,8 @@ public final class IfNode extends StatementNode {
     @Override
     public void compile(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
                         @NotNull ConstantPool constantPool, @NotNull CodeAttribute.VariablePool variablePool,
-                        @NotNull DataOutput dataOutput) throws IOException {
-        condition.compile(context, currentClass, constantPool, variablePool, dataOutput, false);
+                        @NotNull CompilationExecutable currentExecutable, @NotNull DataOutput dataOutput) throws IOException {
+        condition.compile(context, currentClass, constantPool, variablePool, currentExecutable, dataOutput, false);
 
         // olang.Boolean -> boolean primitive
         // invokevirtual (#Boolean.java$value()Z)
@@ -196,7 +197,7 @@ public final class IfNode extends StatementNode {
         dataOutput.writeShort(oMethod.index());
 
         // Firstly, compile then body because we need to know else body offset for IFEQ opcode
-        byte[] compiledThenBody = compileBodyNode(context, currentClass, constantPool, variablePool, thenBody);
+        byte[] compiledThenBody = compileBodyNode(context, currentClass, constantPool, variablePool, currentExecutable, thenBody);
 
         boolean hasElseBody = elseBody != null && !elseBody.statements().isEmpty();
 
@@ -211,7 +212,7 @@ public final class IfNode extends StatementNode {
 
         if (hasElseBody) {
             // Firstly, compile else body because we need to know offset for GOTO opcode
-            byte[] compiledElseBody = compileBodyNode(context, currentClass, constantPool, variablePool, elseBody);
+            byte[] compiledElseBody = compileBodyNode(context, currentClass, constantPool, variablePool, currentExecutable, elseBody);
 
             // Secondly, define GOTO with known size of else body
             // goto (#X)
@@ -227,12 +228,13 @@ public final class IfNode extends StatementNode {
     private byte @NotNull [] compileBodyNode(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
                                              @NotNull ConstantPool constantPool,
                                              @NotNull CodeAttribute.VariablePool variablePool,
+                                             @NotNull CompilationExecutable currentExecutable,
                                              @NotNull BodyNode bodyNode) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
         DataOutputStream byteDataOutput = new DataOutputStream(byteArrayOutputStream);
 
         for (StatementNode statementNode : bodyNode.statements()) {
-            statementNode.compile(context, currentClass, constantPool, variablePool, byteDataOutput);
+            statementNode.compile(context, currentClass, constantPool, variablePool, currentExecutable, byteDataOutput);
         }
 
         return byteArrayOutputStream.toByteArray();

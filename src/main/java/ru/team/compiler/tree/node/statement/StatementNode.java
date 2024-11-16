@@ -3,6 +3,7 @@ package ru.team.compiler.tree.node.statement;
 import org.jetbrains.annotations.NotNull;
 import ru.team.compiler.compiler.CompilationContext;
 import ru.team.compiler.compiler.attribute.CodeAttribute;
+import ru.team.compiler.compiler.attribute.CompilationExecutable;
 import ru.team.compiler.compiler.constant.ConstantPool;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.exception.NodeFormatException;
@@ -36,6 +37,7 @@ public abstract sealed class StatementNode extends TreeNode permits AssignmentNo
                         yield MethodCallNode.PARSER.parse(iterator);
                     }
                 }
+                case SUPER_KEYWORD -> MethodCallNode.PARSER.parse(iterator);
                 case WHILE_KEYWORD -> WhileLoopNode.PARSER.parse(iterator);
                 case IF_KEYWORD -> IfNode.PARSER.parse(iterator);
                 case RETURN_KEYWORD -> ReturnNode.PARSER.parse(iterator);
@@ -56,6 +58,7 @@ public abstract sealed class StatementNode extends TreeNode permits AssignmentNo
 
     public abstract void compile(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
                                  @NotNull ConstantPool constantPool, @NotNull CodeAttribute.VariablePool variablePool,
+                                 @NotNull CompilationExecutable currentExecutable,
                                  @NotNull DataOutput dataOutput) throws IOException;
 
 }

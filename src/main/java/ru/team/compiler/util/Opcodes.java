@@ -22,6 +22,7 @@ public interface Opcodes {
     int SIPUSH = 17;
 
     int LDC = 18;
+    int LDC_2 = 19;
 
     int ALOAD = 25;
     int ALOAD_0 = 42;
@@ -69,7 +70,13 @@ public interface Opcodes {
                 } else if (Short.MIN_VALUE <= value && value <= Short.MAX_VALUE) {
                     yield Bytes.byteAndShort((byte) SIPUSH, (short) value);
                 } else {
-                    yield Bytes.byteAndShort((byte) LDC, constantPool.getInt(value).index());
+                    short index = constantPool.getInt(value).index();
+
+                    if (Byte.MIN_VALUE <= index && index <= Byte.MAX_VALUE) {
+                        yield Bytes.of((byte) LDC, (byte) index);
+                    } else {
+                        yield Bytes.byteAndShort((byte) LDC_2, index);
+                    }
                 }
             }
         };
@@ -84,7 +91,13 @@ public interface Opcodes {
             return Bytes.of((byte) FCONST_2);
         }
 
-        return Bytes.byteAndShort((byte) LDC, constantPool.getFloat(value).index());
+        short index = constantPool.getFloat(value).index();
+
+        if (Byte.MIN_VALUE <= index && index <= Byte.MAX_VALUE) {
+            return Bytes.of((byte) LDC, (byte) index);
+        } else {
+            return Bytes.byteAndShort((byte) LDC_2, index);
+        }
     }
 
     static byte @NotNull [] aload(@NotNull ConstantPool constantPool, int value) {
