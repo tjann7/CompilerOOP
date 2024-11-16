@@ -35,7 +35,7 @@ public final class CompilerMain {
     }
 
     private static void printUsage() {
-        System.out.println("Usage: java -jar olang [-bundle] <file>");
+        System.out.println("Usage: java -jar olang [-bundle] [-jar] <file>");
     }
 
 }
