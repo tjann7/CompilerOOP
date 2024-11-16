@@ -9,6 +9,7 @@ import ru.team.compiler.tree.node.clas.ClassMemberNode;
 import ru.team.compiler.tree.node.clas.ClassNode;
 import ru.team.compiler.tree.node.clas.ConstructorNode;
 import ru.team.compiler.tree.node.clas.FieldNode;
+import ru.team.compiler.tree.node.clas.IncludeNode;
 import ru.team.compiler.tree.node.clas.MethodNode;
 import ru.team.compiler.tree.node.clas.ParametersNode;
 import ru.team.compiler.tree.node.clas.ProgramNode;
@@ -19,6 +20,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -90,14 +93,71 @@ public final class Analyzer {
     }
 
     @NotNull
-    public static AnalyzeContext createContext(@NotNull ProgramNode programNode) {
-        return createContext(programNode, stdClasses());
+    public static AnalyzeContext createContext(@NotNull Path path, @NotNull ProgramNode programNode) {
+        Map<ReferenceNode, AnalyzableClass> includedClasses = new HashMap<>(stdClasses());
+
+        for (IncludeNode includeNode : programNode.includeNodes()) {
+            ReferenceNode referenceNode = includeNode.fileName();
+            Path includePath = path.resolve(referenceNode.value() + ".olang");
+            if (!Files.exists(includePath)) {
+                throw new AnalyzerException("Program includes '%s' that cannot be found at '%s'"
+                        .formatted(referenceNode.value(), includePath));
+            }
+
+            if (Files.isDirectory(includePath)) {
+                throw new AnalyzerException("Program includes '%s' that is not a file at '%s'"
+                        .formatted(referenceNode.value(), includePath));
+            }
+
+            String string;
+            try {
+                string = Files.readString(includePath);
+            } catch (IOException e) {
+                throw new AnalyzerException("Program includes '%s' that could not be read from '%s': %s"
+                        .formatted(referenceNode.value(), includePath, e));
+            }
+
+            List<Token> tokens = new ArrayList<>();
+
+            try {
+                Tokenizer tokenizer = new Tokenizer(string);
+                while (tokenizer.hasNext()) {
+                    tokens.add(tokenizer.next());
+                }
+            } catch (Exception e) {
+                throw new AnalyzerException("Program includes '%s' that could not be tokenized from '%s': %s"
+                        .formatted(referenceNode.value(), includePath, e));
+            }
+
+            ProgramNode includedProgramNode;
+            try {
+                includedProgramNode = ProgramNode.PARSER.parse(tokens);
+            } catch (Exception e) {
+                throw new AnalyzerException("Program includes '%s' that failed on syntax analysis from '%s': %s"
+                        .formatted(referenceNode.value(), includePath, e));
+            }
+
+            // TODO: check for cyclic dependency of includes
+
+            AnalyzeContext context = createContext(path, includedProgramNode);
+            context.classes().forEach((k, v) -> {
+                AnalyzableClass old = includedClasses.put(k, v);
+                if (old != null && !v.equals(old)) {
+                    throw new AnalyzerException("Program includes '%s' that defined class '%s' in different way from '%s'"
+                            .formatted(referenceNode.value(), k.value(), includePath));
+                }
+            });
+
+            includedClasses.putAll(context.classes());
+        }
+
+        return createContext(programNode, includedClasses);
     }
 
     @NotNull
     private static AnalyzeContext createContext(@NotNull ProgramNode programNode,
-                                                @NotNull Map<ReferenceNode, AnalyzableClass> parentClasses) {
-        Map<ReferenceNode, AnalyzableClass> classes = new HashMap<>(parentClasses);
+                                                @NotNull Map<ReferenceNode, AnalyzableClass> includedClasses) {
+        Map<ReferenceNode, AnalyzableClass> classes = new HashMap<>(includedClasses);
 
         for (ClassNode classNode : programNode.classes()) {
             ReferenceNode classReference = classNode.name().asReference();

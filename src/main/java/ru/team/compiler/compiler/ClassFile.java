@@ -7,6 +7,7 @@ import ru.team.compiler.compiler.constant.ClassConstant;
 import ru.team.compiler.compiler.constant.ConstantPool;
 import ru.team.compiler.tree.node.clas.ClassMemberNode;
 import ru.team.compiler.tree.node.clas.ClassNode;
+import ru.team.compiler.tree.node.clas.ConstructorNode;
 import ru.team.compiler.tree.node.clas.FieldNode;
 import ru.team.compiler.tree.node.clas.MethodNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
@@ -39,6 +40,9 @@ public record ClassFile(@NotNull ConstantPool constantPool,
                 fields.add(field);
             } else if (classMemberNode instanceof MethodNode methodNode) {
                 CompilationMethod method = CompilationMethod.fromNode(constantPool, classNode, methodNode);
+                methods.add(method);
+            } else if (classMemberNode instanceof ConstructorNode constructorNode) {
+                CompilationMethod method = CompilationMethod.fromNode(constantPool, classNode, constructorNode);
                 methods.add(method);
             }
         }

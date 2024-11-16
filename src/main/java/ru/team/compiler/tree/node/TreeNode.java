@@ -8,6 +8,7 @@ import ru.team.compiler.token.Token;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.tree.node.clas.ClassMemberNode;
 import ru.team.compiler.tree.node.clas.ClassNode;
+import ru.team.compiler.tree.node.clas.IncludeNode;
 import ru.team.compiler.tree.node.clas.ParametersNode;
 import ru.team.compiler.tree.node.clas.ProgramNode;
 import ru.team.compiler.tree.node.expression.ArgumentsNode;
@@ -21,7 +22,7 @@ import java.util.List;
 
 public abstract sealed class TreeNode permits PrimaryNode, IdentifierNode, ExpressionNode, ArgumentsNode,
                                               BodyNode, StatementNode, ParametersNode, ClassMemberNode,
-                                              ClassNode, ProgramNode {
+                                              ClassNode, ProgramNode, IncludeNode {
 
     public static final TreeNodeParser<TreeNode> PARSER = new TreeNodeParser<>() {
 
@@ -65,7 +66,7 @@ public abstract sealed class TreeNode permits PrimaryNode, IdentifierNode, Expre
                 parsers = List.of(
                         PrimaryNode.PARSER, IdentifierNode.PARSER, ExpressionNode.PARSER, ArgumentsNode.PARSER,
                         StatementNode.PARSER, ParametersNode.PARSER, ClassMemberNode.PARSER,
-                        ClassNode.PARSER, ProgramNode.PARSER
+                        ClassNode.PARSER, ProgramNode.PARSER, IncludeNode.PARSER
                 );
             }
 

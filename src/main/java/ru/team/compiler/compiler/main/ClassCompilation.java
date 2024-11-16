@@ -45,7 +45,6 @@ public final class ClassCompilation {
         } catch (IOException e) {
             System.err.println("[ERROR] " + outputPath + " | Failed on file reading: " + e);
             return;
-
         }
 
         List<Token> tokens = new ArrayList<>();
@@ -70,7 +69,7 @@ public final class ClassCompilation {
 
         AnalyzeContext context;
         try {
-            context = Analyzer.createContext(programNode);
+            context = Analyzer.createContext(path.getParent(), programNode);
             programNode.analyze(context);
         } catch (Exception e) {
             System.err.println("[ERROR] " + path + " | Failed on semantic analysis: " + e);

@@ -5,6 +5,7 @@ import ru.team.compiler.compiler.attribute.CodeAttribute;
 import ru.team.compiler.compiler.constant.ConstantPool;
 import ru.team.compiler.compiler.constant.Utf8Constant;
 import ru.team.compiler.tree.node.clas.ClassNode;
+import ru.team.compiler.tree.node.clas.ConstructorNode;
 import ru.team.compiler.tree.node.clas.MethodNode;
 
 import java.io.DataOutput;
@@ -25,6 +26,17 @@ public record CompilationMethod(@NotNull Utf8Constant name, @NotNull Utf8Constan
         Utf8Constant descriptor = constantPool.getUtf(CompilationUtils.descriptor(methodNode));
 
         CodeAttribute codeAttribute = new CodeAttribute(constantPool, classNode, methodNode);
+
+        return new CompilationMethod(name, descriptor, codeAttribute);
+    }
+
+    @NotNull
+    public static CompilationMethod fromNode(@NotNull ConstantPool constantPool, @NotNull ClassNode classNode,
+                                             @NotNull ConstructorNode constructorNode) {
+        Utf8Constant name = constantPool.getUtf("<init>");
+        Utf8Constant descriptor = constantPool.getUtf(CompilationUtils.descriptor(constructorNode));
+
+        CodeAttribute codeAttribute = new CodeAttribute(constantPool, classNode, constructorNode);
 
         return new CompilationMethod(name, descriptor, codeAttribute);
     }

@@ -8,6 +8,7 @@ import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public record AnalyzableMethod(@NotNull MethodNode methodNode, @NotNull IdentifierNode name,
@@ -31,6 +32,27 @@ public record AnalyzableMethod(@NotNull MethodNode methodNode, @NotNull Identifi
                 ", returnType=" + returnType +
                 ", declaredClass=" + declaredClass.name() +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        AnalyzableMethod that = (AnalyzableMethod) object;
+        return Objects.equals(name, that.name)
+                && Objects.equals(methodNode, that.methodNode)
+                && Objects.equals(returnType, that.returnType)
+                && Objects.equals(parameters, that.parameters)
+                && Objects.equals(declaredClass.name(), that.declaredClass.name());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(methodNode, name, parameters, returnType, declaredClass.name());
     }
 
     public record Key(@NotNull IdentifierNode name, @NotNull List<ReferenceNode> parameterTypes) {

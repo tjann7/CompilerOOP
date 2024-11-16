@@ -53,16 +53,17 @@ public final class TreeMain {
 
                     TreeNode analyzeNode = node;
                     if (analyzeNode instanceof ClassNode classNode) {
-                        analyzeNode = new ProgramNode(List.of(classNode));
+                        analyzeNode = new ProgramNode(List.of(), List.of(classNode));
                     }
 
                     AnalyzeContext context;
 
                     try {
+                        Path path = Path.of(".");
                         if (analyzeNode instanceof ProgramNode programNode) {
-                            context = Analyzer.createContext(programNode);
+                            context = Analyzer.createContext(path, programNode);
                         } else {
-                            context = Analyzer.createContext(new ProgramNode(new ArrayList<>()));
+                            context = Analyzer.createContext(path, new ProgramNode(List.of(), List.of()));
                         }
 
                         node.analyze(context);
@@ -105,7 +106,7 @@ public final class TreeMain {
                         if (optimized instanceof ProgramNode programNode) {
                             compileNode = programNode.optimize();
                         } else if (optimized instanceof ClassNode classNode) {
-                            compileNode = new ProgramNode(List.of(classNode));
+                            compileNode = new ProgramNode(List.of(), List.of(classNode));
                         } else {
                             compileNode = null;
                         }
