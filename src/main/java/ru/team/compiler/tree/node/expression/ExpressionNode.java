@@ -152,11 +152,7 @@ public final class ExpressionNode extends TreeNode {
                             .formatted(context.currentPath()));
                 }
 
-                AnalyzableConstructor constructor = context.findMatchingExecutable(
-                        analyzableClass,
-                        idArg.arguments,
-                        currentClass -> new ArrayList<>(currentClass.constructors().values()),
-                        AnalyzableConstructor::parameters);
+                AnalyzableConstructor constructor = context.findMatchingConstructor(analyzableClass, idArg.arguments);
 
                 if (constructor == null) {
                     List<ReferenceNode> argumentsTypes = context.argumentTypes(idArg.arguments);
@@ -230,14 +226,7 @@ public final class ExpressionNode extends TreeNode {
 
                 currentType = field.type();
             } else {
-                AnalyzableMethod method = context.findMatchingExecutable(
-                        analyzableClass,
-                        idArg.arguments,
-                        currentClass -> currentClass.methods().values()
-                                .stream()
-                                .filter(m -> m.name().equals(idArg.name))
-                                .collect(Collectors.toList()),
-                        AnalyzableMethod::parameters);
+                AnalyzableMethod method = context.findMatchingMethod(analyzableClass, idArg.name, idArg.arguments);
 
                 if (method == null) {
                     List<ReferenceNode> argumentsTypes = context.argumentTypes(idArg.arguments);
@@ -375,11 +364,9 @@ public final class ExpressionNode extends TreeNode {
                     throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
                 }
 
-                AnalyzableConstructor constructor = context.analyzeContext().findMatchingExecutable(
-                        analyzableClass,
-                        idArg.arguments,
-                        currentClass1 -> new ArrayList<>(currentClass1.constructors().values()),
-                        AnalyzableConstructor::parameters);
+                AnalyzableConstructor constructor = context.analyzeContext()
+                        .findMatchingConstructor(analyzableClass, idArg.arguments);
+
                 if (constructor == null) {
                     throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
                 }
@@ -461,14 +448,8 @@ public final class ExpressionNode extends TreeNode {
 
                 currentType = field.type();
             } else {
-                AnalyzableMethod method = context.analyzeContext().findMatchingExecutable(
-                        analyzableClass,
-                        idArg.arguments,
-                        currentClass1 -> currentClass1.methods().values()
-                                .stream()
-                                .filter(m -> m.name().equals(idArg.name))
-                                .collect(Collectors.toList()),
-                        AnalyzableMethod::parameters);
+                AnalyzableMethod method = context.analyzeContext()
+                        .findMatchingMethod(analyzableClass, idArg.name, idArg.arguments);
 
                 if (method == null || (!allowVoid && method.returnType() == null)) {
                     throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");

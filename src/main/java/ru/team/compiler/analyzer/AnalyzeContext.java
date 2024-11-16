@@ -8,8 +8,10 @@ import ru.team.compiler.tree.node.clas.ConstructorNode;
 import ru.team.compiler.tree.node.clas.MethodNode;
 import ru.team.compiler.tree.node.clas.ParametersNode;
 import ru.team.compiler.tree.node.expression.ArgumentsNode;
+import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -180,9 +182,32 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
     }
 
     @Nullable
-    public <E> E findMatchingExecutable(@NotNull AnalyzableClass analyzableClass, @NotNull ArgumentsNode arguments,
-                                        @NotNull Function<AnalyzableClass, List<E>> entitiesFromClass,
-                                        @NotNull Function<E, ParametersNode> entityParameters) {
+    public AnalyzableConstructor findMatchingConstructor(@NotNull AnalyzableClass analyzableClass,
+                                                         @NotNull ArgumentsNode arguments) {
+        return findMatchingExecutable(
+                analyzableClass,
+                arguments,
+                currentClass -> new ArrayList<>(currentClass.constructors().values()),
+                AnalyzableConstructor::parameters);
+    }
+
+    @Nullable
+    public AnalyzableMethod findMatchingMethod(@NotNull AnalyzableClass analyzableClass,
+                                               @NotNull IdentifierNode name, @NotNull ArgumentsNode arguments) {
+        return findMatchingExecutable(
+                analyzableClass,
+                arguments,
+                currentClass -> currentClass.methods().values()
+                        .stream()
+                        .filter(m -> m.name().equals(name))
+                        .collect(Collectors.toList()),
+                AnalyzableMethod::parameters);
+    }
+
+    @Nullable
+    private <E> E findMatchingExecutable(@NotNull AnalyzableClass analyzableClass, @NotNull ArgumentsNode arguments,
+                                         @NotNull Function<AnalyzableClass, List<E>> entitiesFromClass,
+                                         @NotNull Function<E, ParametersNode> entityParameters) {
         List<ReferenceNode> argumentsTypes = argumentTypes(arguments);
 
         E finalEntity = null;
