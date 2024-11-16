@@ -25,7 +25,6 @@ import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNode;
 import ru.team.compiler.tree.node.TreeNodeParser;
 import ru.team.compiler.tree.node.clas.ClassNode;
-import ru.team.compiler.tree.node.clas.ParametersNode;
 import ru.team.compiler.tree.node.primary.BooleanLiteralNode;
 import ru.team.compiler.tree.node.primary.IntegerLiteralNode;
 import ru.team.compiler.tree.node.primary.PrimaryNode;
@@ -39,7 +38,6 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @EqualsAndHashCode(callSuper = false)
@@ -154,15 +152,14 @@ public final class ExpressionNode extends TreeNode {
                             .formatted(context.currentPath()));
                 }
 
-                AnalyzableConstructor constructor = findMatchingExecutable(
-                        context,
+                AnalyzableConstructor constructor = context.findMatchingExecutable(
                         analyzableClass,
                         idArg.arguments,
                         currentClass -> new ArrayList<>(currentClass.constructors().values()),
                         AnalyzableConstructor::parameters);
 
                 if (constructor == null) {
-                    List<ReferenceNode> argumentsTypes = argumentTypes(context, idArg.arguments);
+                    List<ReferenceNode> argumentsTypes = context.argumentTypes(idArg.arguments);
 
                     throw new AnalyzerException("Expression at '%s' is invalid: reference to unknown constructor '(%s)' in type '%s'"
                             .formatted(
@@ -233,8 +230,7 @@ public final class ExpressionNode extends TreeNode {
 
                 currentType = field.type();
             } else {
-                AnalyzableMethod method = findMatchingExecutable(
-                        context,
+                AnalyzableMethod method = context.findMatchingExecutable(
                         analyzableClass,
                         idArg.arguments,
                         currentClass -> currentClass.methods().values()
@@ -244,7 +240,7 @@ public final class ExpressionNode extends TreeNode {
                         AnalyzableMethod::parameters);
 
                 if (method == null) {
-                    List<ReferenceNode> argumentsTypes = argumentTypes(context, idArg.arguments);
+                    List<ReferenceNode> argumentsTypes = context.argumentTypes(idArg.arguments);
 
                     throw new AnalyzerException("Expression at '%s' is invalid: reference to unknown method '%s(%s)' in type '%s'"
                             .formatted(
@@ -287,64 +283,6 @@ public final class ExpressionNode extends TreeNode {
         }
 
         return currentType;
-    }
-
-    @NotNull
-    private List<ReferenceNode> argumentTypes(@NotNull AnalyzeContext context, @NotNull ArgumentsNode arguments) {
-        return arguments.expressions()
-                .stream()
-                .map(expressionNode -> expressionNode.type(context, false))
-                .collect(Collectors.toList());
-    }
-
-    @Nullable
-    private <E> E findMatchingExecutable(@NotNull AnalyzeContext context, @NotNull AnalyzableClass analyzableClass,
-                                         @NotNull ArgumentsNode arguments,
-                                         @NotNull Function<AnalyzableClass, List<E>> entitiesFromClass,
-                                         @NotNull Function<E, ParametersNode> entityParameters) {
-        List<ReferenceNode> argumentsTypes = argumentTypes(context, arguments);
-
-        E finalEntity = null;
-
-        AnalyzableClass currentClass = analyzableClass;
-        while (true) {
-            List<E> entities = entitiesFromClass.apply(currentClass);
-
-            for (E entity : entities) {
-                ParametersNode parameters = entityParameters.apply(entity);
-                int size = arguments.expressions().size();
-                if (size != parameters.pars().size()) {
-                    continue;
-                }
-
-                finalEntity = entity;
-
-                for (int j = 0; j < size; j++) {
-                    ReferenceNode argumentType = argumentsTypes.get(j);
-                    ReferenceNode parameterType = parameters.pars().get(j).type();
-
-                    if (!context.isAssignableFrom(parameterType, argumentType)) {
-                        finalEntity = null;
-                        break;
-                    }
-                }
-
-                if (finalEntity != null) {
-                    break;
-                }
-            }
-
-            if (finalEntity != null) {
-                break;
-            }
-
-            currentClass = currentClass.findParentClass(context, "Expression");
-            if (currentClass == null) {
-                break;
-            }
-        }
-
-        return finalEntity;
     }
 
     @NotNull
@@ -437,8 +375,7 @@ public final class ExpressionNode extends TreeNode {
                     throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
                 }
 
-                AnalyzableConstructor constructor = findMatchingExecutable(
-                        context.analyzeContext(),
+                AnalyzableConstructor constructor = context.analyzeContext().findMatchingExecutable(
                         analyzableClass,
                         idArg.arguments,
                         currentClass1 -> new ArrayList<>(currentClass1.constructors().values()),
@@ -524,8 +461,7 @@ public final class ExpressionNode extends TreeNode {
 
                 currentType = field.type();
             } else {
-                AnalyzableMethod method = findMatchingExecutable(
-                        context.analyzeContext(),
+                AnalyzableMethod method = context.analyzeContext().findMatchingExecutable(
                         analyzableClass,
                         idArg.arguments,
                         currentClass1 -> currentClass1.methods().values()

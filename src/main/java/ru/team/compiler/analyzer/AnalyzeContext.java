@@ -7,11 +7,14 @@ import ru.team.compiler.tree.node.clas.ClassNode;
 import ru.team.compiler.tree.node.clas.ConstructorNode;
 import ru.team.compiler.tree.node.clas.MethodNode;
 import ru.team.compiler.tree.node.clas.ParametersNode;
+import ru.team.compiler.tree.node.expression.ArgumentsNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classes,
@@ -166,6 +169,63 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
         }
 
         return classes.get(requiredClassName).isAssignableFrom(this, classes.get(className));
+    }
+
+    @NotNull
+    public List<ReferenceNode> argumentTypes(@NotNull ArgumentsNode arguments) {
+        return arguments.expressions()
+                .stream()
+                .map(expressionNode -> expressionNode.type(this, false))
+                .collect(Collectors.toList());
+    }
+
+    @Nullable
+    public <E> E findMatchingExecutable(@NotNull AnalyzableClass analyzableClass, @NotNull ArgumentsNode arguments,
+                                        @NotNull Function<AnalyzableClass, List<E>> entitiesFromClass,
+                                        @NotNull Function<E, ParametersNode> entityParameters) {
+        List<ReferenceNode> argumentsTypes = argumentTypes(arguments);
+
+        E finalEntity = null;
+
+        AnalyzableClass currentClass = analyzableClass;
+        while (true) {
+            List<E> entities = entitiesFromClass.apply(currentClass);
+
+            for (E entity : entities) {
+                ParametersNode parameters = entityParameters.apply(entity);
+                int size = arguments.expressions().size();
+                if (size != parameters.pars().size()) {
+                    continue;
+                }
+
+                finalEntity = entity;
+
+                for (int j = 0; j < size; j++) {
+                    ReferenceNode argumentType = argumentsTypes.get(j);
+                    ReferenceNode parameterType = parameters.pars().get(j).type();
+
+                    if (!isAssignableFrom(parameterType, argumentType)) {
+                        finalEntity = null;
+                        break;
+                    }
+                }
+
+                if (finalEntity != null) {
+                    break;
+                }
+            }
+
+            if (finalEntity != null) {
+                break;
+            }
+
+            currentClass = currentClass.findParentClass(this, "Expression");
+            if (currentClass == null) {
+                break;
+            }
+        }
+
+        return finalEntity;
     }
 
     @NotNull
