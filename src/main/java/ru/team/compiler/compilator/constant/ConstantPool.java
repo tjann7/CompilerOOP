@@ -5,6 +5,7 @@ import org.jetbrains.annotations.UnmodifiableView;
 import ru.team.compiler.util.Unsigned;
 
 import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;

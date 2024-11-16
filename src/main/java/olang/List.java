@@ -1,6 +1,7 @@
 package olang;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class List extends Collection {
 
@@ -11,7 +12,7 @@ public class List extends Collection {
     }
 
     public List(Collection collection) {
-        list.addAll(collection.java$collection());
+        collection.iterator().java$iterator().forEachRemaining(list::add);
     }
 
     @Override
@@ -36,12 +37,20 @@ public class List extends Collection {
         return l;
     }
 
-    @Override
-    public java.util.Collection<Any> java$collection() {
-        return list;
-    }
-
     public Any get(Integer index) {
         return list.get(index.java$value());
+    }
+
+    @Override
+    public Integer hash() {
+        return new Integer(list.hashCode());
+    }
+
+    @Override
+    public Boolean equals(Any other) {
+        return new Boolean(
+                other.getClass() == getClass()
+                        && Objects.equals(list, ((List) other).list)
+        );
     }
 }

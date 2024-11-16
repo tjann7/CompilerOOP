@@ -28,11 +28,44 @@ public class Integer extends Any {
         return new Integer(value % other.value);
     }
 
+    public Boolean equal(Integer other) {
+        return new Boolean(value == other.value);
+    }
+
+    public Boolean greater(Integer other) {
+        return new Boolean(value > other.value);
+    }
+
+    public Boolean greaterOrEqual(Integer other) {
+        return new Boolean(value >= other.value);
+    }
+
+    public Boolean lower(Integer other) {
+        return new Boolean(value < other.value);
+    }
+
+    public Boolean lowerOrEqual(Integer other) {
+        return new Boolean(value <= other.value);
+    }
+
     public Real toReal() {
         return new Real((float) value);
     }
 
     public int java$value() {
         return value;
+    }
+
+    @Override
+    public Integer hash() {
+        return this;
+    }
+
+    @Override
+    public Boolean equals(Any other) {
+        return new Boolean(
+                other.getClass() == getClass()
+                        && value == ((Integer) other).value
+        );
     }
 }

@@ -27,4 +27,17 @@ public class Boolean extends Any {
     public boolean java$value() {
         return value;
     }
+
+    @Override
+    public Integer hash() {
+        return new Integer(value ? 1 : 0);
+    }
+
+    @Override
+    public Boolean equals(Any other) {
+        return new Boolean(
+                other.getClass() == getClass()
+                        && value == ((Boolean) other).value
+        );
+    }
 }

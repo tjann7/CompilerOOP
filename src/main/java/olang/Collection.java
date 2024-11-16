@@ -14,11 +14,11 @@ public class Collection extends Any {
         throw new UnsupportedOperationException();
     }
 
-    public Collection copy() {
+    public Iterator iterator() {
         throw new UnsupportedOperationException();
     }
 
-    public java.util.Collection<Any> java$collection() {
+    public Collection copy() {
         throw new UnsupportedOperationException();
     }
 }

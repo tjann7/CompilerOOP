@@ -6,8 +6,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.compilator.CompilationContext;
+import ru.team.compiler.compilator.CompilationUtils;
 import ru.team.compiler.compilator.attribute.CodeAttribute;
 import ru.team.compiler.compilator.constant.ConstantPool;
+import ru.team.compiler.compilator.constant.MethodRefConstant;
 import ru.team.compiler.exception.AnalyzerException;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.token.TokenIterator;
@@ -19,8 +21,11 @@ import ru.team.compiler.tree.node.expression.ExpressionNode;
 import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.BooleanLiteralNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
+import ru.team.compiler.util.Opcodes;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -165,7 +170,53 @@ public final class IfNode extends StatementNode {
     public void compile(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
                         @NotNull ConstantPool constantPool, @NotNull CodeAttribute.VariablePool variablePool,
                         @NotNull DataOutput dataOutput) throws IOException {
-        // TODO: implement
-        throw new UnsupportedOperationException();
+        condition.compile(context, currentClass, constantPool, variablePool, dataOutput, false);
+
+        // olang.Boolean -> boolean primitive
+        // invokevirtual (#Boolean.java$value()Z)
+        dataOutput.writeByte(Opcodes.INVOKEVIRTUAL);
+        MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool,
+                "Boolean", "java$value", "()Z");
+        dataOutput.writeShort(oMethod.index());
+
+        // Firstly, compile then body because we need to know else body offset for IFEQ opcode
+        byte[] compiledThenBody = compileBodyNode(context, currentClass, constantPool, variablePool, thenBody);
+
+        boolean hasElseBody = elseBody != null && !elseBody.statements().isEmpty();
+
+        // Secondly, define IFEQ with known offset for else body
+        // ifeq (#X)
+        int offset = 3 + (hasElseBody ? 3 : 0) + compiledThenBody.length;
+
+        dataOutput.writeByte(Opcodes.IFEQ);
+        dataOutput.writeShort(offset);
+
+        dataOutput.write(compiledThenBody);
+
+        if (hasElseBody) {
+            // Firstly, compile else body because we need to know offset for GOTO opcode
+            byte[] compiledElseBody = compileBodyNode(context, currentClass, constantPool, variablePool, elseBody);
+
+            // Secondly, define GOTO with known size of else body
+            // goto (#X)
+            dataOutput.writeByte(Opcodes.GOTO);
+            dataOutput.writeShort(3 + compiledElseBody.length);
+
+            dataOutput.write(compiledElseBody);
+        }
+    }
+
+    private byte @NotNull [] compileBodyNode(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
+                                             @NotNull ConstantPool constantPool,
+                                             @NotNull CodeAttribute.VariablePool variablePool,
+                                             @NotNull BodyNode bodyNode) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
+        DataOutputStream byteDataOutput = new DataOutputStream(byteArrayOutputStream);
+
+        for (StatementNode statementNode : bodyNode.statements()) {
+            statementNode.compile(context, currentClass, constantPool, variablePool, byteDataOutput);
+        }
+
+        return byteArrayOutputStream.toByteArray();
     }
 }

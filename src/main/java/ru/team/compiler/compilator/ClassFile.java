@@ -77,7 +77,7 @@ public record ClassFile(@NotNull ConstantPool constantPool,
 
         // Firstly, compile methods and fields, because they change ConstantPool
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
-        DataOutput byteDataOutput = new DataOutputStream(byteArrayOutputStream);
+        DataOutputStream byteDataOutput = new DataOutputStream(byteArrayOutputStream);
 
         byteDataOutput.writeShort(accessFlags());
 

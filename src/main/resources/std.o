@@ -18,6 +18,12 @@ class Integer extends Any is
     method native divide(other: Integer): Integer
     method native multiply(other: Integer): Integer
 
+    method native equal(other: Integer): Boolean
+    method native greater(other: Integer): Boolean
+    method native greaterOrEqual(other: Integer): Boolean
+    method native lower(other: Integer): Boolean
+    method native lowerOrEqual(other: Integer): Boolean
+
     method native toReal(): Real
 end
 
@@ -27,16 +33,28 @@ class Real extends Any is
     method native divide(other: Real): Real
     method native multiply(other: Real): Real
 
+    method native equal(other: Real): Boolean
+    method native greater(other: Real): Boolean
+    method native greaterOrEqual(other: Real): Boolean
+    method native lower(other: Real): Boolean
+    method native lowerOrEqual(other: Real): Boolean
+
     method native toInteger(): Integer
 end
 
 // Collections
+
+class Iterator extends any is
+    method native hasNext(): Boolean
+    method native next(): Any
+end
 
 class Collection extends Any is
     method native add(element: Any): Boolean
     method native remove(element: Any): Boolean
     method native size(): Integer
 
+    method native iterator(): Iterator
     method native copy(): Collection
 end
 

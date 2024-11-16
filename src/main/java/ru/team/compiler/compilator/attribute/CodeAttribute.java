@@ -11,8 +11,10 @@ import ru.team.compiler.tree.node.clas.ParametersNode;
 import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
 import ru.team.compiler.tree.node.statement.BodyNode;
+import ru.team.compiler.tree.node.statement.ReturnNode;
 import ru.team.compiler.tree.node.statement.StatementNode;
 import ru.team.compiler.tree.node.statement.VariableDeclarationNode;
+import ru.team.compiler.util.Opcodes;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutput;
@@ -108,10 +110,16 @@ public final class CodeAttribute extends Attribute {
     private byte @NotNull [] compileBodyNode(@NotNull CompilationContext context, @NotNull ConstantPool constantPool,
                                              @NotNull CodeAttribute.VariablePool variablePool) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
-        DataOutput byteDataOutput = new DataOutputStream(byteArrayOutputStream);
+        DataOutputStream byteDataOutput = new DataOutputStream(byteArrayOutputStream);
 
+        StatementNode lastStatement = null;
         for (StatementNode statementNode : bodyNode.statements()) {
             statementNode.compile(context, classNode, constantPool, variablePool, byteDataOutput);
+            lastStatement = statementNode;
+        }
+
+        if (!(lastStatement instanceof ReturnNode)) {
+            byteDataOutput.writeByte(Opcodes.RETURN);
         }
 
         return byteArrayOutputStream.toByteArray();

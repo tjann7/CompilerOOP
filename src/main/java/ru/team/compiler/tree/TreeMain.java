@@ -99,11 +99,11 @@ public class TreeMain {
                     if (node instanceof ClassNode classNode && context != null) {
                         String name = classNode.name().value();
 
-//                        Path path = Path.of("C:\\Users\\LeonidM\\Desktop\\test\\Test.class");
                         Path path = Path.of(name + ".class");
                         try (OutputStream outputStream = Files.newOutputStream(path);
                              DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
 
+                            // TODO: compile optimized class node
                             ClassFile classFile = ClassFile.fromNode(context, classNode);
 
                             classFile.compile(new CompilationContext(context), dataOutputStream);

@@ -36,12 +36,17 @@ public interface Opcodes {
 
     int DUP = 89;
 
+    int IFEQ = 153;
+
+    int GOTO = 167;
+
     int ARETURN = 176;
     int RETURN = 177;
 
     int GETFIELD = 180;
     int PUTFIELD = 181;
 
+    int INVOKEVIRTUAL = 182;
     int INVOKESPECIAL = 183;
 
     int NEW = 187;

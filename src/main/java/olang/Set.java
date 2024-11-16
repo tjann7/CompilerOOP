@@ -1,6 +1,7 @@
 package olang;
 
 import java.util.HashSet;
+import java.util.Objects;
 
 public class Set extends Collection {
 
@@ -11,7 +12,7 @@ public class Set extends Collection {
     }
 
     public Set(Collection collection) {
-        set.addAll(collection.java$collection());
+        collection.iterator().java$iterator().forEachRemaining(set::add);
     }
 
     @Override
@@ -37,7 +38,15 @@ public class Set extends Collection {
     }
 
     @Override
-    public java.util.Collection<Any> java$collection() {
-        return set;
+    public Integer hash() {
+        return new Integer(set.hashCode());
+    }
+
+    @Override
+    public Boolean equals(Any other) {
+        return new Boolean(
+                other.getClass() == getClass()
+                        && Objects.equals(set, ((Set) other).set)
+        );
     }
 }

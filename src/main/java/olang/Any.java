@@ -11,12 +11,12 @@ public class Any {
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return hash().java$value();
     }
 
     @Override
-    public boolean equals(Object other) {
+    public final boolean equals(Object other) {
         if (other instanceof Any any) {
             return equals(any).java$value();
         }

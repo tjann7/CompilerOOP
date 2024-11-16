@@ -82,7 +82,8 @@ public final class VariableDeclarationNode extends StatementNode {
     }
 
     @Override
-    public void compile(@NotNull CompilationContext context, @NotNull ClassNode currentClass, @NotNull ConstantPool constantPool, @NotNull CodeAttribute.VariablePool variablePool,
+    public void compile(@NotNull CompilationContext context, @NotNull ClassNode currentClass,
+                        @NotNull ConstantPool constantPool, @NotNull CodeAttribute.VariablePool variablePool,
                         @NotNull DataOutput dataOutput) throws IOException {
 
     }

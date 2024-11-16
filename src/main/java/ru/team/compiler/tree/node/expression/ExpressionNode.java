@@ -349,14 +349,14 @@ public final class ExpressionNode extends TreeNode {
             // dup
             dataOutput.writeByte(Opcodes.DUP);
 
-            // iconst #X (value)
+            // iconst (#X)
             byte[] iconst = Opcodes.iconst(constantPool, node.value());
             dataOutput.write(iconst);
 
-            // invokespecial #X (Integer.<init>(int))
+            // invokevirtual (#Integer.<init>(int))
             MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool,
                     "Integer", "<init>", "(I)V");
-            dataOutput.writeByte(Opcodes.INVOKESPECIAL);
+            dataOutput.writeByte(Opcodes.INVOKEVIRTUAL);
             dataOutput.writeShort(oMethod.index());
 
             currentType = new ReferenceNode("Integer");
@@ -369,13 +369,13 @@ public final class ExpressionNode extends TreeNode {
             // dup
             dataOutput.writeByte(Opcodes.DUP);
 
-            // fconst #X (value)
+            // fconst (#X)
             dataOutput.write(Opcodes.fconst(constantPool, node.value()));
 
-            // invokespecial #X (Real.<init>(float))
+            // invokevirtual (#Real.<init>(float))
             MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool,
                     "Real", "<init>", "(F)V");
-            dataOutput.writeByte(Opcodes.INVOKESPECIAL);
+            dataOutput.writeByte(Opcodes.INVOKEVIRTUAL);
             dataOutput.writeShort(oMethod.index());
 
             currentType = new ReferenceNode("Real");
@@ -388,13 +388,13 @@ public final class ExpressionNode extends TreeNode {
             // dup
             dataOutput.writeByte(Opcodes.DUP);
 
-            // iconst #X (value)
+            // iconst (#X)
             dataOutput.writeByte(node.value() ? Opcodes.ICONST_1 : Opcodes.ICONST_0);
 
-            // invokespecial #X (Boolean.<init>(boolean))
+            // invokevirtual (#Boolean.<init>(boolean))
             MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool,
                     "Boolean", "<init>", "(Z)V");
-            dataOutput.writeByte(Opcodes.INVOKESPECIAL);
+            dataOutput.writeByte(Opcodes.INVOKEVIRTUAL);
             dataOutput.writeShort(oMethod.index());
 
             currentType = new ReferenceNode("Boolean");
@@ -433,10 +433,10 @@ public final class ExpressionNode extends TreeNode {
                     expressionNode.compile(context, currentClass, constantPool, variablePool, dataOutput, false);
                 }
 
-                // invokespecial (#X.<init>(X))
+                // invokevirtual (#X.<init>(X))
                 MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool, oClass.value().value(),
                         constructor.constructorNode());
-                dataOutput.writeByte(Opcodes.INVOKESPECIAL);
+                dataOutput.writeByte(Opcodes.INVOKEVIRTUAL);
                 dataOutput.writeShort(oMethod.index());
 
                 shift = 1;
@@ -447,7 +447,7 @@ public final class ExpressionNode extends TreeNode {
                     throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
                 }
 
-                // aload #X
+                // aload (#X)
                 int index = variablePool.getIndex(referenceNode.value());
                 dataOutput.write(Opcodes.aload(constantPool, index));
 
@@ -507,11 +507,11 @@ public final class ExpressionNode extends TreeNode {
                     expressionNode.compile(context, currentClass, constantPool, variablePool, dataOutput, false);
                 }
 
-                // invokespecial (#X.x(X))
+                // invokevirtual (#X.x(X))
                 MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool, currentType.value(),
                         method.methodNode());
 
-                dataOutput.writeByte(Opcodes.INVOKESPECIAL);
+                dataOutput.writeByte(Opcodes.INVOKEVIRTUAL);
                 dataOutput.writeShort(oMethod.index());
 
                 currentType = method.returnType();
