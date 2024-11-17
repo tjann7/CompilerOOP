@@ -21,7 +21,7 @@ public interface Opcodes {
     int SIPUSH = 17;
 
     int LDC = 18;
-    int LDC_2 = 19;
+    int LDC_W = 19;
 
     int ALOAD = 25;
     int ALOAD_0 = 42;
@@ -74,7 +74,7 @@ public interface Opcodes {
                     if (Byte.MIN_VALUE <= index && index <= Byte.MAX_VALUE) {
                         yield Bytes.of((byte) LDC, (byte) index);
                     } else {
-                        yield Bytes.byteAndShort((byte) LDC_2, index);
+                        yield Bytes.byteAndShort((byte) LDC_W, index);
                     }
                 }
             }
@@ -95,7 +95,7 @@ public interface Opcodes {
         if (Byte.MIN_VALUE <= index && index <= Byte.MAX_VALUE) {
             return Bytes.of((byte) LDC, (byte) index);
         } else {
-            return Bytes.byteAndShort((byte) LDC_2, index);
+            return Bytes.byteAndShort((byte) LDC_W, index);
         }
     }
 
