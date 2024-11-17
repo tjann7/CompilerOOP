@@ -31,7 +31,7 @@ class Integer extends Any is
 end
 
 class Real extends Any is
-    this native ()
+    this native ();
     method native add(other: Real): Real;
     method native subtract(other: Real): Real;
     method native divide(other: Real): Real;
