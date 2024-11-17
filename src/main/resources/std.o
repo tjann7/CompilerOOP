@@ -1,84 +1,84 @@
 class Any is
-    this native ()
-    method native hash(): Integer
-    method native equals(other: Any): Boolean
+    this native ();
+    method native hash(): Integer;
+    method native equals(other: Any): Boolean;
 end
 
 // Math
 
 class Boolean extends Any is
-    this native ()
-    method native not(): Boolean
-    method native and(other: Boolean): Boolean
-    method native or(other: Boolean): Boolean
-    method native xor(other: Boolean): Boolean
+    this native ();
+    method native not(): Boolean;
+    method native and(other: Boolean): Boolean;
+    method native or(other: Boolean): Boolean;
+    method native xor(other: Boolean): Boolean;
 end
 
 class Integer extends Any is
-    this native ()
-    method native add(other: Integer): Integer
-    method native subtract(other: Integer): Integer
-    method native divide(other: Integer): Integer
-    method native multiply(other: Integer): Integer
+    this native ();
+    method native add(other: Integer): Integer;
+    method native subtract(other: Integer): Integer;
+    method native divide(other: Integer): Integer;
+    method native multiply(other: Integer): Integer;
 
-    method native equal(other: Integer): Boolean
-    method native greater(other: Integer): Boolean
-    method native greaterOrEqual(other: Integer): Boolean
-    method native lower(other: Integer): Boolean
-    method native lowerOrEqual(other: Integer): Boolean
+    method native equal(other: Integer): Boolean;
+    method native greater(other: Integer): Boolean;
+    method native greaterOrEqual(other: Integer): Boolean;
+    method native lower(other: Integer): Boolean;
+    method native lowerOrEqual(other: Integer): Boolean;
 
-    method native toReal(): Real
+    method native toReal(): Real;
 end
 
 class Real extends Any is
     this native ()
-    method native add(other: Real): Real
-    method native subtract(other: Real): Real
-    method native divide(other: Real): Real
-    method native multiply(other: Real): Real
+    method native add(other: Real): Real;
+    method native subtract(other: Real): Real;
+    method native divide(other: Real): Real;
+    method native multiply(other: Real): Real;
 
-    method native equal(other: Real): Boolean
-    method native greater(other: Real): Boolean
-    method native greaterOrEqual(other: Real): Boolean
-    method native lower(other: Real): Boolean
-    method native lowerOrEqual(other: Real): Boolean
+    method native equal(other: Real): Boolean;
+    method native greater(other: Real): Boolean;
+    method native greaterOrEqual(other: Real): Boolean;
+    method native lower(other: Real): Boolean;
+    method native lowerOrEqual(other: Real): Boolean;
 
-    method native toInteger(): Integer
+    method native toInteger(): Integer;
 end
 
 // Collections
 
 class Iterator extends any is
-    method native hasNext(): Boolean
-    method native next(): Any
+    method native hasNext(): Boolean;
+    method native next(): Any;
 end
 
 class Collection extends Any is
-    method native add(element: Any): Boolean
-    method native remove(element: Any): Boolean
-    method native size(): Integer
+    method native add(element: Any): Boolean;
+    method native remove(element: Any): Boolean;
+    method native size(): Integer;
 
-    method native iterator(): Iterator
-    method native copy(): Collection
+    method native iterator(): Iterator;
+    method native copy(): Collection;
 end
 
 class List extends Collection is
-    this native ()
-    this native (collection: Collection)
+    this native ();
+    this native (collection: Collection);
 
-    method native get(index: Integer): Any
+    method native get(index: Integer): Any;
 end
 
 class Set extends Collection is
-    this native ()
-    this native (collection: Collection)
+    this native ();
+    this native (collection: Collection);
 end
 
 // Utils
 
 class Console extends Any is
-    this native ()
+    this native ();
 
-    method native print(any: Any)
-    method native println(any: Any)
+    method native print(any: Any);
+    method native println(any: Any);
 end

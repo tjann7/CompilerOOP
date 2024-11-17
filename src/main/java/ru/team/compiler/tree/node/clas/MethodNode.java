@@ -52,6 +52,8 @@ public final class MethodNode extends ClassMemberNode {
                 iterator.next(TokenType.END_KEYWORD);
             } else {
                 bodyNode = new BodyNode(List.of());
+
+                iterator.next(TokenType.SEMICOLON);
             }
 
             return new MethodNode(isNative, identifierNode, parametersNode, returnIdentifierNode, bodyNode);

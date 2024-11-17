@@ -52,6 +52,8 @@ public final class ConstructorNode extends ClassMemberNode {
                 iterator.next(TokenType.END_KEYWORD);
             } else {
                 bodyNode = new BodyNode(List.of());
+
+                iterator.next(TokenType.SEMICOLON);
             }
 
             boolean createSuperCall = !hasSuperCall(bodyNode);
