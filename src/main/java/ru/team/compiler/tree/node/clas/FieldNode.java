@@ -28,6 +28,8 @@ public final class FieldNode extends ClassMemberNode {
 
             ReferenceNode referenceNode = ReferenceNode.PARSER.parse(iterator);
 
+            iterator.next(TokenType.SEMICOLON);
+
             return new FieldNode(identifierNode, referenceNode);
         }
     };

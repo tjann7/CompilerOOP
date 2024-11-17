@@ -131,11 +131,6 @@ public final class BodyNode extends TreeNode {
                 List<StatementNode> statementNodes = new ArrayList<>();
 
                 while (iterator.hasNext()) {
-                    Token token = iterator.lookup();
-                    if (endTypes.contains(token.type())) {
-                        return new BodyNode(statementNodes);
-                    }
-
                     if (!statementNodes.isEmpty()) {
                         Token previous = iterator.previous();
                         if (previous == null || previous.type() != TokenType.END_KEYWORD) {
@@ -144,10 +139,15 @@ public final class BodyNode extends TreeNode {
                         while (iterator.consume(TokenType.SEMICOLON)) {
                         }
 
-                        token = iterator.lookup();
+                        Token token = iterator.lookup();
                         if (endTypes.contains(token.type())) {
                             return new BodyNode(statementNodes);
                         }
+                    }
+
+                    Token token = iterator.lookup();
+                    if (endTypes.contains(token.type())) {
+                        return new BodyNode(statementNodes);
                     }
 
                     StatementNode statementNode = StatementNode.PARSER.parse(iterator);

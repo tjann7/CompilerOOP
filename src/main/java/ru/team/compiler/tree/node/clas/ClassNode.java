@@ -53,6 +53,9 @@ public final class ClassNode extends TreeNode {
             boolean hasConstructor = false;
 
             while (iterator.hasNext()) {
+                while (iterator.consume(TokenType.SEMICOLON)) {
+                }
+
                 if (iterator.consume(TokenType.END_KEYWORD)) {
                     if (!hasConstructor) {
                         classMemberNodes.add(
