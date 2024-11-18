@@ -62,6 +62,7 @@ public class MethodNodeTest {
                 new Token(TokenType.IS_KEYWORD, "is"),
                 new Token(TokenType.RETURN_KEYWORD, "return"),
                 new Token(TokenType.IDENTIFIER, "b"),
+                new Token(TokenType.SEMICOLON, ";"),
                 new Token(TokenType.END_KEYWORD, "end")
         );
 

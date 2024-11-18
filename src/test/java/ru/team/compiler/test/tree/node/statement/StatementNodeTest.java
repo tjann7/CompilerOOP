@@ -55,6 +55,7 @@ public class StatementNodeTest {
                 new Token(TokenType.IDENTIFIER, "variable"),
                 new Token(TokenType.ASSIGNMENT_OPERATOR, ":="),
                 new Token(TokenType.REAL_LITERAL, "5.0"),
+                new Token(TokenType.SEMICOLON, ";"),
                 new Token(TokenType.END_KEYWORD, "end")
         );
 
@@ -79,9 +80,11 @@ public class StatementNodeTest {
                 new Token(TokenType.THEN_KEYWORD, "then"),
                 new Token(TokenType.RETURN_KEYWORD, "return"),
                 new Token(TokenType.REAL_LITERAL, "1.1"),
+                new Token(TokenType.SEMICOLON, ";"),
                 new Token(TokenType.ELSE_KEYWORD, "else"),
                 new Token(TokenType.RETURN_KEYWORD, "return"),
                 new Token(TokenType.REAL_LITERAL, "2.2"),
+                new Token(TokenType.SEMICOLON, ";"),
                 new Token(TokenType.END_KEYWORD, "end")
         ));
 

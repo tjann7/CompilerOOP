@@ -52,6 +52,7 @@ public class WhileLoopTest {
                 new Token(TokenType.SEMICOLON, ";"),
                 new Token(TokenType.RETURN_KEYWORD, "return"),
                 new Token(TokenType.INTEGER_LITERAL, "1"),
+                new Token(TokenType.SEMICOLON, ";"),
                 new Token(TokenType.END_KEYWORD, "end")
         );
 

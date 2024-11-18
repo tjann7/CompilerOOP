@@ -53,30 +53,25 @@ public class BodyNodeTest {
     void parserSingleTest() {
         TreeNodeParser<BodyNode> parser = BodyNode.parser(TokenType.END_KEYWORD);
 
-        for (int i = 0; i < 2; i++) {
-            List<Token> tokens = new ArrayList<>(List.of(
-                    new Token(TokenType.IDENTIFIER, "variable"),
-                    new Token(TokenType.ASSIGNMENT_OPERATOR, ":="),
-                    new Token(TokenType.REAL_LITERAL, "5.0"),
-                    new Token(TokenType.END_KEYWORD, "end")
-            ));
+        List<Token> tokens = new ArrayList<>(List.of(
+                new Token(TokenType.IDENTIFIER, "variable"),
+                new Token(TokenType.ASSIGNMENT_OPERATOR, ":="),
+                new Token(TokenType.REAL_LITERAL, "5.0"),
+                new Token(TokenType.SEMICOLON, ";"),
+                new Token(TokenType.END_KEYWORD, "end")
+        ));
 
-            if (i == 1) {
-                tokens.add(3, new Token(TokenType.SEMICOLON, ";"));
-            }
-
-            TokenIterator iterator = new TokenIterator(tokens);
-            BodyNode node = parser.parse(iterator);
-            assertEquals(new BodyNode(List.of(
-                            new AssignmentNode(
-                                    true,
-                                    new ReferenceNode("variable"),
-                                    new ExpressionNode(new RealLiteralNode(5), List.of())))),
-                    node, "Test #" + (i + 1));
-            assertTrue(iterator.hasNext(), "Test #" + (i + 1));
-            assertEquals(TokenType.END_KEYWORD, iterator.next().type(), "Test #" + (i + 1));
-            assertFalse(iterator.hasNext(), "Test #" + (i + 1));
-        }
+        TokenIterator iterator = new TokenIterator(tokens);
+        BodyNode node = parser.parse(iterator);
+        assertEquals(new BodyNode(List.of(
+                        new AssignmentNode(
+                                true,
+                                new ReferenceNode("variable"),
+                                new ExpressionNode(new RealLiteralNode(5), List.of())))),
+                node);
+        assertTrue(iterator.hasNext());
+        assertEquals(TokenType.END_KEYWORD, iterator.next().type());
+        assertFalse(iterator.hasNext());
     }
 
     @Test
@@ -95,6 +90,7 @@ public class BodyNodeTest {
                 new Token(TokenType.IDENTIFIER, "variable2"),
                 new Token(TokenType.ASSIGNMENT_OPERATOR, ":="),
                 new Token(TokenType.BOOLEAN_LITERAL, "false"),
+                new Token(TokenType.SEMICOLON, ";"),
                 new Token(TokenType.END_KEYWORD, "end")
         );
 
@@ -129,6 +125,7 @@ public class BodyNodeTest {
                 new Token(TokenType.IDENTIFIER, "variable"),
                 new Token(TokenType.ASSIGNMENT_OPERATOR, ":="),
                 new Token(TokenType.REAL_LITERAL, "5.0"),
+                new Token(TokenType.SEMICOLON, ";"),
                 new Token(TokenType.END_KEYWORD, "end"),
                 new Token(TokenType.END_KEYWORD, "end")
         );

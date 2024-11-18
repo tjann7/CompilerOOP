@@ -21,7 +21,8 @@ public class FieldNodeTest {
                 new Token(TokenType.VAR_KEYWORD, "var"),
                 new Token(TokenType.IDENTIFIER, "a"),
                 new Token(TokenType.COLON, ":"),
-                new Token(TokenType.IDENTIFIER, "Integer")
+                new Token(TokenType.IDENTIFIER, "Integer"),
+                new Token(TokenType.SEMICOLON, ";")
         );
 
         TokenIterator iterator = new TokenIterator(tokens);

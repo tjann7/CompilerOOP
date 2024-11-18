@@ -11,11 +11,14 @@ import ru.team.compiler.tree.node.clas.ClassNode;
 import ru.team.compiler.tree.node.clas.ConstructorNode;
 import ru.team.compiler.tree.node.clas.FieldNode;
 import ru.team.compiler.tree.node.clas.ParametersNode;
+import ru.team.compiler.tree.node.expression.ArgumentsNode;
 import ru.team.compiler.tree.node.expression.ExpressionNode;
 import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
+import ru.team.compiler.tree.node.primary.SuperNode;
 import ru.team.compiler.tree.node.statement.AssignmentNode;
 import ru.team.compiler.tree.node.statement.BodyNode;
+import ru.team.compiler.tree.node.statement.MethodCallNode;
 
 import java.util.List;
 
@@ -35,7 +38,17 @@ public class ClassNodeTest {
         assertEquals(new ClassNode(
                         new IdentifierNode("A"),
                         null,
-                        List.of()),
+                        List.of(new ConstructorNode(
+                                false,
+                                new ParametersNode(List.of()),
+                                new BodyNode(List.of(
+                                        new MethodCallNode(
+                                                new ExpressionNode(
+                                                        new SuperNode(), List.of(
+                                                        new ExpressionNode.IdArg(
+                                                                new IdentifierNode("<init>"),
+                                                                new ArgumentsNode(List.of()))))))),
+                                true))),
                 node);
         assertFalse(iterator.hasNext());
     }
@@ -56,7 +69,17 @@ public class ClassNodeTest {
         assertEquals(new ClassNode(
                         new IdentifierNode("A"),
                         new ReferenceNode("B"),
-                        List.of()),
+                        List.of(new ConstructorNode(
+                                false,
+                                new ParametersNode(List.of()),
+                                new BodyNode(List.of(
+                                        new MethodCallNode(
+                                                new ExpressionNode(
+                                                        new SuperNode(), List.of(
+                                                                new ExpressionNode.IdArg(
+                                                                        new IdentifierNode("<init>"),
+                                                                        new ArgumentsNode(List.of()))))))),
+                                true))),
                 node);
         assertFalse(iterator.hasNext());
     }
@@ -73,6 +96,7 @@ public class ClassNodeTest {
                 new Token(TokenType.IDENTIFIER, "a"),
                 new Token(TokenType.COLON, ":"),
                 new Token(TokenType.IDENTIFIER, "Integer"),
+                new Token(TokenType.SEMICOLON, ";"),
                 new Token(TokenType.END_KEYWORD, "end")
         );
 
@@ -82,7 +106,19 @@ public class ClassNodeTest {
                         new IdentifierNode("A"),
                         new ReferenceNode("B"),
                         List.of(
-                                new FieldNode(new IdentifierNode("a"), new ReferenceNode("Integer")))),
+                                new FieldNode(new IdentifierNode("a"), new ReferenceNode("Integer")),
+                                new ConstructorNode(
+                                        false,
+                                        new ParametersNode(List.of()),
+                                        new BodyNode(List.of(
+                                                new MethodCallNode(
+                                                        new ExpressionNode(
+                                                                new SuperNode(), List.of(
+                                                                new ExpressionNode.IdArg(
+                                                                        new IdentifierNode("<init>"),
+                                                                        new ArgumentsNode(List.of()))))))),
+                                        true
+                                ))),
                 node);
         assertFalse(iterator.hasNext());
     }
@@ -100,6 +136,7 @@ public class ClassNodeTest {
                 new Token(TokenType.IDENTIFIER, "a"),
                 new Token(TokenType.COLON, ":"),
                 new Token(TokenType.IDENTIFIER, "Integer"),
+                new Token(TokenType.SEMICOLON, ";"),
 
                 new Token(TokenType.THIS_KEYWORD, "this"),
                 new Token(TokenType.OPENING_PARENTHESIS, "("),
@@ -113,6 +150,7 @@ public class ClassNodeTest {
                 new Token(TokenType.IDENTIFIER, "a"),
                 new Token(TokenType.ASSIGNMENT_OPERATOR, ":="),
                 new Token(TokenType.IDENTIFIER, "a"),
+                new Token(TokenType.SEMICOLON, ";"),
                 new Token(TokenType.END_KEYWORD, "end"),
 
                 new Token(TokenType.END_KEYWORD, "end")
@@ -131,11 +169,18 @@ public class ClassNodeTest {
                                                 new ParametersNode.Par(new IdentifierNode("a"),
                                                         new ReferenceNode("Integer")))),
                                         new BodyNode(List.of(
+                                                new MethodCallNode(
+                                                        new ExpressionNode(
+                                                                new SuperNode(), List.of(
+                                                                new ExpressionNode.IdArg(
+                                                                        new IdentifierNode("<init>"),
+                                                                        new ArgumentsNode(List.of()))))),
                                                 new AssignmentNode(
                                                         false,
                                                         new ReferenceNode("a"),
                                                         new ExpressionNode(new ReferenceNode("a"), List.of()))
-                                        ))))),
+                                        )),
+                                        true))),
                 node);
         assertFalse(iterator.hasNext());
     }
