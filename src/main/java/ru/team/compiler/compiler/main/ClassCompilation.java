@@ -56,6 +56,7 @@ public final class ClassCompilation {
                 Files.createDirectories(outputPath);
             } catch (IOException e) {
                 System.err.println("[ERROR] " + outputPath + " | Failed on directory creation: " + e);
+                e.printStackTrace();
                 return;
             }
         }
@@ -65,6 +66,7 @@ public final class ClassCompilation {
             string = Files.readString(path);
         } catch (IOException e) {
             System.err.println("[ERROR] " + outputPath + " | Failed on file reading: " + e);
+            e.printStackTrace();
             return;
         }
 
@@ -77,6 +79,7 @@ public final class ClassCompilation {
             }
         } catch (Exception e) {
             System.err.println("[ERROR] " + path + " | Failed on tokenization: " + e);
+            e.printStackTrace();
             return;
         }
 
@@ -85,6 +88,7 @@ public final class ClassCompilation {
             programNode = ProgramNode.PARSER.parse(tokens);
         } catch (Exception e) {
             System.err.println("[ERROR] " + path + " | Failed on syntax analysis: " + e);
+            e.printStackTrace();
             return;
         }
 
@@ -94,10 +98,11 @@ public final class ClassCompilation {
 
         AnalyzeContext context;
         try {
-            context = Analyzer.createContext(path.getParent(), programNode);
+            context = Analyzer.createContext(path.toAbsolutePath().getParent(), programNode);
             programNode.analyze(context);
         } catch (Exception e) {
             System.err.println("[ERROR] " + path + " | Failed on semantic analysis: " + e);
+            e.printStackTrace();
             return;
         }
 
@@ -105,6 +110,7 @@ public final class ClassCompilation {
             programNode = programNode.optimize();
         } catch (Exception e) {
             System.err.println("[ERROR] " + path + " | Failed on optimization: " + e);
+            e.printStackTrace();
             return;
         }
 
@@ -119,6 +125,7 @@ public final class ClassCompilation {
                     Files.deleteIfExists(jarOutputPath);
                 } catch (IOException e) {
                     System.err.println("[ERROR] " + jarOutputPath + " | Failed on old jar deletion: " + e);
+                    e.printStackTrace();
                     return;
                 }
 
@@ -138,6 +145,7 @@ public final class ClassCompilation {
                     };
                 } catch (URISyntaxException | IOException e) {
                     System.err.println("[ERROR] " + jarOutputPath + " | Failed on jar create: " + e);
+                    e.printStackTrace();
                     return;
                 }
             } else {
