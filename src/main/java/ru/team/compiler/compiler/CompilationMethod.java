@@ -33,6 +33,10 @@ public record CompilationMethod(@NotNull Utf8Constant name, @NotNull Utf8Constan
     @NotNull
     public static CompilationMethod fromNode(@NotNull ConstantPool constantPool, @NotNull ClassNode classNode,
                                              @NotNull ConstructorNode constructorNode) {
+        if (constructorNode.isNative()) {
+            throw new IllegalArgumentException("Cannot convert native ConstructorNode to CompilationMethod");
+        }
+
         Utf8Constant name = constantPool.getUtf("<init>");
         Utf8Constant descriptor = constantPool.getUtf(CompilationUtils.descriptor(constructorNode));
 

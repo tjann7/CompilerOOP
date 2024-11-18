@@ -134,40 +134,39 @@ public final class ConstructorNode extends ClassMemberNode {
             }
         }
 
-        AnalyzableClass analyzableClass = context.currentClass("Constructor");
+        if (!isNative) {
+            AnalyzableClass analyzableClass = context.currentClass("Constructor");
+            Set<ReferenceNode> allFields = analyzableClass.fields().values()
+                    .stream()
+                    .map(AnalyzableField::name)
+                    .map(IdentifierNode::asReference)
+                    .collect(Collectors.toSet());
 
-        Set<ReferenceNode> allFields = analyzableClass.fields().values()
-                .stream()
-                .map(AnalyzableField::name)
-                .map(IdentifierNode::asReference)
-                .collect(Collectors.toSet());
+            if (!allFields.equals(context.initializedFields())) {
+                String message;
+                Set<ReferenceNode> difference = Sets.difference(allFields, context.initializedFields());
+                if (difference.isEmpty()) {
+                    difference = Sets.difference(context.initializedFields(), allFields);
+                    message = "define unknown field";
+                } else {
+                    message = "does not define field";
+                }
 
-        if (!allFields.equals(context.initializedFields())) {
-            String message;
-            Set<ReferenceNode> difference = Sets.difference(allFields, context.initializedFields());
-            if (difference.isEmpty()) {
-                difference = Sets.difference(context.initializedFields(), allFields);
-                message = "define unknown field";
-            } else {
-                message = "does not define field";
+                if (!difference.isEmpty()) {
+                    throw new AnalyzerException("Constructor '%s(%s)' %s%s %s"
+                            .formatted(
+                                    analyzableClass.name().value(),
+                                    parameters.pars().stream()
+                                            .map(ParametersNode.Par::type)
+                                            .map(ReferenceNode::value)
+                                            .collect(Collectors.joining(",")),
+                                    message,
+                                    difference.size() == 1 ? "" : "s",
+                                    difference.stream()
+                                            .map(type -> "this." + type.value())
+                                            .collect(Collectors.joining(","))));
+                }
             }
-
-            if (!difference.isEmpty()) {
-                throw new AnalyzerException("Constructor '%s(%s)' %s%s %s"
-                        .formatted(
-                                analyzableClass.name().value(),
-                                parameters.pars().stream()
-                                        .map(ParametersNode.Par::type)
-                                        .map(ReferenceNode::value)
-                                        .collect(Collectors.joining(",")),
-                                message,
-                                difference.size() == 1 ? "" : "s",
-                                difference.stream()
-                                        .map(type -> "this." + type.value())
-                                        .collect(Collectors.joining(","))));
-            }
-
-            difference = Sets.difference(context.initializedFields(), allFields);
         }
 
         return initialContext;
