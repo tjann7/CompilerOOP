@@ -15,6 +15,7 @@ import ru.team.compiler.tree.node.statement.ReturnNode;
 import ru.team.compiler.tree.node.statement.StatementNode;
 import ru.team.compiler.tree.node.statement.VariableDeclarationNode;
 import ru.team.compiler.util.Opcodes;
+import ru.team.compiler.util.Unsigned;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutput;
@@ -75,6 +76,11 @@ public final class CodeAttribute extends Attribute {
                 .map(value -> new AnalyzableVariable(value.name(), value.type()))
                 .collect(Collectors.toList()));
 
+        int maxLocals = 1 + locals.size();
+        if (maxLocals > Unsigned.MAX_BYTE) {
+            throw new IOException("There can be at maximum %d locals, got %d".formatted(Unsigned.MAX_BYTE, maxLocals));
+        }
+
         VariablePool variablePool = new VariablePool();
         Map<ReferenceNode, AnalyzableVariable> variables = new HashMap<>();
 
@@ -104,9 +110,8 @@ public final class CodeAttribute extends Attribute {
         dataOutput.writeInt(4 + byteArrayOutputStream.size()); // maxStacks + maxLocals + code
 
         int maxStack = context.maxStackSize().get();
-        dataOutput.writeShort(maxStack);
 
-        int maxLocals = 1 + locals.size();
+        dataOutput.writeShort(maxStack);
         dataOutput.writeShort(maxLocals);
 
         dataOutput.write(byteArrayOutputStream.toByteArray());

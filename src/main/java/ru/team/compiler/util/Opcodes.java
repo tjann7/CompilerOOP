@@ -105,7 +105,7 @@ public interface Opcodes {
             case 1 -> Bytes.of((byte) ALOAD_1);
             case 2 -> Bytes.of((byte) ALOAD_2);
             case 3 -> Bytes.of((byte) ALOAD_3);
-            default -> Bytes.byteAndShort((byte) ALOAD, constantPool.getInt(value).index());
+            default -> Bytes.of((byte) ALOAD, (byte) value);
         };
     }
 
@@ -115,7 +115,7 @@ public interface Opcodes {
             case 1 -> Bytes.of((byte) ASTORE_1);
             case 2 -> Bytes.of((byte) ASTORE_2);
             case 3 -> Bytes.of((byte) ASTORE_3);
-            default -> Bytes.byteAndShort((byte) ASTORE, constantPool.getInt(value).index());
+            default -> Bytes.of((byte) ASTORE, (byte) value);
         };
     }
 
