@@ -672,11 +672,31 @@ public final class ExpressionNode extends TreeNode {
 
                     currentType = requiredClass;
                 } else {
+                    // new (Boolean)
+                    ClassConstant oBooleanClass = CompilationUtils.oClass(constantPool, "Boolean");
+                    dataOutput.writeByte(Opcodes.NEW);
+                    dataOutput.writeShort(oBooleanClass.index());
+
+                    // dup_x1, so we will have: olang.Boolean | objectref | olang.Boolean at the stack
+                    dataOutput.writeByte(Opcodes.DUP_X1);
+                    // and swap them to get: olang.Boolean | olang.Boolean | objectref
+                    dataOutput.writeByte(Opcodes.SWAP);
+
                     // instanceof (#X)
                     ClassConstant oClass = CompilationUtils.oClass(constantPool, requiredClass.value());
 
                     dataOutput.writeByte(Opcodes.INSTANCEOF);
                     dataOutput.writeShort(oClass.index());
+
+                    context.incrementStackSize(2); // new + dup_x1
+
+                    // invokespecial (#Boolean.<init>(boolean))
+                    MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool,
+                            "Boolean", "<init>", "(Z)V");
+                    dataOutput.writeByte(Opcodes.INVOKESPECIAL);
+                    dataOutput.writeShort(oMethod.index());
+
+                    context.decrementStackSize(2); // invokespecial for this and result of instanceof
 
                     currentType = new ReferenceNode("Boolean");
                 }
