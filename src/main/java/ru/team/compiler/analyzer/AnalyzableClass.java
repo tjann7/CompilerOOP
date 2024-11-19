@@ -3,6 +3,7 @@ package ru.team.compiler.analyzer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.team.compiler.exception.AnalyzerException;
+import ru.team.compiler.tree.node.clas.ClassNode;
 import ru.team.compiler.tree.node.clas.ParametersNode;
 import ru.team.compiler.tree.node.expression.ArgumentsNode;
 import ru.team.compiler.tree.node.expression.IdentifierNode;
@@ -15,17 +16,20 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public record AnalyzableClass(@NotNull IdentifierNode name,
+public record AnalyzableClass(@NotNull ClassNode classNode,
+                              @NotNull IdentifierNode name,
                               @NotNull ReferenceNode parentClass,
                               @NotNull Map<AnalyzableConstructor.Key, AnalyzableConstructor> constructors,
                               @NotNull Map<AnalyzableMethod.Key, AnalyzableMethod> methods,
                               @NotNull Map<AnalyzableField.Key, AnalyzableField> fields) {
 
-    public AnalyzableClass(@NotNull IdentifierNode name,
+    public AnalyzableClass(@NotNull ClassNode classNode,
+                           @NotNull IdentifierNode name,
                            @NotNull ReferenceNode parentClass,
                            @NotNull Map<AnalyzableConstructor.Key, AnalyzableConstructor> constructors,
                            @NotNull Map<AnalyzableMethod.Key, AnalyzableMethod> methods,
                            @NotNull Map<AnalyzableField.Key, AnalyzableField> fields) {
+        this.classNode = classNode;
         this.name = name;
         this.parentClass = parentClass;
         this.constructors = Collections.unmodifiableMap(constructors);

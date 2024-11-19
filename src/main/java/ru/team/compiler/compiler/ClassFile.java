@@ -20,7 +20,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-public record ClassFile(@NotNull ConstantPool constantPool,
+public record ClassFile(@NotNull ConstantPool constantPool, boolean isAbstract,
                         @NotNull String className, @Nullable String superClassName,
                         @NotNull List<CompilationField> fields,
                         @NotNull List<CompilationMethod> methods) {
@@ -49,6 +49,7 @@ public record ClassFile(@NotNull ConstantPool constantPool,
 
         return new ClassFile(
                 constantPool,
+                classNode.isAbstract(),
                 classNode.name().value(),
                 parentName != null ? parentName.value() : null,
                 fields,
@@ -57,7 +58,7 @@ public record ClassFile(@NotNull ConstantPool constantPool,
     }
 
     public int accessFlags() {
-        return Modifier.PUBLIC;
+        return Modifier.PUBLIC | (isAbstract ? Modifier.ABSTRACT : 0);
     }
 
     public void compile(@NotNull CompilationContext context, @NotNull DataOutput dataOutput) throws IOException {

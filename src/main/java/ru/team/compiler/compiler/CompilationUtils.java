@@ -48,7 +48,7 @@ public final class CompilationUtils {
     public static String descriptor(@NotNull ConstructorNode constructorNode) {
         return descriptor(
                 new MethodNode(
-                        false, new IdentifierNode("<init>"),
+                        false, false, new IdentifierNode("<init>"),
                         constructorNode.parameters(), null, constructorNode.body()
                 )
         );

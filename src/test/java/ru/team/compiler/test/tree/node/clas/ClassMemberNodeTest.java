@@ -66,6 +66,7 @@ public class ClassMemberNodeTest {
         ClassMemberNode node = ClassMemberNode.PARSER.parse(iterator);
         assertEquals(new MethodNode(
                         false,
+                        false,
                         new IdentifierNode("a"),
                         new ParametersNode(List.of(
                                 new ParametersNode.Par(
@@ -98,6 +99,7 @@ public class ClassMemberNodeTest {
         ClassMemberNode node = ClassMemberNode.PARSER.parse(iterator);
         assertEquals(new MethodNode(
                         true,
+                        false,
                         new IdentifierNode("a"),
                         new ParametersNode(List.of(
                                 new ParametersNode.Par(

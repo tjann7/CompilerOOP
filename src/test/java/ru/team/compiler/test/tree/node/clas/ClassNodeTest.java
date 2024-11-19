@@ -36,6 +36,7 @@ public class ClassNodeTest {
         TokenIterator iterator = new TokenIterator(tokens);
         ClassNode node = ClassNode.PARSER.parse(iterator);
         assertEquals(new ClassNode(
+                        false,
                         new IdentifierNode("A"),
                         null,
                         List.of(new ConstructorNode(
@@ -67,6 +68,7 @@ public class ClassNodeTest {
         TokenIterator iterator = new TokenIterator(tokens);
         ClassNode node = ClassNode.PARSER.parse(iterator);
         assertEquals(new ClassNode(
+                        false,
                         new IdentifierNode("A"),
                         new ReferenceNode("B"),
                         List.of(new ConstructorNode(
@@ -76,9 +78,9 @@ public class ClassNodeTest {
                                         new MethodCallNode(
                                                 new ExpressionNode(
                                                         new SuperNode(), List.of(
-                                                                new ExpressionNode.IdArg(
-                                                                        new IdentifierNode("<init>"),
-                                                                        new ArgumentsNode(List.of()))))))),
+                                                        new ExpressionNode.IdArg(
+                                                                new IdentifierNode("<init>"),
+                                                                new ArgumentsNode(List.of()))))))),
                                 true))),
                 node);
         assertFalse(iterator.hasNext());
@@ -103,6 +105,7 @@ public class ClassNodeTest {
         TokenIterator iterator = new TokenIterator(tokens);
         ClassNode node = ClassNode.PARSER.parse(iterator);
         assertEquals(new ClassNode(
+                        false,
                         new IdentifierNode("A"),
                         new ReferenceNode("B"),
                         List.of(
@@ -159,6 +162,7 @@ public class ClassNodeTest {
         TokenIterator iterator = new TokenIterator(tokens);
         ClassNode node = ClassNode.PARSER.parse(iterator);
         assertEquals(new ClassNode(
+                        false,
                         new IdentifierNode("A"),
                         new ReferenceNode("B"),
                         List.of(

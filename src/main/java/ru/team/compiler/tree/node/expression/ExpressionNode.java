@@ -180,8 +180,13 @@ public final class ExpressionNode extends TreeNode {
                 }
 
                 if (idArg.arguments == null) {
-                    throw new AnalyzerException("Expression at '%s' is invalid: no arguments for constructor"
-                            .formatted(context.currentPath()));
+                    throw new AnalyzerException("Expression at '%s' is invalid: no arguments for constructor of '%s'"
+                            .formatted(context.currentPath(), referenceNode.value()));
+                }
+
+                if (analyzableClass.classNode().isAbstract()) {
+                    throw new AnalyzerException("Expression at '%s' is invalid: calling for constructor of abstract class '%s'"
+                            .formatted(context.currentPath(), referenceNode.value()));
                 }
 
                 AnalyzableConstructor constructor = analyzableClass.findMatchingConstructor(
@@ -367,9 +372,8 @@ public final class ExpressionNode extends TreeNode {
                 AnalyzableMethod method = analyzableClass.findMatchingMethod(
                         context, idArg.name, idArg.arguments, checkUninitialized);
 
+                boolean superCall = i == 0 && primary instanceof SuperNode;
                 if (method == null) {
-                    boolean superCall = i == 0 && primary instanceof SuperNode;
-
                     List<ReferenceNode> argumentsTypes = context.argumentTypes(idArg.arguments);
 
                     throw new AnalyzerException("Expression at '%s' is invalid: reference to unknown %smethod '%s(%s)' in type '%s'"
@@ -381,6 +385,17 @@ public final class ExpressionNode extends TreeNode {
                                             .map(ReferenceNode::value)
                                             .collect(Collectors.joining(",")),
                                     superCall ? analyzableClass.parentClass().value() : currentType.value()));
+                }
+
+                if (superCall && method.methodNode().isAbstract()) {
+                    throw new AnalyzerException("Expression at '%s' is invalid: reference to super abstract method '%s(%s)' in type '%s'"
+                            .formatted(
+                                    context.currentPath(),
+                                    idArg.name.value(),
+                                    method.parameters().pars().stream()
+                                            .map(par -> par.type().value())
+                                            .collect(Collectors.joining(",")),
+                                    currentType.value()));
                 }
 
                 if (!allowVoid) {
@@ -503,7 +518,8 @@ public final class ExpressionNode extends TreeNode {
                 }
 
                 IdArg idArg = idArgs.get(0);
-                if (!idArg.name.value().equals("<init>") || idArg.arguments == null) {
+                if (!idArg.name.value().equals("<init>") || idArg.arguments == null
+                        || analyzableClass.classNode().isAbstract()) {
                     throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
                 }
 

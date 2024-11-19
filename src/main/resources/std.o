@@ -53,13 +53,13 @@ class Iterator extends any is
     method native next(): Any;
 end
 
-class Collection extends Any is
-    method native add(element: Any): Boolean;
-    method native remove(element: Any): Boolean;
-    method native size(): Integer;
+class abstract Collection extends Any is
+    method abstract add(element: Any): Boolean;
+    method abstract remove(element: Any): Boolean;
+    method abstract size(): Integer;
 
-    method native iterator(): Iterator;
-    method native copy(): Collection;
+    method abstract iterator(): Iterator;
+    method abstract copy(): Collection;
 end
 
 class List extends Collection is

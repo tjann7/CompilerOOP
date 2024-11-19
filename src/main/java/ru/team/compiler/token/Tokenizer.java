@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class Tokenizer {
 
-    private final Pattern identifierPattern = Pattern.compile("[a-zA-Z0-9]+");
+    private final Pattern identifierPattern = Pattern.compile("[a-zA-Z0-9_]+");
     private final Map<Character, TokenType> singleTokens = Map.of(
             '.', TokenType.DOT,
             ',', TokenType.COMMA,

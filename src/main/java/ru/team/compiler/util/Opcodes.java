@@ -38,6 +38,9 @@ public interface Opcodes {
     int POP = 87;
 
     int DUP = 89;
+    int DUP_X1 = 90;
+
+    int SWAP = 95;
 
     int IFEQ = 153;
 

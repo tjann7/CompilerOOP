@@ -34,6 +34,8 @@ public final class ClassNode extends TreeNode {
         public ClassNode parse(@NotNull TokenIterator iterator) throws CompilerException {
             iterator.next(TokenType.CLASS_KEYWORD);
 
+            boolean isAbstract = iterator.consume(TokenType.ABSTRACT_KEYWORD);
+
             IdentifierNode identifierNode = IdentifierNode.PARSER.parse(iterator);
 
             ReferenceNode parentIdentifierNode;
@@ -72,7 +74,7 @@ public final class ClassNode extends TreeNode {
                                         true));
                     }
 
-                    return new ClassNode(identifierNode, parentIdentifierNode, classMemberNodes);
+                    return new ClassNode(isAbstract, identifierNode, parentIdentifierNode, classMemberNodes);
                 }
 
                 ClassMemberNode classMemberNode = ClassMemberNode.PARSER.parse(iterator);
@@ -87,15 +89,21 @@ public final class ClassNode extends TreeNode {
         }
     };
 
+    private final boolean isAbstract;
     private final IdentifierNode name;
     private final ReferenceNode parentName;
     private final List<ClassMemberNode> classMembers;
 
-    public ClassNode(@NotNull IdentifierNode name, @Nullable ReferenceNode parentName,
+    public ClassNode(boolean isAbstract, @NotNull IdentifierNode name, @Nullable ReferenceNode parentName,
                      @NotNull List<ClassMemberNode> classMembers) {
+        this.isAbstract = isAbstract;
         this.name = name;
         this.parentName = parentName;
         this.classMembers = List.copyOf(classMembers);
+    }
+
+    public boolean isAbstract() {
+        return isAbstract;
     }
 
     @NotNull
@@ -124,12 +132,15 @@ public final class ClassNode extends TreeNode {
             context = classMemberNode.analyze(context);
         }
 
+        // TODO: check that all abstract methods are implemented and create synthetic bridges if needed
+
         return initialContext;
     }
 
     @NotNull
     public ClassNode optimize() {
         return new ClassNode(
+                isAbstract,
                 name,
                 parentName,
                 classMembers.stream()

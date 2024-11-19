@@ -184,6 +184,7 @@ public final class Analyzer {
 
             ReferenceNode parentName = classNode.parentName();
             AnalyzableClass analyzableClass = new AnalyzableClass(
+                    classNode,
                     classNode.name(),
                     parentName != null ? parentName : new ReferenceNode("Any"),
                     constructors,

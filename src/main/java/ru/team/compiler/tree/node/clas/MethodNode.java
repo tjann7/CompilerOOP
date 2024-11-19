@@ -31,6 +31,11 @@ public final class MethodNode extends ClassMemberNode {
             iterator.next(TokenType.METHOD_KEYWORD);
 
             boolean isNative = iterator.consume(TokenType.NATIVE_KEYWORD);
+            boolean isAbstract = iterator.consume(TokenType.ABSTRACT_KEYWORD);
+
+            if (isNative && isAbstract) {
+                // TODO: throw error
+            }
 
             IdentifierNode identifierNode = IdentifierNode.PARSER.parse(iterator);
 
@@ -44,7 +49,7 @@ public final class MethodNode extends ClassMemberNode {
             }
 
             BodyNode bodyNode;
-            if (!isNative) {
+            if (!isNative && !isAbstract) {
                 iterator.next(TokenType.IS_KEYWORD);
 
                 bodyNode = BODY_PARSER.parse(iterator);
@@ -56,19 +61,21 @@ public final class MethodNode extends ClassMemberNode {
                 iterator.next(TokenType.SEMICOLON);
             }
 
-            return new MethodNode(isNative, identifierNode, parametersNode, returnIdentifierNode, bodyNode);
+            return new MethodNode(isNative, isAbstract, identifierNode, parametersNode, returnIdentifierNode, bodyNode);
         }
     };
 
     private final boolean isNative;
+    private final boolean isAbstract;
     private final IdentifierNode name;
     private final ParametersNode parameters;
     private final ReferenceNode returnType;
     private final BodyNode body;
 
-    public MethodNode(boolean isNative, @NotNull IdentifierNode name, @NotNull ParametersNode parameters,
-                      @Nullable ReferenceNode returnType, @NotNull BodyNode body) {
+    public MethodNode(boolean isNative, boolean isAbstract, @NotNull IdentifierNode name,
+                      @NotNull ParametersNode parameters, @Nullable ReferenceNode returnType, @NotNull BodyNode body) {
         this.isNative = isNative;
+        this.isAbstract = isAbstract;
         this.name = name;
         this.parameters = parameters;
         this.returnType = returnType;
@@ -77,6 +84,10 @@ public final class MethodNode extends ClassMemberNode {
 
     public boolean isNative() {
         return isNative;
+    }
+
+    public boolean isAbstract() {
+        return isAbstract;
     }
 
     @NotNull
@@ -130,7 +141,7 @@ public final class MethodNode extends ClassMemberNode {
             }
         }
 
-        if (returnType != null && !body.alwaysReturn()) {
+        if (!isNative && !isAbstract && returnType != null && !body.alwaysReturn()) {
             throw new AnalyzerException("Method '%s.%s' does not always return"
                     .formatted(initialContext.currentPath(), name.value()));
         }
@@ -148,6 +159,7 @@ public final class MethodNode extends ClassMemberNode {
     public MethodNode optimize() {
         return new MethodNode(
                 isNative,
+                isAbstract,
                 name,
                 parameters,
                 returnType,

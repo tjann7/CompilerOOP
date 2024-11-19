@@ -26,7 +26,7 @@ public class Console extends Any {
             for (Field field : fields) {
                 stringBuilder.append(field.getName()).append("=");
 
-                Object o = field.get(this);
+                Object o = field.get(any);
                 if (o instanceof Any a) {
                     stringBuilder.append(native$toString(a));
                 } else {
