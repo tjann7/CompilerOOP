@@ -54,6 +54,9 @@ public interface Opcodes {
 
     int NEW = 187;
 
+    int CHECKCAST = 192;
+    int INSTANCEOF = 193;
+
     static byte @NotNull [] iconst(@NotNull ConstantPool constantPool, int value) {
         return switch (value) {
             case -1 -> Bytes.of((byte) ICONST_M1);

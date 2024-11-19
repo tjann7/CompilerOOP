@@ -35,7 +35,8 @@ public enum TokenType {
     VAR_KEYWORD,
     NATIVE_KEYWORD,
     INCLUDE_KEYWORD,
-    SUPER_KEYWORD;
+    SUPER_KEYWORD,
+    INSTANCEOF_KEYWORD;
 
     private final boolean literal = name().endsWith("_LITERAL");
     private final boolean keyword = name().endsWith("_KEYWORD");

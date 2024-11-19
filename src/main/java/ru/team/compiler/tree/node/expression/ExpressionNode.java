@@ -78,6 +78,26 @@ public final class ExpressionNode extends TreeNode {
                     }
 
                     idArgs.add(new IdArg(identifierNode, argumentsNode));
+                } else if (iterator.consume(TokenType.OPENING_BRACKET)) {
+                    ReferenceNode referenceNode = ReferenceNode.PARSER.parse(iterator);
+
+                    idArgs.add(new IdArg(
+                            new IdentifierNode("<cast>"),
+                            new ArgumentsNode(List.of(
+                                    new ExpressionNode(referenceNode, List.of())))));
+
+                    iterator.next(TokenType.CLOSING_BRACKET);
+                } else if (iterator.consume(TokenType.INSTANCEOF_KEYWORD)) {
+                    iterator.next(TokenType.OPENING_BRACKET);
+
+                    ReferenceNode referenceNode = ReferenceNode.PARSER.parse(iterator);
+
+                    idArgs.add(new IdArg(
+                            new IdentifierNode("<instanceof>"),
+                            new ArgumentsNode(List.of(
+                                    new ExpressionNode(referenceNode, List.of())))));
+
+                    iterator.next(TokenType.CLOSING_BRACKET);
                 } else {
                     break;
                 }
@@ -298,7 +318,45 @@ public final class ExpressionNode extends TreeNode {
 
             IdArg idArg = idArgs.get(i);
 
-            if (idArg.arguments == null) {
+            boolean cast = idArg.name.value().equals("<cast>");
+            boolean instance = idArg.name.value().equals("<instanceof>");
+            if (cast || instance) {
+                if (idArg.arguments == null) {
+                    throw new AnalyzerException("Expression at '%s' is invalid: %s without specified class"
+                            .formatted(context.currentPath(), cast ? "cast" : "instanceof"));
+                }
+
+                List<ExpressionNode> expressions = idArg.arguments.expressions();
+                if (expressions.size() != 1
+                        || !(expressions.get(0).primary instanceof ReferenceNode requiredClass)
+                        || !expressions.get(0).idArgs.isEmpty()) {
+                    throw new AnalyzerException("Expression at '%s' is invalid: %s without correctly specified class"
+                            .formatted(context.currentPath(), cast ? "cast" : "instanceof"));
+                }
+
+                if (!context.hasClass(requiredClass)) {
+                    throw new AnalyzerException("Expression at '%s' is invalid: %s unknown class '%s'"
+                            .formatted(context.currentPath(), cast ? "cast to" : "instanceof", currentType, requiredClass));
+                }
+
+                if (cast && !context.isAssignableFrom(currentType, requiredClass)
+                        && !context.isAssignableFrom(requiredClass, currentType)) {
+                    throw new AnalyzerException("Expression at '%s' is invalid: cast from '%s' to '%s' is not possible"
+                            .formatted(context.currentPath(), currentType, requiredClass));
+                }
+
+                if (instance && (currentType.equals(requiredClass)
+                        || !context.isAssignableFrom(currentType, requiredClass))) {
+                    throw new AnalyzerException("Expression at '%s' is invalid: '%s' instanceof '%s' is always %s"
+                            .formatted(
+                                    context.currentPath(),
+                                    currentType.value(),
+                                    requiredClass.value(),
+                                    context.isAssignableFrom(requiredClass, currentType)));
+                }
+
+                currentType = cast ? requiredClass : new ReferenceNode("Boolean");
+            } else if (idArg.arguments == null) {
                 AnalyzableField field = analyzableClass.getField(
                         context,
                         new AnalyzableField.Key(idArg.name),
@@ -508,11 +566,6 @@ public final class ExpressionNode extends TreeNode {
 
             currentType = currentClass.name().asReference();
         } else if (primary instanceof SuperNode) {
-            currentType = currentClass.parentName();
-            if (currentType == null) {
-                currentType = new ReferenceNode("Any");
-            }
-
             if (idArgs.isEmpty()) {
                 throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
             }
@@ -586,7 +639,48 @@ public final class ExpressionNode extends TreeNode {
 
             IdArg idArg = idArgs.get(i);
 
-            if (idArg.arguments == null) {
+            boolean cast = idArg.name.value().equals("<cast>");
+            boolean instance = idArg.name.value().equals("<instanceof>");
+            if (cast || instance) {
+                if (idArg.arguments == null) {
+                    throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
+                }
+
+                List<ExpressionNode> expressions = idArg.arguments.expressions();
+                if (expressions.size() != 1
+                        || !(expressions.get(0).primary instanceof ReferenceNode requiredClass)
+                        || !expressions.get(0).idArgs.isEmpty()) {
+                    throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
+                }
+
+                if (cast && !context.analyzeContext().isAssignableFrom(currentType, requiredClass)
+                        && !context.analyzeContext().isAssignableFrom(requiredClass, currentType)) {
+                    throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
+                }
+
+                if (instance && (currentType.equals(requiredClass)
+                        || !context.analyzeContext().isAssignableFrom(currentType, requiredClass))) {
+                    throw new IllegalStateException("ExpressionNode#compile called before ExpressionNode#analyze");
+                }
+
+                if (cast) {
+                    // checkcast (#X)
+                    ClassConstant oClass = CompilationUtils.oClass(constantPool, requiredClass.value());
+
+                    dataOutput.writeByte(Opcodes.CHECKCAST);
+                    dataOutput.writeShort(oClass.index());
+
+                    currentType = requiredClass;
+                } else {
+                    // instanceof (#X)
+                    ClassConstant oClass = CompilationUtils.oClass(constantPool, requiredClass.value());
+
+                    dataOutput.writeByte(Opcodes.INSTANCEOF);
+                    dataOutput.writeShort(oClass.index());
+
+                    currentType = new ReferenceNode("Boolean");
+                }
+            } else if (idArg.arguments == null) {
                 AnalyzableField field = analyzableClass.getField(
                         context.analyzeContext(),
                         new AnalyzableField.Key(idArg.name),
