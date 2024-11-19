@@ -67,33 +67,35 @@ public final class ExpressionNode extends TreeNode {
 
             while (iterator.hasNext()) {
                 if (iterator.consume(TokenType.DOT)) {
-                    IdentifierNode identifierNode = IdentifierNode.PARSER.parse(iterator);
+                    if (iterator.consume(TokenType.INSTANCEOF_KEYWORD)) {
+                        iterator.next(TokenType.OPENING_BRACKET);
 
-                    ArgumentsNode argumentsNode;
+                        ReferenceNode referenceNode = ReferenceNode.PARSER.parse(iterator);
 
-                    if (iterator.lookup(TokenType.OPENING_PARENTHESIS)) {
-                        argumentsNode = ArgumentsNode.PARSER.parse(iterator);
+                        idArgs.add(new IdArg(
+                                new IdentifierNode("<instanceof>"),
+                                new ArgumentsNode(List.of(
+                                        new ExpressionNode(referenceNode, List.of())))));
+
+                        iterator.next(TokenType.CLOSING_BRACKET);
                     } else {
-                        argumentsNode = null;
-                    }
+                        IdentifierNode identifierNode = IdentifierNode.PARSER.parse(iterator);
 
-                    idArgs.add(new IdArg(identifierNode, argumentsNode));
+                        ArgumentsNode argumentsNode;
+
+                        if (iterator.lookup(TokenType.OPENING_PARENTHESIS)) {
+                            argumentsNode = ArgumentsNode.PARSER.parse(iterator);
+                        } else {
+                            argumentsNode = null;
+                        }
+
+                        idArgs.add(new IdArg(identifierNode, argumentsNode));
+                    }
                 } else if (iterator.consume(TokenType.OPENING_BRACKET)) {
                     ReferenceNode referenceNode = ReferenceNode.PARSER.parse(iterator);
 
                     idArgs.add(new IdArg(
                             new IdentifierNode("<cast>"),
-                            new ArgumentsNode(List.of(
-                                    new ExpressionNode(referenceNode, List.of())))));
-
-                    iterator.next(TokenType.CLOSING_BRACKET);
-                } else if (iterator.consume(TokenType.INSTANCEOF_KEYWORD)) {
-                    iterator.next(TokenType.OPENING_BRACKET);
-
-                    ReferenceNode referenceNode = ReferenceNode.PARSER.parse(iterator);
-
-                    idArgs.add(new IdArg(
-                            new IdentifierNode("<instanceof>"),
                             new ArgumentsNode(List.of(
                                     new ExpressionNode(referenceNode, List.of())))));
 
