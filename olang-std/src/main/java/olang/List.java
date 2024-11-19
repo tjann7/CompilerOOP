@@ -2,8 +2,9 @@ package olang;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
-public class List extends Collection {
+public class List extends Collection implements Native$ToString {
 
     private final java.util.List<Any> list = new ArrayList<>();
 
@@ -31,6 +32,11 @@ public class List extends Collection {
     }
 
     @Override
+    public Iterator iterator() {
+        return Iterator.java$wrap(list.iterator());
+    }
+
+    @Override
     public List copy() {
         List l = new List();
         l.list.addAll(list);
@@ -52,5 +58,12 @@ public class List extends Collection {
                 other.getClass() == getClass()
                         && Objects.equals(list, ((List) other).list)
         );
+    }
+
+    @Override
+    public String native$toString(Console console) {
+        return "List" + list.stream()
+                .map(console::native$toString)
+                .collect(Collectors.joining(", ", "[", "]"));
     }
 }

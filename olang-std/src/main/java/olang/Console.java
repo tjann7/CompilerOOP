@@ -5,27 +5,40 @@ import java.lang.reflect.Field;
 public class Console extends Any {
 
     public void print(Any any) {
-        System.out.print(toString(any));
+        System.out.print(native$toString(any));
     }
 
     public void println(Any any) {
-        System.out.println(toString(any));
+        System.out.println(native$toString(any));
     }
 
-    private String toString(Any any) {
+    public String native$toString(Any any) {
+        if (any instanceof Native$ToString native$ToString) {
+            return native$ToString.native$toString(this);
+        }
+
         try {
             StringBuilder stringBuilder = new StringBuilder();
 
-            stringBuilder.append(getClass().getSimpleName()).append("{");
+            stringBuilder.append(any.getClass().getSimpleName()).append("{");
 
-            Field[] fields = getClass().getFields();
+            Field[] fields = any.getClass().getFields();
             for (Field field : fields) {
                 stringBuilder.append(field.getName()).append("=");
-                stringBuilder.append(field.get(this).toString());
+
+                Object o = field.get(this);
+                if (o instanceof Any a) {
+                    stringBuilder.append(native$toString(a));
+                } else {
+                    stringBuilder.append(o.toString());
+                }
+
                 stringBuilder.append(", ");
             }
 
-            stringBuilder.delete(stringBuilder.length() - 2, stringBuilder.length());
+            if (fields.length > 0) {
+                stringBuilder.delete(stringBuilder.length() - 2, stringBuilder.length());
+            }
 
             stringBuilder.append("}");
 

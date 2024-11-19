@@ -1,5 +1,8 @@
 package ru.team.compiler.util;
 
+import lombok.EqualsAndHashCode;
+
+@EqualsAndHashCode
 public final class Pair<A, B> {
 
     private final A left;
@@ -20,5 +23,10 @@ public final class Pair<A, B> {
 
     public B getRight() {
         return right;
+    }
+
+    @Override
+    public String toString() {
+        return "Pair(" + left + ", " + right + ")";
     }
 }

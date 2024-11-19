@@ -2,6 +2,24 @@ package olang;
 
 public class Iterator extends Any {
 
+    public Iterator() {
+
+    }
+
+    public static Iterator java$wrap(java.util.Iterator<Any> iterator) {
+        return new Iterator() {
+            @Override
+            public Boolean hasNext() {
+                return new Boolean(iterator.hasNext());
+            }
+
+            @Override
+            public Any next() {
+                return iterator.next();
+            }
+        };
+    }
+
     public Boolean hasNext() {
         throw new UnsupportedOperationException();
     }

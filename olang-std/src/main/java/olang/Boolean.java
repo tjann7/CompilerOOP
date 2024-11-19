@@ -1,6 +1,6 @@
 package olang;
 
-public class Boolean extends Any {
+public class Boolean extends Any implements Native$ToString {
 
     private final boolean value;
 
@@ -43,5 +43,10 @@ public class Boolean extends Any {
                 other.getClass() == getClass()
                         && value == ((Boolean) other).value
         );
+    }
+
+    @Override
+    public String native$toString(Console console) {
+        return String.valueOf(value);
     }
 }

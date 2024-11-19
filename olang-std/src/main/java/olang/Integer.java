@@ -1,6 +1,6 @@
 package olang;
 
-public class Integer extends Any {
+public class Integer extends Any implements Native$ToString {
 
     private final int value;
 
@@ -71,5 +71,10 @@ public class Integer extends Any {
                 other.getClass() == getClass()
                         && value == ((Integer) other).value
         );
+    }
+
+    @Override
+    public String native$toString(Console console) {
+        return String.valueOf(value);
     }
 }

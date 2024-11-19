@@ -440,13 +440,13 @@ public final class ExpressionNode extends TreeNode {
 
             context.incrementStackSize(3); // new + dup + fconst
 
-            // invokevirtual (#Integer.<init>(int))
+            // invokespecial (#Integer.<init>(int))
             MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool,
                     "Integer", "<init>", "(I)V");
-            dataOutput.writeByte(Opcodes.INVOKEVIRTUAL);
+            dataOutput.writeByte(Opcodes.INVOKESPECIAL);
             dataOutput.writeShort(oMethod.index());
 
-            context.decrementStackSize(2); // invokevirtual for this and int
+            context.decrementStackSize(2); // invokespecial for this and int
 
             currentType = new ReferenceNode("Integer");
         } else if (primary instanceof RealLiteralNode node) {
@@ -463,13 +463,13 @@ public final class ExpressionNode extends TreeNode {
 
             context.incrementStackSize(3); // new + dup + fconst
 
-            // invokevirtual (#Real.<init>(float))
+            // invokespecial (#Real.<init>(float))
             MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool,
                     "Real", "<init>", "(F)V");
-            dataOutput.writeByte(Opcodes.INVOKEVIRTUAL);
+            dataOutput.writeByte(Opcodes.INVOKESPECIAL);
             dataOutput.writeShort(oMethod.index());
 
-            context.decrementStackSize(2); // invokevirtual for this and float
+            context.decrementStackSize(2); // invokespecial for this and float
 
             currentType = new ReferenceNode("Real");
         } else if (primary instanceof BooleanLiteralNode node) {
@@ -486,13 +486,13 @@ public final class ExpressionNode extends TreeNode {
 
             context.incrementStackSize(3); // new + dup + iconst
 
-            // invokevirtual (#Boolean.<init>(boolean))
+            // invokespecial (#Boolean.<init>(boolean))
             MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool,
                     "Boolean", "<init>", "(Z)V");
-            dataOutput.writeByte(Opcodes.INVOKEVIRTUAL);
+            dataOutput.writeByte(Opcodes.INVOKESPECIAL);
             dataOutput.writeShort(oMethod.index());
 
-            context.decrementStackSize(2); // invokevirtual for this and boolean
+            context.decrementStackSize(2); // invokespecial for this and boolean
 
             currentType = new ReferenceNode("Boolean");
         } else if (primary instanceof ReferenceNode referenceNode) {
@@ -529,13 +529,13 @@ public final class ExpressionNode extends TreeNode {
                     expressionNode.compile(context, currentClass, constantPool, variablePool, currentExecutable, dataOutput, false);
                 }
 
-                // invokevirtual (#X.<init>(X))
-                MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool, oClass.value().value(),
+                // invokespecial (#X.<init>(X))
+                MethodRefConstant oMethod = CompilationUtils.oMethod(constantPool, analyzableClass.name().value(),
                         constructor.constructorNode());
-                dataOutput.writeByte(Opcodes.INVOKEVIRTUAL);
+                dataOutput.writeByte(Opcodes.INVOKESPECIAL);
                 dataOutput.writeShort(oMethod.index());
 
-                context.decrementStackSize(idArg.arguments.expressions().size() + 1); // invokevirtual for this and arguments
+                context.decrementStackSize(idArg.arguments.expressions().size() + 1); // invokespecial for this and arguments
 
                 shift = 1;
 
@@ -613,7 +613,7 @@ public final class ExpressionNode extends TreeNode {
                 dataOutput.writeByte(Opcodes.INVOKESPECIAL);
                 dataOutput.writeShort(oMethod.index());
 
-                context.decrementStackSize(idArg.arguments.expressions().size()); // invokevirtual for arguments
+                context.decrementStackSize(idArg.arguments.expressions().size()); // invokespecial for arguments
 
                 shift = 1;
 

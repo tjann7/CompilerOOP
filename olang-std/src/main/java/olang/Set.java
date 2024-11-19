@@ -2,8 +2,9 @@ package olang;
 
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
-public class Set extends Collection {
+public class Set extends Collection implements Native$ToString {
 
     private final java.util.Set<Any> set = new HashSet<>();
 
@@ -31,6 +32,11 @@ public class Set extends Collection {
     }
 
     @Override
+    public Iterator iterator() {
+        return Iterator.java$wrap(set.iterator());
+    }
+
+    @Override
     public Set copy() {
         Set s = new Set();
         s.set.addAll(set);
@@ -48,5 +54,12 @@ public class Set extends Collection {
                 other.getClass() == getClass()
                         && Objects.equals(set, ((Set) other).set)
         );
+    }
+
+    @Override
+    public String native$toString(Console console) {
+        return "Set" + set.stream()
+                .map(console::native$toString)
+                .collect(Collectors.joining(", ", "{", "}"));
     }
 }

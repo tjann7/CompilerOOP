@@ -1,6 +1,6 @@
 package olang;
 
-public class Real extends Any {
+public class Real extends Any implements Native$ToString {
 
     private final float value;
 
@@ -71,5 +71,10 @@ public class Real extends Any {
                 other.getClass() == getClass()
                         && value == ((Real) other).value
         );
+    }
+
+    @Override
+    public String native$toString(Console console) {
+        return String.valueOf(value);
     }
 }
