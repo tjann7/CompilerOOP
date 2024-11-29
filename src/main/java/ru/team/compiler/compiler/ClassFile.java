@@ -99,6 +99,7 @@ public record ClassFile(@NotNull ConstantPool constantPool, boolean isAbstract,
         }
 
         // Methods
+        // TODO: create synthetic bridges if needed
         byteDataOutput.writeShort(methods.size());
         for (CompilationMethod method : methods) {
             method.compile(context, constantPool, byteDataOutput);

@@ -5,7 +5,10 @@ import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import ru.team.compiler.analyzer.AnalyzableClass;
+import ru.team.compiler.analyzer.AnalyzableMethod;
 import ru.team.compiler.analyzer.AnalyzeContext;
+import ru.team.compiler.exception.AnalyzerException;
 import ru.team.compiler.exception.CompilerException;
 import ru.team.compiler.exception.NodeFormatException;
 import ru.team.compiler.token.TokenIterator;
@@ -21,7 +24,10 @@ import ru.team.compiler.tree.node.statement.BodyNode;
 import ru.team.compiler.tree.node.statement.MethodCallNode;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @EqualsAndHashCode(callSuper = false)
@@ -132,7 +138,40 @@ public final class ClassNode extends TreeNode {
             context = classMemberNode.analyze(context);
         }
 
-        // TODO: check that all abstract methods are implemented and create synthetic bridges if needed
+        AnalyzableClass currentClass = Objects.requireNonNull(context.currentClass());
+        if (!isAbstract) {
+            Map<AnalyzableMethod.Key, AnalyzableClass> abstractMethods = new HashMap<>();
+            Map<AnalyzableMethod.Key, AnalyzableMethod> nonAbstractMethods = new HashMap<>(currentClass.methods());
+
+            AnalyzableClass currentParentClass = currentClass;
+            while (true) {
+                currentParentClass = currentParentClass.findParentClass(context, "Class");
+                if (currentParentClass == null || !currentParentClass.classNode().isAbstract()) {
+                    break;
+                }
+
+                for (AnalyzableMethod method : currentParentClass.methods().values()) {
+                    if (method.methodNode().isAbstract()) {
+                        abstractMethods.put(method.key(), currentParentClass);
+                    } else {
+                        nonAbstractMethods.putIfAbsent(method.key(), method);
+                    }
+                }
+            }
+
+            for (var entry : abstractMethods.entrySet()) {
+                AnalyzableMethod.Key key = entry.getKey();
+
+                AnalyzableMethod method = nonAbstractMethods.get(key);
+                if (method == null) {
+                    AnalyzableClass definedClass = entry.getValue();
+                    throw new AnalyzerException("Class '%s' must implement abstract method '%s.%s(%s)'"
+                            .formatted(name.value(), definedClass.classNode().name.value(),
+                                    key.name().value(), key.parameterTypesAsString()));
+                }
+            }
+
+        }
 
         return initialContext;
     }
