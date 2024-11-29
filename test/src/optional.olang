@@ -1,0 +1,93 @@
+class abstract Optional extends Any is
+    method abstract isPresent(): Boolean;
+    method abstract isEmpty(): Boolean;
+    method abstract orElse(any: Any): Any;
+
+    method abstract map(mapper: OptionalMapper): Optional;
+    method abstract flatMap(mapper: OptionalFlatMapper): Optional;
+end
+
+class Nothing extends Optional is
+    method isPresent(): Boolean is
+        return false;
+    end
+
+    method isEmpty(): Boolean is
+        return true;
+    end
+
+    method orElse(any: Any): Any is
+        return any;
+    end
+
+
+    method map(mapper: OptionalMapper): Optional is
+        return this;
+    end
+
+    method flatMap(mapper: OptionalFlatMapper): Optional is
+        return this;
+    end
+
+
+    method hash(): Integer is
+        return 0;
+    end
+
+    method equals(any: Any): Boolean is
+        return any.instanceof[Nothing];
+    end
+end
+
+class Just extends Optional is
+    var value: Any;
+
+    this(value: Any) is
+        this.value := value;
+    end
+
+
+    method isPresent(): Boolean is
+        return true;
+    end
+
+    method isEmpty(): Boolean is
+        return false;
+    end
+
+    method orElse(any: Any): Any is
+        return this.value;
+    end
+
+
+    method map(mapper: OptionalMapper): Optional is
+        return Just(mapper.map(this.value));
+    end
+
+    method flatMap(mapper: OptionalFlatMapper): Optional is
+        return mapper.flatMap(this.value);
+    end
+
+
+    method hash(): Integer is
+        return this.value.hash();
+    end
+
+    method equals(any: Any): Boolean is
+        if any.instanceof[Just] then
+            return this.value.equals(any[Just].value);
+        end
+
+        return false;
+    end
+end
+
+// Functions
+
+class abstract OptionalMapper is
+    method abstract map(value: Any): Any;
+end
+
+class abstract OptionalFlatMapper is
+    method abstract flatMap(value: Any): Optional;
+end

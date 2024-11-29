@@ -1,0 +1,65 @@
+include optional;
+
+class A is
+  var a: Integer;
+
+  this() is
+    this.a := 1;
+  end
+
+  method foo() is
+    this.a := this.a.add(1);
+
+    var b: List;
+    b := List();
+    b.add(this);
+
+    var c: Set;
+    c := Set(b);
+
+    var a: Integer;
+    a := 100;
+
+    var console: Console;
+    console := Console();
+
+    while a.greater(0) loop
+      console.println(a);
+      a := a.subtract(1);
+    end
+  end
+end
+
+// ---
+
+class MyFlatMapper extends OptionalFlatMapper is
+    method flatMap(any: Any): Optional is
+        if any.instanceof[Integer].and(any[Integer].greater(0)) then
+            return Just(any[Integer].subtract(1));
+        end
+
+        return Nothing();
+    end
+end
+
+class Program is
+  method run() is
+    A().foo();
+
+    var o: Optional;
+    o := Just(25);
+
+    var flatMapper: OptionalFlatMapper;
+    flatMapper := MyFlatMapper();
+
+    var console: Console;
+    console := Console();
+
+    while o.instanceof[Just] loop
+      console.println(o);
+      o := o.flatMap(flatMapper);
+    end
+
+    console.println(o);
+  end
+end

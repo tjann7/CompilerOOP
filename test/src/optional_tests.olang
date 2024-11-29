@@ -1,0 +1,83 @@
+include optional;
+include tester;
+
+class __OptMap1 extends OptionalMapper is
+    method map(value: Any): Any is
+        if value.instanceof[Integer] then
+            return value[Integer].add(1);
+        end
+
+        if value.instanceof[Real] then
+            return value[Real].add(1.0);
+        end
+
+        return value;
+    end
+end
+
+class __OptFMap1 extends OptionalFlatMapper is
+    method flatMap(value: Any): Optional is
+        if value.instanceof[Integer] then
+            return Just(value[Integer].add(1));
+        end
+
+        if value.instanceof[Real] then
+            return Just(value[Real].add(1.0));
+        end
+
+        return Nothing();
+    end
+end
+
+class Program is
+    method run() is
+        var tester: Tester;
+        tester := Tester(Console());
+
+        var l: List;
+        l := List();
+        l.add(1);
+
+        // Map tests
+        tester.assertEquals(
+            Just(2),
+            Just(1).map(__OptMap1()),
+            1
+        );
+
+        tester.assertEquals(
+            Just(2.0),
+            Just(1.0).map(__OptMap1()),
+            2
+        );
+
+        tester.assertEquals(
+            Just(l),
+            Just(l).map(__OptMap1()),
+            3
+        );
+
+        // FlatMap test
+        tester.assertEquals(
+            Just(2),
+            Just(1).flatMap(__OptFMap1()),
+            4
+        );
+
+        tester.assertEquals(
+            Just(2.0),
+            Just(1.0).flatMap(__OptFMap1()),
+            5
+        );
+
+        tester.assertEquals(
+            Nothing(),
+            Just(l).flatMap(__OptFMap1()),
+            6
+        );
+    end
+
+    method a(o: Optional) is
+        Console().println(o);
+    end
+end

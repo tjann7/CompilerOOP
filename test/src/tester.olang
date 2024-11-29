@@ -1,0 +1,61 @@
+class __TAssertError is
+    var test: Integer;
+    var expected: Any;
+    var actual: Any;
+
+    this(test: Integer, expected: Any, actual: Any) is
+        this.test := test;
+        this.expected := expected;
+        this.actual := actual;
+    end
+end
+
+class __TAssertError_ extends __TAssertError is
+    var message: Any;
+
+    this(test: Integer, expected: Any, actual: Any, message: Any) is
+        super(test, expected, actual);
+        this.message := message;
+    end
+end
+
+class __TOk is
+    var test: Integer;
+
+    this(test: Integer) is
+        this.test := test;
+    end
+end
+
+class __TOk_ extends __TOk is
+    var message: Any;
+
+    this(test: Integer, message: Any) is
+        super(test);
+        this.message := message;
+    end
+end
+
+class Tester is
+    var console: Console;
+
+    this(console: Console) is
+        this.console := console;
+    end
+
+    method assertEquals(expected: Any, actual: Any, test: Integer) is
+        if expected.equals(actual) then
+            this.console.println(__TOk(test));
+        else
+            this.console.println(__TAssertError(test, expected, actual));
+        end
+    end
+
+    method assertEquals(expected: Any, actual: Any, test: Integer, message: Any) is
+        if expected.equals(actual) then
+            this.console.println(__TOk_(test, message));
+        else
+            this.console.println(__TAssertError_(test, expected, actual, message));
+        end
+    end
+end

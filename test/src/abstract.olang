@@ -1,0 +1,30 @@
+class abstract A is
+  method abstract foo(): Any;
+
+  method abstract bar(): Any;
+end
+
+class abstract B extends A is
+  method bar(): Any is
+    return 1;
+  end
+end
+
+class C extends B is
+  method foo(): B is
+    return this;
+  end
+end
+
+// ---
+
+class Program is
+  method run() is
+    var console: Console;
+    console := Console();
+    var a: A;
+    a := C();
+    console.println(a.foo());
+    console.println(a.bar());
+  end
+end

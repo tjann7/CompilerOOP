@@ -142,8 +142,8 @@ public record ClassFile(@NotNull ConstantPool constantPool, boolean isAbstract,
     public void compile(@NotNull CompilationContext context, @NotNull DataOutput dataOutput) throws IOException {
         dataOutput.writeInt(0xCAFEBABE);
 
-        dataOutput.writeShort(0); // Java 8
-        dataOutput.writeShort(52);
+        dataOutput.writeShort(0); // Java 6
+        dataOutput.writeShort(50);
 
         ClassConstant thisClass = CompilationUtils.oClass(constantPool, className);
 
