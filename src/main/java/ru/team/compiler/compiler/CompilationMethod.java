@@ -15,11 +15,17 @@ import java.lang.reflect.Modifier;
 import java.util.stream.Collectors;
 
 public record CompilationMethod(@NotNull Utf8Constant name, @NotNull Utf8Constant descriptor,
-                                @Nullable CodeAttribute codeAttribute) {
+                                @Nullable CodeAttribute codeAttribute, int modifiers) {
 
     @NotNull
     public static CompilationMethod fromNode(@NotNull ConstantPool constantPool, @NotNull ClassNode classNode,
                                              @NotNull MethodNode methodNode) {
+        return fromNode(constantPool, classNode, methodNode, 0);
+    }
+
+    @NotNull
+    public static CompilationMethod fromNode(@NotNull ConstantPool constantPool, @NotNull ClassNode classNode,
+                                             @NotNull MethodNode methodNode, int modifiers) {
         if (methodNode.isNative()) {
             throw new IllegalArgumentException("Class '%s' has native method '%s(%s)', so it cannot be compiled"
                     .formatted(
@@ -45,7 +51,7 @@ public record CompilationMethod(@NotNull Utf8Constant name, @NotNull Utf8Constan
                 ? null
                 : new CodeAttribute(constantPool, classNode, methodNode);
 
-        return new CompilationMethod(name, descriptor, codeAttribute);
+        return new CompilationMethod(name, descriptor, codeAttribute, modifiers);
     }
 
     @NotNull
@@ -60,11 +66,11 @@ public record CompilationMethod(@NotNull Utf8Constant name, @NotNull Utf8Constan
 
         CodeAttribute codeAttribute = new CodeAttribute(constantPool, classNode, constructorNode);
 
-        return new CompilationMethod(name, descriptor, codeAttribute);
+        return new CompilationMethod(name, descriptor, codeAttribute, 0);
     }
 
     public int accessFlags() {
-        return Modifier.PUBLIC | (codeAttribute == null ? Modifier.ABSTRACT : 0);
+        return Modifier.PUBLIC | (codeAttribute == null ? Modifier.ABSTRACT : 0) | modifiers;
     }
 
     public void compile(@NotNull CompilationContext context, @NotNull ConstantPool constantPool,

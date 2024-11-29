@@ -2,15 +2,28 @@ package ru.team.compiler.compiler;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ru.team.compiler.analyzer.AnalyzableClass;
+import ru.team.compiler.analyzer.AnalyzableMethod;
 import ru.team.compiler.analyzer.AnalyzeContext;
+import ru.team.compiler.compiler.attribute.CodeAttribute;
 import ru.team.compiler.compiler.constant.ClassConstant;
 import ru.team.compiler.compiler.constant.ConstantPool;
+import ru.team.compiler.compiler.constant.Utf8Constant;
 import ru.team.compiler.tree.node.clas.ClassMemberNode;
 import ru.team.compiler.tree.node.clas.ClassNode;
 import ru.team.compiler.tree.node.clas.ConstructorNode;
 import ru.team.compiler.tree.node.clas.FieldNode;
 import ru.team.compiler.tree.node.clas.MethodNode;
+import ru.team.compiler.tree.node.clas.ParametersNode;
+import ru.team.compiler.tree.node.expression.ArgumentsNode;
+import ru.team.compiler.tree.node.expression.ExpressionNode;
+import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
+import ru.team.compiler.tree.node.primary.ThisNode;
+import ru.team.compiler.tree.node.statement.BodyNode;
+import ru.team.compiler.tree.node.statement.MethodCallNode;
+import ru.team.compiler.tree.node.statement.ReturnNode;
+import ru.team.compiler.util.Pair;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutput;
@@ -18,7 +31,12 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public record ClassFile(@NotNull ConstantPool constantPool, boolean isAbstract,
                         @NotNull String className, @Nullable String superClassName,
@@ -44,6 +62,66 @@ public record ClassFile(@NotNull ConstantPool constantPool, boolean isAbstract,
             } else if (classMemberNode instanceof ConstructorNode constructorNode) {
                 CompilationMethod method = CompilationMethod.fromNode(constantPool, classNode, constructorNode);
                 methods.add(method);
+            }
+        }
+
+        AnalyzableClass currentClass = analyzeContext.classes().get(classNode.name().asReference());
+
+        Map<AnalyzableMethod.Key, AnalyzableMethod> thisMethods = currentClass.methods();
+
+        AnalyzableClass currentParentClass = currentClass;
+        while (true) {
+            currentParentClass = currentParentClass.findParentClass(analyzeContext, "Class");
+            if (currentParentClass == null) {
+                break;
+            }
+
+            Set<Pair<AnalyzableMethod.Key, ReferenceNode>> bridges = new HashSet<>();
+
+            for (AnalyzableMethod superMethod : currentParentClass.methods().values()) {
+                AnalyzableMethod.Key key = superMethod.key();
+                AnalyzableMethod thisMethod = thisMethods.get(key);
+                if (thisMethod == null) {
+                    continue;
+                }
+
+                Pair<AnalyzableMethod.Key, ReferenceNode> pair = Pair.of(key, superMethod.returnType());
+                if (!bridges.add(pair)) {
+                    continue;
+                }
+
+                IdentifierNode methodName = superMethod.name();
+                Utf8Constant name = constantPool.getUtf(methodName.value());
+                Utf8Constant descriptor = constantPool.getUtf(CompilationUtils.descriptor(superMethod.methodNode()));
+
+                ReferenceNode returnType = superMethod.returnType();
+                if (!Objects.equals(thisMethod.returnType(), returnType)) {
+                    ParametersNode parameters = superMethod.parameters();
+
+                    ExpressionNode expression = new ExpressionNode(
+                            new ThisNode(),
+                            List.of(new ExpressionNode.IdArg(
+                                    methodName,
+                                    new ArgumentsNode(
+                                            parameters.pars().stream()
+                                                    .map(par -> new ExpressionNode(par.type(), List.of()))
+                                                    .collect(Collectors.toList())))));
+
+                    MethodNode methodNode = new MethodNode(
+                            false, false, methodName, parameters, returnType,
+                            new BodyNode(List.of(
+                                    returnType != null
+                                            ? new ReturnNode(expression)
+                                            : new MethodCallNode(expression))));
+
+                    CodeAttribute codeAttribute = new CodeAttribute(constantPool, classNode,
+                            methodNode);
+
+                    // Bridge and synthetic
+                    int modifiers = 0x0040 | 0x1000;
+
+                    methods.add(new CompilationMethod(name, descriptor, codeAttribute, modifiers));
+                }
             }
         }
 
@@ -99,7 +177,6 @@ public record ClassFile(@NotNull ConstantPool constantPool, boolean isAbstract,
         }
 
         // Methods
-        // TODO: create synthetic bridges if needed
         byteDataOutput.writeShort(methods.size());
         for (CompilationMethod method : methods) {
             method.compile(context, constantPool, byteDataOutput);

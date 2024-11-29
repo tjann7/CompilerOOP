@@ -166,7 +166,7 @@ public final class ClassNode extends TreeNode {
                 if (method == null) {
                     AnalyzableClass definedClass = entry.getValue();
                     throw new AnalyzerException("Class '%s' must implement abstract method '%s.%s(%s)'"
-                            .formatted(name.value(), definedClass.classNode().name.value(),
+                            .formatted(name().value(), definedClass.classNode().name().value(),
                                     key.name().value(), key.parameterTypesAsString()));
                 }
             }
