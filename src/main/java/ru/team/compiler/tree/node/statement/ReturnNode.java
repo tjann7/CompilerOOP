@@ -34,7 +34,8 @@ public final class ReturnNode extends StatementNode {
         public ReturnNode parse(@NotNull TokenIterator iterator) throws CompilerException {
             iterator.next(TokenType.RETURN_KEYWORD);
 
-            if (iterator.lookup(TokenType.END_KEYWORD) || iterator.lookup(TokenType.SEMICOLON)) {
+            if (iterator.lookup(TokenType.END_KEYWORD) || iterator.lookup(TokenType.ELSE_KEYWORD)
+                    || iterator.lookup(TokenType.SEMICOLON)) {
                 return new ReturnNode(null);
             }
 
