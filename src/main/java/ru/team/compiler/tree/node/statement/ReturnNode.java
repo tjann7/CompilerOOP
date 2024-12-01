@@ -12,6 +12,7 @@ import ru.team.compiler.compiler.attribute.CompilationExecutable;
 import ru.team.compiler.compiler.constant.ConstantPool;
 import ru.team.compiler.exception.AnalyzerException;
 import ru.team.compiler.exception.CompilerException;
+import ru.team.compiler.exception.NodeFormatException;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNodeParser;
@@ -34,14 +35,14 @@ public final class ReturnNode extends StatementNode {
         public ReturnNode parse(@NotNull TokenIterator iterator) throws CompilerException {
             iterator.next(TokenType.RETURN_KEYWORD);
 
-            if (iterator.lookup(TokenType.END_KEYWORD) || iterator.lookup(TokenType.ELSE_KEYWORD)
-                    || iterator.lookup(TokenType.SEMICOLON)) {
+            int index = iterator.index();
+            try {
+                ExpressionNode expressionNode = ExpressionNode.PARSER.parse(iterator);
+                return new ReturnNode(expressionNode);
+            } catch (NodeFormatException e) {
+                iterator.index(index);
                 return new ReturnNode(null);
             }
-
-            ExpressionNode expressionNode = ExpressionNode.PARSER.parse(iterator);
-
-            return new ReturnNode(expressionNode);
         }
     };
 

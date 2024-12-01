@@ -9,6 +9,8 @@ import ru.team.compiler.analyzer.AnalyzableMethod;
 import ru.team.compiler.analyzer.AnalyzeContext;
 import ru.team.compiler.exception.AnalyzerException;
 import ru.team.compiler.exception.CompilerException;
+import ru.team.compiler.exception.NodeFormatException;
+import ru.team.compiler.token.Token;
 import ru.team.compiler.token.TokenIterator;
 import ru.team.compiler.token.TokenType;
 import ru.team.compiler.tree.node.TreeNodeParser;
@@ -28,13 +30,13 @@ public final class MethodNode extends ClassMemberNode {
         @Override
         @NotNull
         public MethodNode parse(@NotNull TokenIterator iterator) throws CompilerException {
-            iterator.next(TokenType.METHOD_KEYWORD);
+            Token token = iterator.next(TokenType.METHOD_KEYWORD);
 
             boolean isNative = iterator.consume(TokenType.NATIVE_KEYWORD);
             boolean isAbstract = iterator.consume(TokenType.ABSTRACT_KEYWORD);
 
             if (isNative && isAbstract) {
-                // TODO: throw error
+                throw new NodeFormatException("native or abstract or neither", "native and abstract at the same time", token);
             }
 
             IdentifierNode identifierNode = IdentifierNode.PARSER.parse(iterator);
