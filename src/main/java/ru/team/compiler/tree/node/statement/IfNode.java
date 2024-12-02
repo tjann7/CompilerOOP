@@ -96,7 +96,7 @@ public final class IfNode extends StatementNode {
 
     @Override
     @NotNull
-    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyzeUnsafe(@NotNull AnalyzeContext context) {
         ReferenceNode type = condition.type(context, false);
 
         if (!type.value().equals("Boolean")) {
@@ -104,25 +104,30 @@ public final class IfNode extends StatementNode {
                     .formatted(context.currentPath(), type.value()));
         }
 
-        AnalyzeContext thenContext = thenBody.analyze(context);
+        AnalyzeContext contextWithoutExceptions = context.withExceptions(List.of());
+
+        AnalyzeContext thenContext = thenBody.analyze(contextWithoutExceptions);
         if (elseBody != null) {
-            AnalyzeContext elseContext = elseBody.analyze(context);
+            AnalyzeContext elseContext = elseBody.analyze(contextWithoutExceptions);
 
             Set<ReferenceNode> initializedFields = Sets.intersection(
                     thenContext.initializedFields(), elseContext.initializedFields()
             );
             initializedFields = Sets.union(context.initializedFields(), initializedFields);
 
+            // TODO: check that this variable in the final scope
             Set<ReferenceNode> initializedVariables = Sets.intersection(
                     thenContext.initializedVariables(), elseContext.initializedVariables()
             );
             initializedVariables = Sets.union(context.initializedVariables(), initializedVariables);
 
             return context.withInitializedVariables(initializedVariables)
-                    .withInitializedFields(initializedFields);
+                    .withInitializedFields(initializedFields)
+                    .addExceptions(thenContext.exceptions())
+                    .addExceptions(elseContext.exceptions());
         }
 
-        return context;
+        return context.addExceptions(thenContext.exceptions());
     }
 
     @Override

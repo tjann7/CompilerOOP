@@ -66,7 +66,20 @@ public final class TreeMain {
                             context = Analyzer.createContext(path, new ProgramNode(List.of(), List.of()));
                         }
 
-                        node.analyze(context);
+                        AnalyzeContext newContext = node.analyze(context);
+
+                        List<Exception> exceptions = newContext.exceptions();
+                        if (!exceptions.isEmpty()) {
+                            System.out.println("\n---\n[!] Node was not traversed: \n");
+
+                            for (Exception exception : exceptions) {
+                                System.out.println(exception);
+                            }
+
+                            System.out.println("\n---");
+                            stringBuilder = new StringBuilder();
+                            continue;
+                        }
 
                         System.out.println("\n---\nNode was traversed successfully!\n---");
                     } catch (Exception e) {

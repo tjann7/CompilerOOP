@@ -56,7 +56,7 @@ public final class MethodCallNode extends StatementNode {
 
     @Override
     @NotNull
-    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyzeUnsafe(@NotNull AnalyzeContext context) {
         expression.type(context, true);
         return context;
     }

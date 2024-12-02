@@ -151,7 +151,7 @@ public final class ExpressionNode extends TreeNode {
 
     @Override
     @NotNull
-    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyzeUnsafe(@NotNull AnalyzeContext context) {
         type(context, false);
         return context;
     }

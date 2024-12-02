@@ -41,10 +41,10 @@ public final class BodyNode extends TreeNode {
 
     @Override
     @NotNull
-    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyzeUnsafe(@NotNull AnalyzeContext context) {
         AnalyzeContext initialContext = context;
 
-        context = context.concatPath("<body>");
+        context = context.concatPath("<body>").withExceptions(List.of());
         for (StatementNode statementNode : statements) {
             context = statementNode.analyze(context);
         }
@@ -57,7 +57,8 @@ public final class BodyNode extends TreeNode {
         Set<ReferenceNode> initializedFields = Sets.union(initialContext.initializedFields(), context.initializedFields());
 
         return initialContext.withInitializedVariables(initializedVariables)
-                .withInitializedFields(initializedFields);
+                .withInitializedFields(initializedFields)
+                .addExceptions(context.exceptions());
     }
 
     public boolean alwaysReturn() {

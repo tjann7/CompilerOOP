@@ -26,7 +26,9 @@ import ru.team.compiler.util.Opcodes;
 
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @EqualsAndHashCode(callSuper = false)
@@ -74,31 +76,48 @@ public final class AssignmentNode extends StatementNode {
 
     @Override
     @NotNull
-    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyzeUnsafe(@NotNull AnalyzeContext context) {
         ReferenceNode leftType;
+
+        List<Exception> exceptions = new ArrayList<>();
 
         if (local) {
             AnalyzableVariable variable = context.variables().get(referenceNode);
             if (variable == null) {
-                throw new AnalyzerException("Assignment at '%s' is invalid: reference to unknown variable '%s'"
-                        .formatted(context.currentPath(), referenceNode.value()));
-            }
+                exceptions.add(new AnalyzerException("Assignment at '%s' is invalid: reference to unknown variable '%s'"
+                        .formatted(context.currentPath(), referenceNode.value())));
 
-            leftType = variable.type();
+                leftType = null;
+            } else {
+                leftType = variable.type();
+            }
         } else {
             AnalyzableClass currentClass = context.currentClass("Assignment");
 
-            AnalyzableField field = currentClass.getField(
-                    context,
-                    new AnalyzableField.Key(referenceNode.asIdentifier()),
-                    "Assignment");
+            try {
+                AnalyzableField field = currentClass.getField(
+                        context,
+                        new AnalyzableField.Key(referenceNode.asIdentifier()),
+                        "Assignment");
 
-            leftType = field.type();
+                leftType = field.type();
+            } catch (AnalyzerException e) {
+                exceptions.add(new AnalyzerException("Assignment at '%s' is invalid: reference to unknown field '%s'"
+                        .formatted(context.currentPath(), referenceNode.value())));
+
+                leftType = null;
+            }
         }
 
-        ReferenceNode rightType = valueExpression.type(context, false);
+        ReferenceNode rightType;
+        try {
+            rightType = valueExpression.type(context, false);
+        } catch (AnalyzerException e) {
+            exceptions.add(e);
+            rightType = null;
+        }
 
-        if (!context.isAssignableFrom(leftType, rightType)) {
+        if (leftType != null && rightType != null && !context.isAssignableFrom(leftType, rightType)) {
             throw new AnalyzerException("Assignment at '%s' is invalid: expected '%s' type on the right side, got '%s'"
                     .formatted(context.currentPath(), leftType.value(), rightType.value()));
         }
@@ -106,11 +125,11 @@ public final class AssignmentNode extends StatementNode {
         if (local) {
             Set<ReferenceNode> initializedVariables = new HashSet<>(context.initializedVariables());
             initializedVariables.add(referenceNode);
-            return context.withInitializedVariables(initializedVariables);
+            return context.withInitializedVariables(initializedVariables).addExceptions(exceptions);
         } else {
             Set<ReferenceNode> initializedFields = new HashSet<>(context.initializedFields());
             initializedFields.add(referenceNode);
-            return context.withInitializedFields(initializedFields);
+            return context.withInitializedFields(initializedFields).addExceptions(exceptions);
         }
     }
 

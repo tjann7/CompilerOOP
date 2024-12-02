@@ -64,7 +64,7 @@ public final class ReturnNode extends StatementNode {
 
     @Override
     @NotNull
-    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyzeUnsafe(@NotNull AnalyzeContext context) {
         ReferenceNode type = expression != null ? expression.type(context, false) : null;
 
         AnalyzableMethod currentMethod = context.currentMethod("Return");

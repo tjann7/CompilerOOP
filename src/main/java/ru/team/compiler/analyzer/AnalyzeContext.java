@@ -10,6 +10,7 @@ import ru.team.compiler.tree.node.clas.ParametersNode;
 import ru.team.compiler.tree.node.expression.ArgumentsNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
                              @NotNull Map<ReferenceNode, AnalyzableVariable> variables,
                              @NotNull Set<ReferenceNode> initializedVariables,
                              @NotNull Set<ReferenceNode> initializedFields,
+                             @NotNull List<Exception> exceptions,
                              @NotNull String currentPath,
                              @Nullable AnalyzableClass currentClass,
                              @Nullable AnalyzableMethod currentMethod,
@@ -29,6 +31,7 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
                           @NotNull Map<ReferenceNode, AnalyzableVariable> variables,
                           @NotNull Set<ReferenceNode> initializedVariables,
                           @NotNull Set<ReferenceNode> initializedFields,
+                          @NotNull List<Exception> exceptions,
                           @NotNull String currentPath,
                           @Nullable AnalyzableClass currentClass,
                           @Nullable AnalyzableMethod currentMethod,
@@ -41,6 +44,7 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
         this.variables = Collections.unmodifiableMap(variables);
         this.initializedVariables = Collections.unmodifiableSet(initializedVariables);
         this.initializedFields = Collections.unmodifiableSet(initializedFields);
+        this.exceptions = Collections.unmodifiableList(exceptions);
         this.currentPath = currentPath;
         this.currentClass = currentClass;
         this.currentMethod = currentMethod;
@@ -58,7 +62,7 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
     @NotNull
     public AnalyzeContext concatPath(@NotNull String path) {
         return new AnalyzeContext(
-                classes, variables, initializedVariables, initializedFields,
+                classes, variables, initializedVariables, initializedFields, exceptions,
                 currentPath.isEmpty() ? path : currentPath + "." + path, currentClass,
                 currentMethod, currentConstructor
         );
@@ -68,12 +72,12 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
     public AnalyzeContext withClass(@NotNull ClassNode classNode) {
         AnalyzableClass analyzableClass = classes.get(classNode.name().asReference());
         if (analyzableClass == null) {
-            throw new AnalyzerException("Reference to unknown class '%s'".formatted(classNode.name().value()));
+            new AnalyzerException("Reference to unknown class '%s'".formatted(classNode.name().value()));
         }
 
         String path = classNode.name().value();
         return new AnalyzeContext(
-                classes, variables, initializedVariables, initializedFields,
+                classes, variables, initializedVariables, initializedFields, exceptions,
                 currentPath.isEmpty() ? path : currentPath + "." + path, analyzableClass,
                 currentMethod, currentConstructor
         );
@@ -96,7 +100,7 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
 
         String path = analyzableMethod.name().value() + "(" + key.parameterTypesAsString() + ")";
         return new AnalyzeContext(
-                classes, variables, initializedVariables, initializedFields,
+                classes, variables, initializedVariables, initializedFields, exceptions,
                 currentPath.isEmpty() ? path : currentPath + "." + path, currentClass,
                 analyzableMethod, null
         );
@@ -121,7 +125,7 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
 
         String path = "this(" + key.parameterTypesAsString() + ")";
         return new AnalyzeContext(
-                classes, variables, initializedVariables, initializedFields,
+                classes, variables, initializedVariables, initializedFields, exceptions,
                 currentPath.isEmpty() ? path : currentPath + "." + path, currentClass,
                 null, new AnalyzableConstructor(constructorNode, constructorNode.parameters(), currentClass)
         );
@@ -134,6 +138,7 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
                 variables,
                 initializedVariables,
                 initializedFields,
+                exceptions,
                 currentPath,
                 currentClass,
                 currentMethod,
@@ -148,6 +153,7 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
                 variables,
                 initializedVariables,
                 initializedFields,
+                exceptions,
                 currentPath,
                 currentClass,
                 currentMethod,
@@ -162,11 +168,41 @@ public record AnalyzeContext(@NotNull Map<ReferenceNode, AnalyzableClass> classe
                 variables,
                 initializedVariables,
                 initializedFields,
+                exceptions,
                 currentPath,
                 currentClass,
                 currentMethod,
                 currentConstructor
         );
+    }
+
+    @NotNull
+    public AnalyzeContext withExceptions(@NotNull List<Exception> exceptions) {
+        return new AnalyzeContext(
+                classes,
+                variables,
+                initializedVariables,
+                initializedFields,
+                exceptions,
+                currentPath,
+                currentClass,
+                currentMethod,
+                currentConstructor
+        );
+    }
+
+    @NotNull
+    public AnalyzeContext addException(@NotNull Exception exception) {
+        List<Exception> newExceptions = new ArrayList<>(exceptions);
+        newExceptions.add(exception);
+        return withExceptions(newExceptions);
+    }
+
+    @NotNull
+    public AnalyzeContext addExceptions(@NotNull List<Exception> exceptions) {
+        List<Exception> newExceptions = new ArrayList<>(this.exceptions);
+        newExceptions.addAll(exceptions);
+        return withExceptions(newExceptions);
     }
 
     public boolean isAssignableFrom(@NotNull ReferenceNode requiredClassName, @NotNull ReferenceNode className) {

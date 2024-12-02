@@ -130,13 +130,13 @@ public final class ClassNode extends TreeNode {
 
     @Override
     @NotNull
-    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
-        AnalyzeContext initialContext = context;
-
+    public AnalyzeContext analyzeUnsafe(@NotNull AnalyzeContext context) {
         context = context.withClass(this);
         for (ClassMemberNode classMemberNode : classMembers) {
             context = classMemberNode.analyze(context);
         }
+
+        List<Exception> exceptions = new ArrayList<>();
 
         AnalyzableClass currentClass = Objects.requireNonNull(context.currentClass());
         if (!isAbstract) {
@@ -145,7 +145,13 @@ public final class ClassNode extends TreeNode {
 
             AnalyzableClass currentParentClass = currentClass;
             while (true) {
-                currentParentClass = currentParentClass.findParentClass(context, "Class");
+                try {
+                    currentParentClass = currentParentClass.findParentClass(context, "Class");
+                } catch (Exception exception) {
+                    exceptions.add(exception);
+                    currentParentClass = null;
+                }
+
                 if (currentParentClass == null || !currentParentClass.classNode().isAbstract()) {
                     break;
                 }
@@ -165,15 +171,17 @@ public final class ClassNode extends TreeNode {
                 AnalyzableMethod method = nonAbstractMethods.get(key);
                 if (method == null) {
                     AnalyzableClass definedClass = entry.getValue();
-                    throw new AnalyzerException("Class '%s' must implement abstract method '%s.%s(%s)'"
-                            .formatted(name().value(), definedClass.classNode().name().value(),
-                                    key.name().value(), key.parameterTypesAsString()));
+                    exceptions.add(
+                            new AnalyzerException("Class '%s' must implement abstract method '%s.%s(%s)'"
+                                    .formatted(name().value(), definedClass.classNode().name().value(),
+                                            key.name().value(), key.parameterTypesAsString()))
+                    );
                 }
             }
 
         }
 
-        return initialContext;
+        return context.addExceptions(exceptions);
     }
 
     @NotNull

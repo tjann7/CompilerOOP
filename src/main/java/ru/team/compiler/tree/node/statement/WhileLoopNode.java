@@ -70,7 +70,7 @@ public final class WhileLoopNode extends StatementNode {
 
     @Override
     @NotNull
-    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyzeUnsafe(@NotNull AnalyzeContext context) {
         ReferenceNode type = condition.type(context, false);
 
         if (!type.value().equals("Boolean")) {

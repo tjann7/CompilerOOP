@@ -69,14 +69,12 @@ public final class ProgramNode extends TreeNode {
 
     @Override
     @NotNull
-    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
-        AnalyzeContext initialContext = context;
-
+    public AnalyzeContext analyzeUnsafe(@NotNull AnalyzeContext context) {
         for (ClassNode classNode : classes) {
             context = classNode.analyze(context);
         }
 
-        return initialContext;
+        return context;
     }
 
     @NotNull

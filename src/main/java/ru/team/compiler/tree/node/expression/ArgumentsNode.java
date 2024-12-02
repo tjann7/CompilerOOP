@@ -59,13 +59,14 @@ public final class ArgumentsNode extends TreeNode {
 
     @Override
     @NotNull
-    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyzeUnsafe(@NotNull AnalyzeContext context) {
         AnalyzeContext initialContext = context;
-        context = context.concatPath("<arguments>");
+
+        context = context.concatPath("<arguments>").withExceptions(List.of());
         for (ExpressionNode expressionNode : expressions) {
             context = expressionNode.analyze(context);
         }
 
-        return initialContext;
+        return initialContext.addExceptions(context.exceptions());
     }
 }

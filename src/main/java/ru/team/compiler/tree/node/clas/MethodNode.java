@@ -18,6 +18,7 @@ import ru.team.compiler.tree.node.expression.IdentifierNode;
 import ru.team.compiler.tree.node.primary.ReferenceNode;
 import ru.team.compiler.tree.node.statement.BodyNode;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = false)
@@ -114,7 +115,7 @@ public final class MethodNode extends ClassMemberNode {
 
     @Override
     @NotNull
-    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyzeUnsafe(@NotNull AnalyzeContext context) {
         AnalyzeContext initialContext = context;
 
         if (returnType != null && !initialContext.hasClass(returnType)) {
@@ -122,13 +123,22 @@ public final class MethodNode extends ClassMemberNode {
                     .formatted(initialContext.currentPath(), name.value(), returnType.value()));
         }
 
-        context = context.withMethod(this);
+        context = context.withMethod(this).withExceptions(List.of());
         context = parameters.analyze(context);
-        body.analyze(context);
+        context = body.analyze(context);
 
         AnalyzableClass analyzableClass = context.currentClass("Method");
 
-        AnalyzableClass parentClass = analyzableClass.findParentClass(context, "Method");
+        List<Exception> exceptions = new ArrayList<>();
+
+        AnalyzableClass parentClass;
+        try {
+            parentClass = analyzableClass.findParentClass(context, "Method");
+        } catch (AnalyzerException e) {
+            exceptions.add(e);
+            parentClass = null;
+        }
+
         if (parentClass != null) {
             AnalyzableMethod.Key key = AnalyzableMethod.Key.fromNode(this);
 
@@ -136,19 +146,22 @@ public final class MethodNode extends ClassMemberNode {
             if (method != null) {
                 if ((method.returnType() == null) != (returnType == null)
                         || returnType != null && !context.isAssignableFrom(method.returnType(), returnType)) {
-                    throw new AnalyzerException("Method '%s.%s' overrides method with incorrect return type '%s' (expected '%s')"
-                            .formatted(initialContext.currentPath(), name.value(),
-                                    prettyType(returnType), prettyType(method.returnType())));
+                    exceptions.add(
+                            new AnalyzerException("Method '%s.%s' overrides method with incorrect return type '%s' (expected '%s')"
+                                    .formatted(initialContext.currentPath(), name.value(),
+                                            prettyType(returnType), prettyType(method.returnType())))
+                    );
                 }
             }
         }
 
         if (!isNative && !isAbstract && returnType != null && !body.alwaysReturn()) {
-            throw new AnalyzerException("Method '%s.%s' does not always return"
-                    .formatted(initialContext.currentPath(), name.value()));
+            exceptions.add(new AnalyzerException("Method '%s.%s' does not always return"
+                    .formatted(initialContext.currentPath(), name.value())));
         }
 
-        return initialContext;
+        return initialContext.addExceptions(exceptions)
+                .addExceptions(context.exceptions());
     }
 
     @NotNull

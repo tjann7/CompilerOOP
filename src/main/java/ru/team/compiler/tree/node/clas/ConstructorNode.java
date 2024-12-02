@@ -109,10 +109,10 @@ public final class ConstructorNode extends ClassMemberNode {
 
     @Override
     @NotNull
-    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyzeUnsafe(@NotNull AnalyzeContext context) {
         AnalyzeContext initialContext = context;
 
-        context = context.withConstructor(this);
+        context = context.withConstructor(this).withExceptions(List.of());
         context = parameters.analyze(context);
         context = body.analyze(context);
 
@@ -169,7 +169,7 @@ public final class ConstructorNode extends ClassMemberNode {
             }
         }
 
-        return initialContext;
+        return initialContext.addExceptions(context.exceptions());
     }
 
     @Override

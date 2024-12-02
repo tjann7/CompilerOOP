@@ -170,12 +170,13 @@ public final class Analyzer {
     private static AnalyzeContext createContext(@NotNull ProgramNode programNode,
                                                 @NotNull Map<ReferenceNode, AnalyzableClass> includedClasses) {
         Map<ReferenceNode, AnalyzableClass> classes = new HashMap<>(includedClasses);
+        List<Exception> exceptions = new ArrayList<>();
 
         for (ClassNode classNode : programNode.classes()) {
             ReferenceNode classReference = classNode.name().asReference();
             if (classes.containsKey(classReference)) {
-                throw new AnalyzerException("Class '%s' is already defined"
-                        .formatted(classNode.name().value()));
+                exceptions.add(new AnalyzerException("Class '%s' is already defined"
+                        .formatted(classNode.name().value())));
             }
 
             Map<AnalyzableConstructor.Key, AnalyzableConstructor> constructors = new HashMap<>();
@@ -269,7 +270,7 @@ public final class Analyzer {
         }
 
         return new AnalyzeContext(
-                classes, Map.of(), Set.of(), Set.of(), "", null, null, null
+                classes, Map.of(), Set.of(), Set.of(), exceptions, "", null, null, null
         );
     }
 

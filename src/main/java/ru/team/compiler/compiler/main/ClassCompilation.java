@@ -95,7 +95,16 @@ public final class ClassCompilation {
         AnalyzeContext context;
         try {
             context = Analyzer.createContext(path.toAbsolutePath().getParent(), programNode);
-            programNode.analyze(context);
+            context = programNode.analyze(context);
+
+            List<Exception> exceptions = context.exceptions();
+            if (!exceptions.isEmpty()) {
+                System.err.println("[ERROR] " + path + " | Failed on semantic analysis:\n\n");
+                for (Exception exception : exceptions) {
+                    System.out.println(exception);
+                }
+                return;
+            }
         } catch (Exception e) {
             System.err.println("[ERROR] " + path + " | Failed on semantic analysis: " + e);
             return;

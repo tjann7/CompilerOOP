@@ -72,7 +72,7 @@ public final class ParametersNode extends TreeNode {
 
     @Override
     @NotNull
-    public AnalyzeContext analyze(@NotNull AnalyzeContext context) {
+    public AnalyzeContext analyzeUnsafe(@NotNull AnalyzeContext context) {
         Map<ReferenceNode, AnalyzableVariable> variables = new HashMap<>(context.variables());
         Set<ReferenceNode> initializedVariables = new HashSet<>(context.initializedVariables());
 
